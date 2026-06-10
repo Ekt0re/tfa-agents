@@ -216,3 +216,28 @@ func _collect_canvas_items(node: Node, canvas_items: Array[CanvasItem]) -> void:
 
 	for child in node.get_children():
 		_collect_canvas_items(child, canvas_items)
+
+
+
+#Organizzazione collisioni fisiche, layer, maschere e navigation.
+# Piano 0
+# - layer 1: muri
+# - layer 2: player, nemici ecc
+# - - mask: layer 1, 2
+# - layer 3: proiettili Piano 0
+# - - mask: layer 1, 2
+# - Navigation: layer 0
+# Piano 1
+# - layer 4: muri
+# - layer 5: player, nemici ecc
+# - - mask: layer 4, 5
+# - layer 6: proiettili Piano 1
+# - - mask: layer 4, 5
+# - Navigation: layer 1
+# Piano 2
+# - layer 7: muri
+# - layer 8: player, nemici ecc
+# - - mask: layer 7, 8
+# - layer 9: proiettili Piano 2
+# - - mask: layer 7, 8
+# - Navigation: layer 2
