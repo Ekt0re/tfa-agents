@@ -13,13 +13,22 @@ signal height_level_changed(new_level: int)
 @onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D if has_node("NavigationAgent2D") else null
 
 
+func _ready() -> void:
+	call_deferred("change_height_level", current_height_level, true)
+
+
 ## Funzione per cambiare dinamicamente il livello di altezza.
 ## Se force_update è true, forza l'aggiornamento anche se il livello è lo stesso (es. all'avvio).
 func change_height_level(new_level: int, force_update: bool = false) -> void:
 	if new_level == current_height_level and not force_update:
 		return
 
+	var previous_level := current_height_level
+	if not force_update:
+		remove_from_group("entities_level_" + str(previous_level))
+
 	current_height_level = new_level
+	add_to_group("entities_level_" + str(current_height_level))
 
 	# Configurazione dei layer fisici:
 	# Layer 1: players_l0 (Valore 1)
