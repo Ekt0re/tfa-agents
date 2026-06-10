@@ -19,13 +19,16 @@ region = Rect2(1791.0908, 513.72723, 253.09082, 253.81818)
 size = Vector2(256, 256)
 
 [node name="Ramp" type="Area2D" unique_id=266899831]
+z_index = 10
 collision_layer = 0
-collision_mask = 3
+collision_mask = 19
 monitorable = false
 script = ExtResource("1_script")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1664099517]
 material = SubResource("ShaderMaterial_ramp")
+rotation = -1.5707964
+scale = Vector2(1.0222961, 1.0222961)
 texture = SubResource("AtlasTexture_ramp")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=288520488]

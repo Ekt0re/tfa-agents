@@ -30,7 +30,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.keycode == KEY_Q:
 			var next_level := (current_height_level + 1) % total_levels
 			change_height_level(next_level)
-			
+
 
 
 func _input(event: InputEvent) -> void:
@@ -106,7 +106,7 @@ func change_height_level(new_level: int, force_update: bool = false) -> void:
 
 	height_level_changed.emit(current_height_level)
 	_update_level_visibility_effects()
-	
+
 	print("Player cambia piano: " + str(new_level) + " da piano: " + str(previous_level))
 
 
@@ -184,7 +184,9 @@ func _update_entity_auras_in_shaders() -> void:
 
 func _set_entities_visibility_for_level(level: int, should_be_visible: bool) -> void:
 	for entity in get_tree().get_nodes_in_group("entities_level_" + str(level)):
-		if entity != self and entity is CanvasItem:
+		if entity == self or entity is Ramp:
+			continue
+		if entity is CanvasItem:
 			entity.visible = should_be_visible
 
 
