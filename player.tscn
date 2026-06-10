@@ -1,0 +1,102 @@
+[gd_scene format=3 uid="uid://c7t8r6j8v4vj2"]
+
+[ext_resource type="Script" uid="uid://dw4tftukb2mhl" path="res://Scripts/player_prototype.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://d0iv8c7vyf17i" path="res://Assets/Skins1Test.png" id="2_i3pqv"]
+[ext_resource type="PackedScene" uid="uid://bv23agle1jwqg" path="res://Game/InputManager.tscn" id="3_i3pqv"]
+[ext_resource type="Texture2D" uid="uid://ubmql7s7p4mi" path="res://Assets/Weapons.png" id="4_hqtel"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_player"]
+radius = 64.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sweqy"]
+atlas = ExtResource("4_hqtel")
+region = Rect2(0, 400, 340, 796)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2hs0m"]
+atlas = ExtResource("4_hqtel")
+region = Rect2(340, 400, 340, 796)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1jxqw"]
+atlas = ExtResource("4_hqtel")
+region = Rect2(1020, 400, 340, 796)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dw050"]
+atlas = ExtResource("4_hqtel")
+region = Rect2(680, 400, 340, 796)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b26j0"]
+atlas = ExtResource("4_hqtel")
+region = Rect2(1360, 400, 340, 796)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_n7ghd"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": null
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sweqy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2hs0m")
+}],
+"loop": true,
+"name": &"granata",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1jxqw")
+}],
+"loop": true,
+"name": &"mitra",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dw050")
+}],
+"loop": true,
+"name": &"pistola",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b26j0")
+}],
+"loop": false,
+"name": &"pompa",
+"speed": 5.0
+}]
+
+[node name="Player" type="CharacterBody2D" unique_id=508163454]
+collision_mask = 69
+script = ExtResource("1_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=947634542]
+position = Vector2(3.0517578e-05, 2.2888184e-05)
+rotation = 1.5707964
+scale = Vector2(0.45640326, 0.45640326)
+texture = ExtResource("2_i3pqv")
+flip_v = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=883108112]
+shape = SubResource("CircleShape2D_player")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1851631176]
+zoom = Vector2(0.75, 0.75)
+position_smoothing_enabled = true
+
+[node name="InputManager" parent="." unique_id=2080147043 instance=ExtResource("3_i3pqv")]
+
+[node name="Arama" type="AnimatedSprite2D" parent="." unique_id=1589357251]
+position = Vector2(144.00002, -23.999998)
+rotation = -1.5707964
+scale = Vector2(0.36123276, 0.3612328)
+sprite_frames = SubResource("SpriteFrames_n7ghd")
+animation = &"mitra"

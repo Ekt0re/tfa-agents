@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://bv23agle1jwqg"]
+
+[ext_resource type="Script" uid="uid://du65plwnxxes" path="res://addons/virtual_joystick_plus/virtual_joystick_plus.gd" id="1_6bkw0"]
+[ext_resource type="Texture2D" uid="uid://c0icr5bxu2uwu" path="res://addons/virtual_joystick_plus/resources/textures/joystick_texture_2.png" id="2_6bkw0"]
+[ext_resource type="Texture2D" uid="uid://cnyuu81bbjcvo" path="res://addons/virtual_joystick_plus/resources/textures/stick_texture_5.png" id="3_dunbb"]
+
+[node name="InputManager" type="CanvasLayer" unique_id=2080147043]
+
+[node name="left_stick" type="Control" parent="." unique_id=1736506250]
+visible = false
+custom_minimum_size = Vector2(300, 300)
+layout_mode = 3
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_top = 64.0
+pivot_offset = Vector2(288, 292)
+script = ExtResource("1_6bkw0")
+joystick_mode = 1
+only_mobile = true
+relative_position = Vector2(0.2, 0.8)
+joystick_preset_texture = 2
+joystick_texture = ExtResource("2_6bkw0")
+stick_texture = ExtResource("3_dunbb")
+metadata/_custom_type_script = "uid://du65plwnxxes"
+
+[node name="right_stick" type="Control" parent="." unique_id=1165139053]
+visible = false
+custom_minimum_size = Vector2(300, 300)
+layout_mode = 3
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 64.0
+pivot_offset = Vector2(288, 292)
+script = ExtResource("1_6bkw0")
+joystick_mode = 1
+only_mobile = true
+relative_position = Vector2(0.8, 0.8)
+joystick_preset_texture = 2
+joystick_texture = ExtResource("2_6bkw0")
+joystick_color = Color(1, 0, 0.23921569, 1)
+stick_texture = ExtResource("3_dunbb")
+stick_color = Color(0.9269253, 0.8287307, 0.5883088, 1)
+metadata/_custom_type_script = "uid://du65plwnxxes"

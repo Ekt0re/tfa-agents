@@ -1,0 +1,53 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="tfa-agents"
+run/main_scene="uid://eednrdxv8xdm"
+config/features=PackedStringArray("4.6", "Mobile")
+config/icon="res://icon.svg"
+
+[autoload]
+
+RampEvents="*res://Scripts/ramp_events.gd"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/shader-previewer/plugin.cfg", "res://addons/virtual_joystick_plus/plugin.cfg")
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+
+[layer_names]
+
+2d_physics/layer_1="players_l0"
+2d_physics/layer_2="players_l1"
+2d_physics/layer_3="world_l0"
+2d_physics/layer_4="world_l1"
+2d_physics/layer_5="projectiles_l0"
+2d_physics/layer_6="projectiles_l1"
+2d_physics/layer_7="ramps"
+
+[navigation]
+
+2d/warnings/navmesh_edge_merge_errors=false
+2d/merge_rasterizer_cell_scale=0.001
+
+[physics]
+
+3d/physics_engine="Jolt Physics"
+
+[rendering]
+
+rendering_device/driver.windows="d3d12"
+renderer/rendering_method="mobile"
+textures/vram_compression/import_etc2_astc=true
