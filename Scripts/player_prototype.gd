@@ -18,12 +18,17 @@ const PROJECTILE_VISUAL_SCENE := preload("res://Scenes/projectile_visual.tscn")
 @onready var right_stick: VirtualJoystickPlus = $InputManager/right_stick
 @onready var muzzle_marker: Marker2D = $Muzzle if has_node("Muzzle") else null
 @onready var shot_raycast: RayCast2D = $ShotRayCast2D if has_node("ShotRayCast2D") else null
+@onready var camera_2d: Camera2D = $Camera2D if has_node("Camera2D") else null
+@onready var global_settings: Node = get_node_or_null("/root/GlobalSettings")
 
 var level_shader := preload("res://Shaders/level_transition.gdshader")
 var _using_touch := false
 var _last_shot_time: float = -1000.0
 var _last_touch_aim_direction: Vector2 = Vector2.RIGHT
 var _touch_aim_active: bool = false
+var _camera_base_offset := Vector2.ZERO
+var _shake_time_left := 0.0
+var _shake_strength := 0.0
 
 
 func _ready() -> void:
@@ -31,6 +36,8 @@ func _ready() -> void:
 	if shot_raycast:
 		shot_raycast.enabled = true
 		shot_raycast.add_exception(self)
+	if camera_2d:
+		_camera_base_offset = camera_2d.offset
 	call_deferred("_initialize_level_system")
 
 
@@ -95,9 +102,10 @@ func _physics_process(delta: float) -> void:
 			rotation = lerp_angle(rotation, dir_to_mouse.angle(), 20.0 * delta)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	_update_player_position_in_shaders()
 	_update_entity_auras_in_shaders()
+	_update_camera_shake(delta)
 
 
 func change_height_level(new_level: int, force_update: bool = false) -> void:
@@ -126,6 +134,10 @@ func change_height_level(new_level: int, force_update: bool = false) -> void:
 
 	height_level_changed.emit(current_height_level)
 	_update_level_visibility_effects()
+	if _can_apply_local_feedback():
+		_trigger_screen_shake(5.0, 0.18)
+		if global_settings:
+			global_settings.call("show_subtitle_key", "subtitle_level_changed", [current_height_level + 1], 1.8)
 
 	print("Player cambia piano: " + str(new_level) + " da piano: " + str(previous_level))
 
@@ -146,6 +158,10 @@ func _try_fire_in_direction(aim_direction: Vector2) -> void:
 	var fire_origin := _get_fire_origin()
 	var shot_data := _build_shot_data(fire_origin, aim_direction.normalized())
 	_last_shot_time = _get_time_seconds()
+	if _can_apply_local_feedback():
+		_trigger_screen_shake(3.5, 0.12)
+		if global_settings:
+			global_settings.call("show_subtitle_key", "subtitle_weapon_fired", [], 0.6)
 
 	if multiplayer.has_multiplayer_peer():
 		_replicate_fire.rpc(
@@ -197,6 +213,11 @@ func _on_projectile_impact(target_path: NodePath) -> void:
 		target.call_deferred("destroy_from_projectile")
 	else:
 		target.call_deferred("queue_free")
+
+	if _can_apply_local_feedback():
+		_trigger_screen_shake(7.0, 0.16)
+		if global_settings:
+			global_settings.call("show_subtitle_key", "subtitle_enemy_down", [], 1.0)
 
 
 func _can_fire() -> bool:
@@ -319,6 +340,39 @@ func _can_apply_projectile_impacts() -> bool:
 
 func _get_time_seconds() -> float:
 	return Time.get_ticks_msec() / 1000.0
+
+
+func _can_apply_local_feedback() -> bool:
+	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
+		return false
+	return true
+
+
+func _trigger_screen_shake(strength: float, duration: float) -> void:
+	if not camera_2d:
+		return
+	if global_settings and not bool(global_settings.call("get_setting", "screen_shake", true)):
+		camera_2d.offset = _camera_base_offset
+		return
+	_shake_strength = maxf(_shake_strength, strength)
+	_shake_time_left = maxf(_shake_time_left, duration)
+
+
+func _update_camera_shake(delta: float) -> void:
+	if not camera_2d:
+		return
+	if global_settings and not bool(global_settings.call("get_setting", "screen_shake", true)):
+		camera_2d.offset = camera_2d.offset.lerp(_camera_base_offset, minf(1.0, delta * 20.0))
+		_shake_time_left = 0.0
+		_shake_strength = 0.0
+		return
+	if _shake_time_left <= 0.0:
+		camera_2d.offset = camera_2d.offset.lerp(_camera_base_offset, minf(1.0, delta * 18.0))
+		return
+	_shake_time_left = maxf(0.0, _shake_time_left - delta)
+	var shake_offset := Vector2(randf_range(-_shake_strength, _shake_strength), randf_range(-_shake_strength, _shake_strength))
+	camera_2d.offset = _camera_base_offset + shake_offset
+	_shake_strength = lerpf(_shake_strength, 0.0, minf(1.0, delta * 12.0))
 
 
 func _setup_shader_materials() -> void:

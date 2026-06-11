@@ -4,4 +4,5 @@ extends Node
 ## - entity: il nodo che ha attraversato la rampa (es. PlayerPrototype, nemico)
 ## - new_level: il livello di altezza raggiunto dopo la transizione
 ## - ramp: il nodo della rampa attraversata
+@warning_ignore("unused_signal")
 signal ramp_traversed(entity: Node2D, new_level: int, ramp: Node2D)

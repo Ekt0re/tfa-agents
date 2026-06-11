@@ -251,6 +251,20 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Gioco e interfaccia"
 
+[node name="UiScaleRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox"]
+layout_mode = 2
+columns = 2
+
+[node name="UiScaleLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/UiScaleRow"]
+layout_mode = 2
+text = "Scala UI"
+
+[node name="UiScaleOption" type="OptionButton" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/UiScaleRow" unique_id=19]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Normale"
+
 [node name="LanguageRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox"]
 layout_mode = 2
 columns = 2

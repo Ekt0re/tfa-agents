@@ -14,8 +14,11 @@ signal settings_changed(settings: Dictionary)
 @onready var _vsync_toggle: CheckButton = %VSyncToggle
 @onready var _fps_cap: OptionButton = %FpsCapOption
 @onready var _graphics_preset: OptionButton = %GraphicsPresetOption
+@onready var _ui_scale: OptionButton = %UiScaleOption
 @onready var _language: OptionButton = %LanguageOption
 @onready var _show_fps_toggle: CheckButton = %ShowFpsToggle
+@onready var _subtitles_toggle: CheckButton = %SubtitlesToggle
+@onready var _screen_shake_toggle: CheckButton = %ScreenShakeToggle
 
 var _is_loading := false
 
@@ -44,55 +47,73 @@ func _connect_controls() -> void:
 	_vsync_toggle.toggled.connect(_on_toggle_changed)
 	_fps_cap.item_selected.connect(_on_setting_changed)
 	_graphics_preset.item_selected.connect(_on_setting_changed)
+	_ui_scale.item_selected.connect(_on_setting_changed)
 	_language.item_selected.connect(_on_setting_changed)
 	_show_fps_toggle.toggled.connect(_on_toggle_changed)
+	_subtitles_toggle.toggled.connect(_on_toggle_changed)
+	_screen_shake_toggle.toggled.connect(_on_toggle_changed)
 
 
 func _hide_non_real_rows() -> void:
 	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/MusicRow").visible = false
 	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/SfxRow").visible = false
-	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/SubtitlesRow").visible = false
-	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/ScreenShakeRow").visible = false
 
 
 func _populate_options() -> void:
 	_window_mode.clear()
 	for key: String in ["window_mode_windowed", "window_mode_borderless", "window_mode_fullscreen"]:
-		_window_mode.add_item(_global_settings.text(key))
+		_window_mode.add_item(tr(key))
 
 	_fps_cap.clear()
 	for fps_value: int in [30, 60, 120, 0]:
-		var label := "%d FPS" % fps_value if fps_value > 0 else _global_settings.text("fps_limit_unlimited")
+		var label: String
+		if fps_value > 0:
+			label = "%d FPS" % fps_value
+		else:
+			label = tr("fps_limit_unlimited")
 		_fps_cap.add_item(label)
 		_fps_cap.set_item_metadata(_fps_cap.item_count - 1, fps_value)
 
 	_graphics_preset.clear()
 	for key: String in ["graphics_low", "graphics_medium", "graphics_high", "graphics_ultra"]:
-		_graphics_preset.add_item(_global_settings.text(key))
+		_graphics_preset.add_item(tr(key))
+
+	_ui_scale.clear()
+	for entry in [
+		{"key": "ui_scale_small", "value": 0.85},
+		{"key": "ui_scale_normal", "value": 1.0},
+		{"key": "ui_scale_large", "value": 1.15},
+		{"key": "ui_scale_huge", "value": 1.3},
+	]:
+		_ui_scale.add_item(tr(String(entry["key"])))
+		_ui_scale.set_item_metadata(_ui_scale.item_count - 1, float(entry["value"]))
 
 	_language.clear()
-	_language.add_item(_global_settings.text("language_italian"))
+	_language.add_item(tr("language_italian"))
 	_language.set_item_metadata(_language.item_count - 1, "it")
-	_language.add_item(_global_settings.text("language_english"))
+	_language.add_item(tr("language_english"))
 	_language.set_item_metadata(_language.item_count - 1, "en")
 
 
 func _update_texts() -> void:
-	_title_label.text = _global_settings.text("settings_title")
-	_subtitle_label.text = _global_settings.text("settings_subtitle")
-	_back_button.text = _global_settings.text("back")
-	_reset_button.text = _global_settings.text("reset_defaults")
-	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/AudioTitle").text = _global_settings.text("settings_section_audio")
-	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/MasterRow/MasterLabel").text = _global_settings.text("settings_master_volume")
-	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/GraphicsTitle").text = _global_settings.text("settings_section_graphics")
-	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/WindowModeRow/WindowModeLabel").text = _global_settings.text("settings_window_mode")
-	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/VSyncRow/VSyncLabel").text = _global_settings.text("settings_vsync")
-	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/FpsCapRow/FpsCapLabel").text = _global_settings.text("settings_fps_limit")
-	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/PresetRow/PresetLabel").text = _global_settings.text("settings_graphics_preset")
-	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/GameplayTitle").text = _global_settings.text("settings_section_interface")
-	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/LanguageRow/LanguageLabel").text = _global_settings.text("settings_language")
-	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/ShowFpsRow/ShowFpsLabel").text = _global_settings.text("settings_show_fps")
-	get_node("ContentMargin/RootVBox/Footer/FooterHint").text = _global_settings.text("settings_footer_hint")
+	_title_label.text = tr("settings_title")
+	_subtitle_label.text = tr("settings_subtitle")
+	_back_button.text = tr("back")
+	_reset_button.text = tr("reset_defaults")
+	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/AudioTitle").text = tr("settings_section_audio")
+	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/MasterRow/MasterLabel").text = tr("settings_master_volume")
+	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/GraphicsTitle").text = tr("settings_section_graphics")
+	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/WindowModeRow/WindowModeLabel").text = tr("settings_window_mode")
+	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/VSyncRow/VSyncLabel").text = tr("settings_vsync")
+	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/FpsCapRow/FpsCapLabel").text = tr("settings_fps_limit")
+	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/PresetRow/PresetLabel").text = tr("settings_graphics_preset")
+	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/GameplayTitle").text = tr("settings_section_interface")
+	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/UiScaleRow/UiScaleLabel").text = tr("settings_ui_scale")
+	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/LanguageRow/LanguageLabel").text = tr("settings_language")
+	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/ShowFpsRow/ShowFpsLabel").text = tr("settings_show_fps")
+	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/SubtitlesRow/SubtitlesLabel").text = tr("settings_subtitles")
+	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/ScreenShakeRow/ScreenShakeLabel").text = tr("settings_screen_shake")
+	get_node("ContentMargin/RootVBox/Footer/FooterHint").text = tr("settings_footer_hint")
 	_refresh_toggle_texts()
 
 
@@ -103,8 +124,11 @@ func _apply_settings_to_controls(settings: Dictionary) -> void:
 	_vsync_toggle.button_pressed = bool(settings.get("vsync", true))
 	_select_option_by_metadata(_fps_cap, int(settings.get("fps_cap", 60)))
 	_graphics_preset.select(clampi(int(settings.get("graphics_preset", 2)), 0, _graphics_preset.item_count - 1))
+	_select_option_by_metadata(_ui_scale, float(settings.get("ui_scale", 1.0)))
 	_select_option_by_metadata(_language, String(settings.get("language", "it")))
 	_show_fps_toggle.button_pressed = bool(settings.get("show_fps", false))
+	_subtitles_toggle.button_pressed = bool(settings.get("subtitles", true))
+	_screen_shake_toggle.button_pressed = bool(settings.get("screen_shake", true))
 	_refresh_slider_labels()
 	_refresh_toggle_texts()
 	_is_loading = false
@@ -118,8 +142,11 @@ func _collect_settings() -> Dictionary:
 		"vsync": _vsync_toggle.button_pressed,
 		"fps_cap": int(_fps_cap.get_selected_metadata()),
 		"graphics_preset": _graphics_preset.selected,
+		"ui_scale": float(_ui_scale.get_selected_metadata()),
 		"language": String(_language.get_selected_metadata()),
 		"show_fps": _show_fps_toggle.button_pressed,
+		"subtitles": _subtitles_toggle.button_pressed,
+		"screen_shake": _screen_shake_toggle.button_pressed,
 	}
 
 
@@ -128,8 +155,10 @@ func _refresh_slider_labels() -> void:
 
 
 func _refresh_toggle_texts() -> void:
-	_vsync_toggle.text = _global_settings.text("enabled") if _vsync_toggle.button_pressed else _global_settings.text("disabled")
-	_show_fps_toggle.text = _global_settings.text("enabled") if _show_fps_toggle.button_pressed else _global_settings.text("disabled")
+	_vsync_toggle.text = tr("enabled") if _vsync_toggle.button_pressed else tr("disabled")
+	_show_fps_toggle.text = tr("enabled") if _show_fps_toggle.button_pressed else tr("disabled")
+	_subtitles_toggle.text = tr("enabled") if _subtitles_toggle.button_pressed else tr("disabled")
+	_screen_shake_toggle.text = tr("enabled") if _screen_shake_toggle.button_pressed else tr("disabled")
 
 
 func _on_master_slider_changed(_value: float) -> void:

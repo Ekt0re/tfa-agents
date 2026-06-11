@@ -101,20 +101,20 @@ func _should_freeze_game() -> bool:
 
 
 func _refresh_texts() -> void:
-	_pause_button.text = _global_settings.text("pause_button")
-	_title_label.text = _global_settings.text("pause_title")
-	_resume_button.text = _global_settings.text("pause_resume")
-	_settings_button.text = _global_settings.text("pause_settings")
-	_main_menu_button.text = _global_settings.text("pause_main_menu")
-	_hint_label.text = _global_settings.text("pause_hint")
+	_pause_button.text = tr("pause_button")
+	_title_label.text = tr("pause_title")
+	_resume_button.text = tr("pause_resume")
+	_settings_button.text = tr("pause_settings")
+	_main_menu_button.text = tr("pause_main_menu")
+	_hint_label.text = tr("pause_hint")
 	_update_mode_label()
 
 
 func _update_mode_label() -> void:
 	if _should_freeze_game():
-		_mode_label.text = _global_settings.text("pause_mode_singleplayer")
+		_mode_label.text = tr("pause_mode_singleplayer")
 	else:
-		_mode_label.text = _global_settings.text("pause_mode_multiplayer")
+		_mode_label.text = tr("pause_mode_multiplayer")
 
 
 func _on_language_changed(_language_code: String) -> void:

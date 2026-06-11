@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://deb727qfvrtx4"]
 
 [ext_resource type="Script" uid="uid://bkv054683blnf" path="res://Menu/main_menu.gd" id="1_script"]
-[ext_resource type="Theme" path="res://Assets/UI/global_theme.tres" id="2_theme"]
+[ext_resource type="Theme" uid="uid://du6vlm3j6xlwy" path="res://Assets/UI/global_theme.tres" id="2_theme"]
 [ext_resource type="PackedScene" path="res://Menu/settings_panel.tscn" id="3_settings_panel"]
 
 [node name="MainMenu" type="Control" unique_id=1631154325]
@@ -77,7 +77,7 @@ theme_override_constants/separation = 18
 [node name="Eyebrow" type="Label" parent="MainContent/CenterContainer/MenuCard/CardMargin/VBox" unique_id=933893136]
 modulate = Color(0.403922, 0.878431, 1, 0.95)
 layout_mode = 2
-text = "QGG - Codex V 4-8-76 Operatore Zed"
+text = "QGG AGENT - TED"
 
 [node name="TitleLabel" type="Label" parent="MainContent/CenterContainer/MenuCard/CardMargin/VBox" unique_id=1715941798]
 layout_mode = 2
@@ -103,8 +103,80 @@ text = "Esci dal gioco"
 [node name="InfoLabel" type="Label" parent="MainContent/CenterContainer/MenuCard/CardMargin/VBox" unique_id=2141293697]
 modulate = Color(0.8, 0.88, 1, 0.66)
 layout_mode = 2
-text = "ATTENZIONE: Sta giocando ad una versione di prova!"
+text = "Le impostazioni globali vengono applicate in tempo reale."
 horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ReleaseStatusLabel" type="Label" parent="MainContent/CenterContainer/MenuCard/CardMargin/VBox" unique_id=20509999]
+unique_name_in_owner = true
+modulate = Color(0.8, 0.88, 1, 0.66)
+layout_mode = 2
+text = "Controllo aggiornamenti in corso..."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ReleaseBanner" type="PanelContainer" parent="." unique_id=20510000]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+offset_left = 24.0
+offset_top = 24.0
+offset_right = 420.0
+offset_bottom = 184.0
+grow_horizontal = 0
+
+[node name="BannerMargin" type="MarginContainer" parent="ReleaseBanner" unique_id=209666878]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="BannerVBox" type="VBoxContainer" parent="ReleaseBanner/BannerMargin" unique_id=116305179]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ReleaseBannerTitle" type="Label" parent="ReleaseBanner/BannerMargin/BannerVBox" unique_id=20510001]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Nuova release disponibile"
+
+[node name="ReleaseBannerBody" type="Label" parent="ReleaseBanner/BannerMargin/BannerVBox" unique_id=20510002]
+unique_name_in_owner = true
+layout_mode = 2
+text = "È disponibile una nuova versione su GitHub."
+autowrap_mode = 3
+
+[node name="BannerButtons" type="HBoxContainer" parent="ReleaseBanner/BannerMargin/BannerVBox" unique_id=1420853005]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="DownloadReleaseButton" type="Button" parent="ReleaseBanner/BannerMargin/BannerVBox/BannerButtons" unique_id=20510003]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Scarica release"
+
+[node name="DismissReleaseButton" type="Button" parent="ReleaseBanner/BannerMargin/BannerVBox/BannerButtons" unique_id=20510004]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Più tardi"
+
+[node name="DownloadProgressBar" type="ProgressBar" parent="ReleaseBanner/BannerMargin/BannerVBox" unique_id=20510010]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+max_value = 100.0
+show_percentage = false
+value = 0.0
+
+[node name="DownloadProgressLabel" type="Label" parent="ReleaseBanner/BannerMargin/BannerVBox" unique_id=20510011]
+unique_name_in_owner = true
+visible = false
+modulate = Color(0.8, 0.88, 1, 0.72)
+layout_mode = 2
+text = ""
 autowrap_mode = 3
 
 [node name="VersionLabel" type="Label" parent="." unique_id=1]
@@ -156,7 +228,88 @@ grow_vertical = 2
 [node name="SettingsPanel" parent="SettingsOverlay/CenterContainer" unique_id=3 instance=ExtResource("3_settings_panel")]
 layout_mode = 2
 
+[node name="ChangelogOverlay" type="Control" parent="." unique_id=20510005]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="ChangelogDim" type="ColorRect" parent="ChangelogOverlay" unique_id=590384520]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0117647, 0.0196078, 0.0352941, 0.88)
+
+[node name="ChangelogCenter" type="CenterContainer" parent="ChangelogOverlay" unique_id=976149854]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ChangelogPanel" type="PanelContainer" parent="ChangelogOverlay/ChangelogCenter" unique_id=1424587531]
+custom_minimum_size = Vector2(820, 620)
+layout_mode = 2
+
+[node name="ChangelogMargin" type="MarginContainer" parent="ChangelogOverlay/ChangelogCenter/ChangelogPanel" unique_id=85329172]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="ChangelogVBox" type="VBoxContainer" parent="ChangelogOverlay/ChangelogCenter/ChangelogPanel/ChangelogMargin" unique_id=165072153]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ChangelogTitleLabel" type="Label" parent="ChangelogOverlay/ChangelogCenter/ChangelogPanel/ChangelogMargin/ChangelogVBox" unique_id=20510006]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Changelog"
+
+[node name="ChangelogSubtitleLabel" type="Label" parent="ChangelogOverlay/ChangelogCenter/ChangelogPanel/ChangelogMargin/ChangelogVBox" unique_id=20510007]
+unique_name_in_owner = true
+modulate = Color(0.8, 0.88, 1, 0.72)
+layout_mode = 2
+text = "Note release"
+
+[node name="ChangelogScroll" type="ScrollContainer" parent="ChangelogOverlay/ChangelogCenter/ChangelogPanel/ChangelogMargin/ChangelogVBox" unique_id=1132412433]
+custom_minimum_size = Vector2(0, 460)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ChangelogBody" type="RichTextLabel" parent="ChangelogOverlay/ChangelogCenter/ChangelogPanel/ChangelogMargin/ChangelogVBox/ChangelogScroll" unique_id=20510008]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 440)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+scroll_active = false
+
+[node name="ChangelogButtons" type="HBoxContainer" parent="ChangelogOverlay/ChangelogCenter/ChangelogPanel/ChangelogMargin/ChangelogVBox" unique_id=1346472460]
+layout_mode = 2
+alignment = 2
+
+[node name="CloseChangelogButton" type="Button" parent="ChangelogOverlay/ChangelogCenter/ChangelogPanel/ChangelogMargin/ChangelogVBox/ChangelogButtons" unique_id=20510009]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Chiudi"
+
 [connection signal="pressed" from="MainContent/CenterContainer/MenuCard/CardMargin/VBox/ButtonsVBox/PlayButton" to="." method="_on_play_pressed"]
 [connection signal="pressed" from="MainContent/CenterContainer/MenuCard/CardMargin/VBox/ButtonsVBox/SettingsButton" to="." method="_on_settings_pressed"]
 [connection signal="pressed" from="MainContent/CenterContainer/MenuCard/CardMargin/VBox/ButtonsVBox/ExitButton" to="." method="_on_exit_pressed"]
+[connection signal="pressed" from="ReleaseBanner/BannerMargin/BannerVBox/BannerButtons/DownloadReleaseButton" to="." method="_on_download_release_pressed"]
+[connection signal="pressed" from="ReleaseBanner/BannerMargin/BannerVBox/BannerButtons/DismissReleaseButton" to="." method="_on_dismiss_release_pressed"]
 [connection signal="back_requested" from="SettingsOverlay/CenterContainer/SettingsPanel" to="." method="_on_settings_back_requested"]
+[connection signal="pressed" from="ChangelogOverlay/ChangelogCenter/ChangelogPanel/ChangelogMargin/ChangelogVBox/ChangelogButtons/CloseChangelogButton" to="." method="_on_close_changelog_pressed"]
