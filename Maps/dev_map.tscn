@@ -1,6 +1,6 @@
 [gd_scene format=4 uid="uid://eednrdxv8xdm"]
 
-[ext_resource type="Script" path="res://Scripts/dev_map_lighting.gd" id="1_lighting"]
+[ext_resource type="Script" uid="uid://dbfdauan77i1h" path="res://Scripts/dev_map_lighting.gd" id="1_lighting"]
 [ext_resource type="NavigationPolygon" uid="uid://dsh462vrrp8fu" path="res://Maps/Nav1/Piano0.tres" id="2_3fjw8"]
 [ext_resource type="PackedScene" uid="uid://c7t8r6j8v4vj2" path="res://player.tscn" id="2_ien3m"]
 [ext_resource type="TileSet" uid="uid://blwvbrtt23g2r" path="res://Scenes/TileSet/Tile_set_prototype.tres" id="3_5wu4l"]
@@ -9,11 +9,12 @@
 [ext_resource type="PackedScene" uid="uid://buu621fan5j1a" path="res://bot.tscn" id="4_kuufh"]
 [ext_resource type="NavigationPolygon" uid="uid://dt86qinqcr3w4" path="res://Maps/Nav1/Piano2.tres" id="4_to1ab"]
 [ext_resource type="PackedScene" uid="uid://yy2t6t2gu7ec" path="res://bot_simple.tscn" id="8_rd1f1"]
+[ext_resource type="PackedScene" path="res://Menu/pause_menu.tscn" id="9_pause_menu"]
 
 [node name="DevMap" type="Node2D" unique_id=73936262]
 script = ExtResource("1_lighting")
 
-[node name="CanvasModulate" type="CanvasModulate" parent="."]
+[node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=1099175156]
 color = Color(0.38, 0.4, 0.46, 1)
 
 [node name="L0" type="Node2D" parent="." unique_id=1319773082]
@@ -100,7 +101,7 @@ start_level = 1
 arrival_level = 2
 
 [node name="Player" parent="." unique_id=1004030284 instance=ExtResource("2_ien3m")]
-position = Vector2(2160, 1824)
+position = Vector2(2288, 1594)
 
 [node name="Bot" parent="." unique_id=1855505913 instance=ExtResource("4_kuufh")]
 modulate = Color(1, 1, 0, 1)
@@ -124,3 +125,5 @@ current_height_level = 2
 z_index = 4
 position = Vector2(-1200, -160)
 current_height_level = 3
+
+[node name="PauseMenu" parent="." instance=ExtResource("9_pause_menu")]

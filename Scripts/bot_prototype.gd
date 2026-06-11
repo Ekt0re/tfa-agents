@@ -53,6 +53,7 @@ var _navigation_layer_masks_by_level: Dictionary = {}
 
 func _ready() -> void:
 	add_to_group("bots")
+	add_to_group("enemy")
 	call_deferred("_initialize_bot")
 
 

@@ -1,0 +1,162 @@
+[gd_scene format=3 uid="uid://deb727qfvrtx4"]
+
+[ext_resource type="Script" uid="uid://bkv054683blnf" path="res://Menu/main_menu.gd" id="1_script"]
+[ext_resource type="Theme" path="res://Assets/UI/global_theme.tres" id="2_theme"]
+[ext_resource type="PackedScene" path="res://Menu/settings_panel.tscn" id="3_settings_panel"]
+
+[node name="MainMenu" type="Control" unique_id=1631154325]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="." unique_id=1764914396]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0196078, 0.0313726, 0.0627451, 1)
+
+[node name="GlowTop" type="ColorRect" parent="." unique_id=232243563]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 220.0
+grow_horizontal = 2
+color = Color(0.129412, 0.403922, 0.701961, 0.14)
+
+[node name="GlowBottom" type="ColorRect" parent="." unique_id=656686008]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -260.0
+grow_horizontal = 2
+grow_vertical = 0
+color = Color(0.309804, 0.247059, 0.772549, 0.08)
+
+[node name="MainContent" type="MarginContainer" parent="." unique_id=1394707898]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 64.0
+offset_top = 48.0
+offset_right = -64.0
+offset_bottom = -48.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="MainContent" unique_id=1233315652]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MenuCard" type="PanelContainer" parent="MainContent/CenterContainer" unique_id=1335883432]
+custom_minimum_size = Vector2(560, 0)
+layout_mode = 2
+
+[node name="CardMargin" type="MarginContainer" parent="MainContent/CenterContainer/MenuCard" unique_id=1471118219]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="MainContent/CenterContainer/MenuCard/CardMargin" unique_id=1918343727]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Eyebrow" type="Label" parent="MainContent/CenterContainer/MenuCard/CardMargin/VBox" unique_id=933893136]
+modulate = Color(0.403922, 0.878431, 1, 0.95)
+layout_mode = 2
+text = "QGG - Codex V 4-8-76 Operatore Zed"
+
+[node name="TitleLabel" type="Label" parent="MainContent/CenterContainer/MenuCard/CardMargin/VBox" unique_id=1715941798]
+layout_mode = 2
+theme_override_font_sizes/font_size = 38
+text = "TFA AGENTS"
+
+[node name="ButtonsVBox" type="VBoxContainer" parent="MainContent/CenterContainer/MenuCard/CardMargin/VBox" unique_id=224837784]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="PlayButton" type="Button" parent="MainContent/CenterContainer/MenuCard/CardMargin/VBox/ButtonsVBox" unique_id=1722900907]
+layout_mode = 2
+text = "Play"
+
+[node name="SettingsButton" type="Button" parent="MainContent/CenterContainer/MenuCard/CardMargin/VBox/ButtonsVBox" unique_id=2135471846]
+layout_mode = 2
+text = "Impostazioni"
+
+[node name="ExitButton" type="Button" parent="MainContent/CenterContainer/MenuCard/CardMargin/VBox/ButtonsVBox" unique_id=2141005162]
+layout_mode = 2
+text = "Esci dal gioco"
+
+[node name="InfoLabel" type="Label" parent="MainContent/CenterContainer/MenuCard/CardMargin/VBox" unique_id=2141293697]
+modulate = Color(0.8, 0.88, 1, 0.66)
+layout_mode = 2
+text = "ATTENZIONE: Sta giocando ad una versione di prova!"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="VersionLabel" type="Label" parent="." unique_id=1]
+unique_name_in_owner = true
+modulate = Color(0.8, 0.88, 1, 0.66)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -160.0
+offset_top = -40.0
+offset_right = -24.0
+offset_bottom = -16.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "v0.1.0-dev"
+horizontal_alignment = 2
+
+[node name="SettingsOverlay" type="Control" parent="." unique_id=2]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="OverlayDim" type="ColorRect" parent="SettingsOverlay" unique_id=1651272905]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0117647, 0.0196078, 0.0352941, 0.86)
+
+[node name="CenterContainer" type="CenterContainer" parent="SettingsOverlay" unique_id=1393542108]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SettingsPanel" parent="SettingsOverlay/CenterContainer" unique_id=3 instance=ExtResource("3_settings_panel")]
+layout_mode = 2
+
+[connection signal="pressed" from="MainContent/CenterContainer/MenuCard/CardMargin/VBox/ButtonsVBox/PlayButton" to="." method="_on_play_pressed"]
+[connection signal="pressed" from="MainContent/CenterContainer/MenuCard/CardMargin/VBox/ButtonsVBox/SettingsButton" to="." method="_on_settings_pressed"]
+[connection signal="pressed" from="MainContent/CenterContainer/MenuCard/CardMargin/VBox/ButtonsVBox/ExitButton" to="." method="_on_exit_pressed"]
+[connection signal="back_requested" from="SettingsOverlay/CenterContainer/SettingsPanel" to="." method="_on_settings_back_requested"]

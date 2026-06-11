@@ -42,63 +42,35 @@ func _rebuild_wall_occluders() -> void:
 
 func _build_occluders_for_wall_layer(wall_layer: TileMapLayer, container: Node2D) -> void:
 	var used_cells: Array[Vector2i] = wall_layer.get_used_cells()
-	if used_cells.is_empty() or not wall_layer.tile_set:
+	if used_cells.is_empty():
 		return
 
-	var rows: Dictionary = {}
 	for cell in used_cells:
-		var row_cells: Array = rows.get(cell.y, [])
-		row_cells.append(cell.x)
-		rows[cell.y] = row_cells
+		_create_cell_occluders(wall_layer, container, cell)
 
-	var tile_size := Vector2(wall_layer.tile_set.tile_size)
-	var sorted_rows: Array = rows.keys()
-	sorted_rows.sort()
 
-	for row_key in sorted_rows:
-		var x_values: Array = rows[row_key]
-		x_values.sort()
-		if x_values.is_empty():
-			continue
+func _create_cell_occluders(wall_layer: TileMapLayer, container: Node2D, cell: Vector2i) -> void:
+	var tile_data := wall_layer.get_cell_tile_data(cell)
+	if not tile_data:
+		return
 
-		var run_start: int = int(x_values[0])
-		var previous_x: int = run_start
-		for index in range(1, x_values.size()):
-			var current_x: int = int(x_values[index])
-			if current_x == previous_x + 1:
-				previous_x = current_x
+	var cell_origin := wall_layer.map_to_local(cell)
+	for physics_layer in range(3):
+		var polygon_count := tile_data.get_collision_polygons_count(physics_layer)
+		for polygon_index in range(polygon_count):
+			var points: PackedVector2Array = tile_data.get_collision_polygon_points(physics_layer, polygon_index)
+			if points.size() < 3:
 				continue
 
-			_create_run_occluder(wall_layer, container, int(row_key), run_start, previous_x, tile_size)
-			run_start = current_x
-			previous_x = current_x
+			var polygon := OccluderPolygon2D.new()
+			polygon.polygon = points
+			polygon.closed = true
+			polygon.cull_mode = OccluderPolygon2D.CULL_DISABLED
 
-		_create_run_occluder(wall_layer, container, int(row_key), run_start, previous_x, tile_size)
-
-
-func _create_run_occluder(wall_layer: TileMapLayer, container: Node2D, row: int, start_x: int, end_x: int, tile_size: Vector2) -> void:
-	var first_center := wall_layer.map_to_local(Vector2i(start_x, row))
-	var last_center := wall_layer.map_to_local(Vector2i(end_x, row))
-	var half_size := tile_size * 0.5
-
-	var left := first_center.x - half_size.x
-	var top := first_center.y - half_size.y
-	var right := last_center.x + half_size.x
-	var bottom := last_center.y + half_size.y
-
-	var polygon := OccluderPolygon2D.new()
-	polygon.polygon = PackedVector2Array([
-		Vector2(left, top),
-		Vector2(right, top),
-		Vector2(right, bottom),
-		Vector2(left, bottom)
-	])
-	polygon.closed = true
-	polygon.cull_mode = OccluderPolygon2D.CULL_DISABLED
-
-	var occluder := LightOccluder2D.new()
-	occluder.occluder = polygon
-	container.add_child(occluder)
+			var occluder := LightOccluder2D.new()
+			occluder.position = cell_origin
+			occluder.occluder = polygon
+			container.add_child(occluder)
 
 
 func _configure_scene_lights() -> void:

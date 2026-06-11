@@ -10,6 +10,7 @@ const PROJECTILE_VISUAL_SCENE := preload("res://Scenes/projectile_visual.tscn")
 @export var total_levels: int = 3
 @export var fire_cooldown: float = 0.12
 @export var shot_range: float = 1600.0
+@export var touch_auto_fire_range: float = 900.0
 @export var projectile_visual_speed: float = 2200.0
 
 @onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D if has_node("NavigationAgent2D") else null
@@ -21,6 +22,8 @@ const PROJECTILE_VISUAL_SCENE := preload("res://Scenes/projectile_visual.tscn")
 var level_shader := preload("res://Shaders/level_transition.gdshader")
 var _using_touch := false
 var _last_shot_time: float = -1000.0
+var _last_touch_aim_direction: Vector2 = Vector2.RIGHT
+var _touch_aim_active: bool = false
 
 
 func _ready() -> void:
@@ -83,9 +86,9 @@ func _physics_process(delta: float) -> void:
 
 	if _using_touch:
 		var look_dir := right_stick.get_value()
-		if look_dir.length() > 0.1:
-			rotation = lerp_angle(rotation, look_dir.angle(), 20.0 * delta)
+		_handle_touch_aim_and_fire(look_dir, delta)
 	else:
+		_touch_aim_active = false
 		var mouse_pos := get_global_mouse_position()
 		var dir_to_mouse := mouse_pos - global_position
 		if dir_to_mouse.length() > 5.0:
@@ -128,15 +131,20 @@ func change_height_level(new_level: int, force_update: bool = false) -> void:
 
 
 func _try_fire() -> void:
+	var fire_origin := _get_fire_origin()
+	var aim_direction := _get_aim_direction(fire_origin)
+	_try_fire_in_direction(aim_direction)
+
+
+func _try_fire_in_direction(aim_direction: Vector2) -> void:
 	if not _can_fire():
 		return
 
-	var fire_origin := _get_fire_origin()
-	var aim_direction := _get_aim_direction(fire_origin)
 	if aim_direction.length() <= 0.001:
 		return
 
-	var shot_data := _build_shot_data(fire_origin, aim_direction)
+	var fire_origin := _get_fire_origin()
+	var shot_data := _build_shot_data(fire_origin, aim_direction.normalized())
 	_last_shot_time = _get_time_seconds()
 
 	if multiplayer.has_multiplayer_peer():
@@ -182,7 +190,7 @@ func _on_projectile_impact(target_path: NodePath) -> void:
 	if not target or not is_instance_valid(target):
 		return
 
-	if not target.is_in_group("bots"):
+	if not _is_enemy_target(target):
 		return
 
 	if target.has_method("destroy_from_projectile"):
@@ -209,12 +217,63 @@ func _get_aim_direction(fire_origin: Vector2) -> Vector2:
 		var touch_direction := right_stick.get_value()
 		if touch_direction.length() > 0.1:
 			return touch_direction.normalized()
+		if _last_touch_aim_direction.length() > 0.1:
+			return _last_touch_aim_direction.normalized()
 
 	var mouse_direction := get_global_mouse_position() - fire_origin
 	if mouse_direction.length() > 0.001:
 		return mouse_direction.normalized()
 
 	return Vector2.RIGHT.rotated(global_rotation)
+
+
+func _handle_touch_aim_and_fire(look_dir: Vector2, delta: float) -> void:
+	var has_active_aim := look_dir.length() > 0.1
+	if has_active_aim:
+		_last_touch_aim_direction = look_dir.normalized()
+		_touch_aim_active = true
+		rotation = lerp_angle(rotation, _last_touch_aim_direction.angle(), 20.0 * delta)
+		_try_touch_auto_fire()
+		return
+
+	if _touch_aim_active and _last_touch_aim_direction.length() > 0.1:
+		_touch_aim_active = false
+		_try_fire_in_direction(_last_touch_aim_direction)
+
+
+func _try_touch_auto_fire() -> void:
+	if not _using_touch or not _touch_aim_active or not _can_fire():
+		return
+
+	var look_direction := Vector2.RIGHT.rotated(global_rotation)
+	if look_direction.length() <= 0.001:
+		return
+
+	var fire_origin := _get_fire_origin()
+	if not _has_enemy_target_in_direction(fire_origin, look_direction.normalized(), touch_auto_fire_range):
+		return
+
+	_try_fire_in_direction(look_direction)
+
+
+func _has_enemy_target_in_direction(fire_origin: Vector2, aim_direction: Vector2, detection_range: float) -> bool:
+	if not shot_raycast:
+		return false
+
+	shot_raycast.global_position = fire_origin
+	shot_raycast.global_rotation = aim_direction.angle()
+	shot_raycast.target_position = Vector2(minf(detection_range, shot_range), 0.0)
+	shot_raycast.force_raycast_update()
+
+	if not shot_raycast.is_colliding():
+		return false
+
+	var collider := shot_raycast.get_collider()
+	return collider is Node and _is_enemy_target(collider)
+
+
+func _is_enemy_target(target: Variant) -> bool:
+	return target is Node and ((target as Node).is_in_group("enemy") or (target as Node).is_in_group("bots"))
 
 
 func _build_shot_data(fire_origin: Vector2, aim_direction: Vector2) -> Dictionary:
@@ -230,7 +289,7 @@ func _build_shot_data(fire_origin: Vector2, aim_direction: Vector2) -> Dictionar
 		if shot_raycast.is_colliding():
 			impact_position = shot_raycast.get_collision_point()
 			var collider := shot_raycast.get_collider()
-			if collider is Node and (collider as Node).is_in_group("bots"):
+			if collider is Node and _is_enemy_target(collider):
 				target_path = (collider as Node).get_path()
 
 	return {

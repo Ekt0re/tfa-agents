@@ -1,0 +1,323 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Menu/settings_panel.gd" id="1_script"]
+[ext_resource type="Theme" path="res://Assets/UI/global_theme.tres" id="2_theme"]
+
+[node name="SettingsPanel" type="PanelContainer"]
+custom_minimum_size = Vector2(820, 620)
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="ContentMargin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="RootVBox" type="VBoxContainer" parent="ContentMargin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Header" type="HBoxContainer" parent="ContentMargin/RootVBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HeaderText" type="VBoxContainer" parent="ContentMargin/RootVBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="TitleLabel" type="Label" parent="ContentMargin/RootVBox/Header/HeaderText" unique_id=1]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "IMPOSTAZIONI"
+
+[node name="SubtitleLabel" type="Label" parent="ContentMargin/RootVBox/Header/HeaderText" unique_id=2]
+unique_name_in_owner = true
+layout_mode = 2
+modulate = Color(0.8, 0.88, 1, 0.78)
+text = "Configura audio, grafica e accessibilità dell'interfaccia."
+autowrap_mode = 3
+
+[node name="BackButton" type="Button" parent="ContentMargin/RootVBox/Header" unique_id=3]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Indietro"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="ContentMargin/RootVBox"]
+custom_minimum_size = Vector2(0, 460)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="SectionsVBox" type="VBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 18
+
+[node name="AudioSection" type="PanelContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox"]
+layout_mode = 2
+
+[node name="AudioMargin" type="MarginContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="AudioVBox" type="VBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="AudioTitle" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Audio"
+
+[node name="MasterRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox"]
+layout_mode = 2
+columns = 2
+
+[node name="MasterLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/MasterRow"]
+layout_mode = 2
+text = "Volume master"
+
+[node name="MasterControl" type="HBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/MasterRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="MasterSlider" type="HSlider" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/MasterRow/MasterControl" unique_id=4]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 100.0
+value = 80.0
+
+[node name="MasterValue" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/MasterRow/MasterControl" unique_id=5]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(56, 0)
+layout_mode = 2
+text = "80%"
+horizontal_alignment = 2
+
+[node name="MusicRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox"]
+layout_mode = 2
+columns = 2
+
+[node name="MusicLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/MusicRow"]
+layout_mode = 2
+text = "Volume musica"
+
+[node name="MusicControl" type="HBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/MusicRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="MusicSlider" type="HSlider" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/MusicRow/MusicControl" unique_id=6]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 100.0
+value = 70.0
+
+[node name="MusicValue" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/MusicRow/MusicControl" unique_id=7]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(56, 0)
+layout_mode = 2
+text = "70%"
+horizontal_alignment = 2
+
+[node name="SfxRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox"]
+layout_mode = 2
+columns = 2
+
+[node name="SfxLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/SfxRow"]
+layout_mode = 2
+text = "Volume effetti"
+
+[node name="SfxControl" type="HBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/SfxRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="SfxSlider" type="HSlider" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/SfxRow/SfxControl" unique_id=8]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 100.0
+value = 85.0
+
+[node name="SfxValue" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/SfxRow/SfxControl" unique_id=9]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(56, 0)
+layout_mode = 2
+text = "85%"
+horizontal_alignment = 2
+
+[node name="GraphicsSection" type="PanelContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox"]
+layout_mode = 2
+
+[node name="GraphicsMargin" type="MarginContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="GraphicsVBox" type="VBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="GraphicsTitle" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Grafica"
+
+[node name="WindowModeRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox"]
+layout_mode = 2
+columns = 2
+
+[node name="WindowModeLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/WindowModeRow"]
+layout_mode = 2
+text = "Modalità finestra"
+
+[node name="WindowModeOption" type="OptionButton" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/WindowModeRow" unique_id=10]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Finestra"
+
+[node name="VSyncRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox"]
+layout_mode = 2
+columns = 2
+
+[node name="VSyncLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/VSyncRow"]
+layout_mode = 2
+text = "VSync"
+
+[node name="VSyncToggle" type="CheckButton" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/VSyncRow" unique_id=11]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Attivo"
+button_pressed = true
+
+[node name="FpsCapRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox"]
+layout_mode = 2
+columns = 2
+
+[node name="FpsCapLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/FpsCapRow"]
+layout_mode = 2
+text = "Limite fotogrammi"
+
+[node name="FpsCapOption" type="OptionButton" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/FpsCapRow" unique_id=12]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "60 FPS"
+
+[node name="PresetRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox"]
+layout_mode = 2
+columns = 2
+
+[node name="PresetLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/PresetRow"]
+layout_mode = 2
+text = "Preset grafico"
+
+[node name="GraphicsPresetOption" type="OptionButton" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/PresetRow" unique_id=13]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Alto"
+
+[node name="GameplaySection" type="PanelContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox"]
+layout_mode = 2
+
+[node name="GameplayMargin" type="MarginContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="GameplayVBox" type="VBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="GameplayTitle" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Gioco e interfaccia"
+
+[node name="LanguageRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox"]
+layout_mode = 2
+columns = 2
+
+[node name="LanguageLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/LanguageRow"]
+layout_mode = 2
+text = "Lingua"
+
+[node name="LanguageOption" type="OptionButton" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/LanguageRow" unique_id=14]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Italiano"
+
+[node name="SubtitlesRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox"]
+layout_mode = 2
+columns = 2
+
+[node name="SubtitlesLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/SubtitlesRow"]
+layout_mode = 2
+text = "Sottotitoli"
+
+[node name="SubtitlesToggle" type="CheckButton" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/SubtitlesRow" unique_id=15]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Attivi"
+button_pressed = true
+
+[node name="ShowFpsRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox"]
+layout_mode = 2
+columns = 2
+
+[node name="ShowFpsLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/ShowFpsRow"]
+layout_mode = 2
+text = "Mostra FPS"
+
+[node name="ShowFpsToggle" type="CheckButton" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/ShowFpsRow" unique_id=16]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Disattivato"
+
+[node name="ScreenShakeRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox"]
+layout_mode = 2
+columns = 2
+
+[node name="ScreenShakeLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/ScreenShakeRow"]
+layout_mode = 2
+text = "Screen shake"
+
+[node name="ScreenShakeToggle" type="CheckButton" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/ScreenShakeRow" unique_id=17]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Attivo"
+button_pressed = true
+
+[node name="Footer" type="HBoxContainer" parent="ContentMargin/RootVBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="FooterHint" type="Label" parent="ContentMargin/RootVBox/Footer"]
+layout_mode = 2
+size_flags_horizontal = 3
+modulate = Color(0.8, 0.88, 1, 0.66)
+text = "Le modifiche vengono applicate e salvate automaticamente."
+autowrap_mode = 3
+
+[node name="ResetButton" type="Button" parent="ContentMargin/RootVBox/Footer" unique_id=18]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Ripristina predefiniti"

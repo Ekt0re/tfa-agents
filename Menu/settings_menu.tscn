@@ -1,0 +1,44 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://Menu/settings_menu.gd" id="1_script"]
+[ext_resource type="Theme" path="res://Assets/UI/global_theme.tres" id="2_theme"]
+[ext_resource type="PackedScene" path="res://Menu/settings_panel.tscn" id="3_panel"]
+
+[node name="SettingsMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0196078, 0.0313726, 0.0627451, 1)
+
+[node name="GlowTop" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 240.0
+grow_horizontal = 2
+color = Color(0.129412, 0.403922, 0.701961, 0.12)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SettingsPanel" parent="CenterContainer" unique_id=1 instance=ExtResource("3_panel")]
+
+[connection signal="back_requested" from="CenterContainer/SettingsPanel" to="." method="_on_back_requested"]
