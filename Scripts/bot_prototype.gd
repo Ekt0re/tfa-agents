@@ -6,6 +6,11 @@ signal height_level_changed(new_level: int)
 const STEP_TYPE_TARGET := "target"
 const STEP_TYPE_RAMP := "ramp"
 const ROUTE_COST_INF := 1.0e18
+const NAV_REGION_NODE_NAMES := [
+	"L0_NavigationRegion2D",
+	"L1_NavigationRegion2D",
+	"L2_NavigationRegion2D"
+]
 
 @export var speed: float = 370.0
 @export var current_height_level: int = 0
@@ -43,6 +48,7 @@ var _agent_target_position: Vector2 = Vector2.INF
 var _agent_target_level: int = -1
 var _debug_route_points: Array[Vector2] = []
 var _tracked_target_signal_node: Node = null
+var _navigation_layer_masks_by_level: Dictionary = {}
 
 
 func _ready() -> void:
@@ -51,6 +57,7 @@ func _ready() -> void:
 
 
 func _initialize_bot() -> void:
+	_cache_navigation_regions()
 	change_height_level(current_height_level, true)
 
 	if ray_cast:
@@ -66,6 +73,10 @@ func _initialize_bot() -> void:
 		var players := get_tree().get_nodes_in_group("players")
 		if not players.is_empty() and players[0] is Node2D:
 			go_to_node(players[0] as Node2D)
+
+
+func destroy_from_projectile() -> void:
+	queue_free()
 
 
 func _physics_process(delta: float) -> void:
@@ -129,27 +140,40 @@ func stop_navigation() -> void:
 
 func change_height_level(new_level: int, force_update: bool = false) -> void:
 	new_level = clampi(new_level, 0, total_levels - 1)
+
+	# Se il livello non cambia e non c'è il force_update, esci subito
 	if new_level == current_height_level and not force_update:
 		return
 
+	# Gestione pulita dei gruppi: rimuove dal vecchio SOLO se è cambiato o se forzato
 	var previous_level := current_height_level
-	if not force_update:
-		remove_from_group("entities_level_" + str(previous_level))
+	if previous_level != new_level or force_update:
+		if is_in_group("entities_level_" + str(previous_level)):
+			remove_from_group("entities_level_" + str(previous_level))
 
 	current_height_level = new_level
-	add_to_group("entities_level_" + str(current_height_level))
 
+	# Evita duplicati nel gruppo se già presente
+	if not is_in_group("entities_level_" + str(current_height_level)):
+		add_to_group("entities_level_" + str(current_height_level))
+
+	# Calcolo offset collisioni (Piano 0 = 0, Piano 1 = 3, Piano 2 = 6)
 	var layer_offset := current_height_level * 3
-	collision_layer = 1 << (1 + layer_offset)
 
+	# Ogni piano usa due bit: muri + personaggi.
+	# Il bot appartiene solo al bit personaggio del piano.
+	# L0 = layer 2, mask 1|2 | L1 = layer 5, mask 4|5 | L2 = layer 8, mask 7|8
 	var wall_bit := 1 << (0 + layer_offset)
 	var character_bit := 1 << (1 + layer_offset)
+	collision_layer = character_bit
 	collision_mask = wall_bit | character_bit
 
+	# Gestione visiva dell'altezza
 	z_index = current_height_level * 10
 
+	# Configurazione Navigation Agent
 	if navigation_agent:
-		navigation_agent.navigation_layers = 1 << current_height_level
+		navigation_agent.navigation_layers = _get_navigation_layers_for_level(current_height_level)
 		_agent_target_level = -1
 
 	visible = true
@@ -460,9 +484,20 @@ func _on_tracked_target_height_level_changed(_new_level: int) -> void:
 
 
 func _force_route_refresh_after_level_change() -> void:
+	# 1. Forza il server di navigazione ad aggiornare la mappa dei Piani
+	var map_rid := get_world_2d().get_navigation_map()
+	NavigationServer2D.map_force_update(map_rid)
+
+	# 2. Sincronizza l'agente con il server per applicare SUBITO il cambio di layer
+	if navigation_agent:
+		navigation_agent.get_next_path_position()
+
+	# 3. Recupera la richiesta attiva attuale
 	var request: Dictionary = _get_active_navigation_request()
 	if request.is_empty():
 		return
+
+	# 4. Bypassa il cooldown del repath e avvia il ricalcolo immediato della rotta
 	_last_repath_time = -1000.0
 	_refresh_route_to(
 		request.get("position", global_position),
@@ -529,12 +564,13 @@ func _get_path_result(from_position: Vector2, to_position: Vector2, level: int, 
 		}
 
 	var navigation_map := get_world_2d().navigation_map
+	var navigation_layers := _get_navigation_layers_for_level(level)
 	var path: PackedVector2Array = NavigationServer2D.map_get_path(
 		navigation_map,
 		from_position,
 		to_position,
 		true,
-		1 << level
+		navigation_layers
 	)
 
 	if path.is_empty():
@@ -566,6 +602,42 @@ func _get_path_result(from_position: Vector2, to_position: Vector2, level: int, 
 		"path_end": last_point,
 		"points": _packed_to_array(path)
 		}
+
+
+func _cache_navigation_regions() -> void:
+	_navigation_layer_masks_by_level.clear()
+
+	for level in range(total_levels):
+		var fallback_mask := 1 << level
+		var region_name := _get_navigation_region_name(level)
+		var region := _find_navigation_region(region_name)
+		if region and region.navigation_layers != 0:
+			_navigation_layer_masks_by_level[level] = region.navigation_layers
+		else:
+			_navigation_layer_masks_by_level[level] = fallback_mask
+			if debug_pathfinding:
+				print("[BOT PATH] NavigationRegion2D non trovata o senza layer per L", level,
+					" | nome=", region_name, " | uso fallback mask=", fallback_mask)
+
+
+func _get_navigation_layers_for_level(level: int) -> int:
+	var clamped_level := clampi(level, 0, total_levels - 1)
+	if _navigation_layer_masks_by_level.is_empty():
+		_cache_navigation_regions()
+	return int(_navigation_layer_masks_by_level.get(clamped_level, 1 << clamped_level))
+
+
+func _get_navigation_region_name(level: int) -> String:
+	if level >= 0 and level < NAV_REGION_NODE_NAMES.size():
+		return String(NAV_REGION_NODE_NAMES[level])
+	return "L%d_NavigationRegion2D" % level
+
+
+func _find_navigation_region(region_name: String) -> NavigationRegion2D:
+	var current_scene := get_tree().current_scene
+	if not current_scene:
+		return null
+	return current_scene.find_child(region_name, true, false) as NavigationRegion2D
 
 
 func _get_ramp_acceptance_distance(ramp: Ramp) -> float:

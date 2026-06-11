@@ -37,13 +37,15 @@ pointing/emulate_touch_from_mouse=true
 
 [layer_names]
 
-2d_physics/layer_1="players_l0"
-2d_physics/layer_2="players_l1"
-2d_physics/layer_3="world_l0"
-2d_physics/layer_4="world_l1"
-2d_physics/layer_5="projectiles_l0"
-2d_physics/layer_6="projectiles_l1"
-2d_physics/layer_7="ramps"
+2d_physics/layer_1="Muri_0"
+2d_physics/layer_2="Player_enemy_0"
+2d_physics/layer_3="Proiettili_0"
+2d_physics/layer_4="Muri_1"
+2d_physics/layer_5="Player_enemy_1"
+2d_physics/layer_6="Proiettili_1"
+2d_physics/layer_7="Muri_2"
+2d_physics/layer_8="Player_enemy_2"
+2d_physics/layer_9="Proiettili_0"
 
 [navigation]
 

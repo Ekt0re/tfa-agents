@@ -3,34 +3,50 @@ class_name PlayerPrototype
 
 signal height_level_changed(new_level: int)
 
+const PROJECTILE_VISUAL_SCENE := preload("res://Scenes/projectile_visual.tscn")
+
 @export var speed: float = 400.0
 @export var current_height_level: int = 0
 @export var total_levels: int = 3
+@export var fire_cooldown: float = 0.12
+@export var shot_range: float = 1600.0
+@export var projectile_visual_speed: float = 2200.0
 
 @onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D if has_node("NavigationAgent2D") else null
 @onready var joystick: VirtualJoystickPlus = $InputManager/left_stick
 @onready var right_stick: VirtualJoystickPlus = $InputManager/right_stick
+@onready var muzzle_marker: Marker2D = $Muzzle if has_node("Muzzle") else null
+@onready var shot_raycast: RayCast2D = $ShotRayCast2D if has_node("ShotRayCast2D") else null
 
 var level_shader := preload("res://Shaders/level_transition.gdshader")
 var _using_touch := false
+var _last_shot_time: float = -1000.0
 
 
 func _ready() -> void:
 	add_to_group("players")
+	if shot_raycast:
+		shot_raycast.enabled = true
+		shot_raycast.add_exception(self)
 	call_deferred("_initialize_level_system")
 
 
 func _initialize_level_system() -> void:
 	_setup_shader_materials()
+	_configure_shot_raycast_for_current_level()
 	change_height_level(current_height_level, true)
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.is_echo():
-		if event.keycode == KEY_Q:
-			var next_level := (current_height_level + 1) % total_levels
-			change_height_level(next_level)
+	if event.is_action_pressed("cambia_piano"):
+		var next_level := (current_height_level + 1) % total_levels
+		change_height_level(next_level)
+		return
 
+	if event is InputEventMouseButton:
+		var mouse_event := event as InputEventMouseButton
+		if mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed:
+			_try_fire()
 
 
 func _input(event: InputEvent) -> void:
@@ -98,6 +114,7 @@ func change_height_level(new_level: int, force_update: bool = false) -> void:
 	var wall_bit := 1 << (0 + layer_offset)
 	var character_bit := 1 << (1 + layer_offset)
 	collision_mask = wall_bit | character_bit
+	_configure_shot_raycast_for_current_level()
 
 	z_index = current_height_level * 10
 
@@ -109,6 +126,140 @@ func change_height_level(new_level: int, force_update: bool = false) -> void:
 
 	print("Player cambia piano: " + str(new_level) + " da piano: " + str(previous_level))
 
+
+func _try_fire() -> void:
+	if not _can_fire():
+		return
+
+	var fire_origin := _get_fire_origin()
+	var aim_direction := _get_aim_direction(fire_origin)
+	if aim_direction.length() <= 0.001:
+		return
+
+	var shot_data := _build_shot_data(fire_origin, aim_direction)
+	_last_shot_time = _get_time_seconds()
+
+	if multiplayer.has_multiplayer_peer():
+		_replicate_fire.rpc(
+			shot_data["origin"],
+			shot_data["impact_position"],
+			shot_data["target_path"],
+			shot_data["height_level"],
+			shot_data["visual_speed"]
+		)
+	else:
+		_replicate_fire(
+			shot_data["origin"],
+			shot_data["impact_position"],
+			shot_data["target_path"],
+			shot_data["height_level"],
+			shot_data["visual_speed"]
+		)
+
+
+@rpc("authority", "call_local", "reliable")
+func _replicate_fire(origin: Vector2, impact_position: Vector2, target_path: NodePath, height_level: int, visual_speed: float) -> void:
+	var current_scene := get_tree().current_scene
+	if not current_scene:
+		return
+
+	var projectile := PROJECTILE_VISUAL_SCENE.instantiate() as ProjectileVisual
+	if not projectile:
+		return
+
+	current_scene.add_child(projectile)
+	projectile.setup_projectile(origin, impact_position, visual_speed, height_level, target_path)
+
+	if not target_path.is_empty() and _can_apply_projectile_impacts():
+		projectile.impact_reached.connect(_on_projectile_impact, CONNECT_ONE_SHOT)
+
+
+func _on_projectile_impact(target_path: NodePath) -> void:
+	if target_path.is_empty():
+		return
+
+	var target := get_tree().root.get_node_or_null(target_path)
+	if not target or not is_instance_valid(target):
+		return
+
+	if not target.is_in_group("bots"):
+		return
+
+	if target.has_method("destroy_from_projectile"):
+		target.call_deferred("destroy_from_projectile")
+	else:
+		target.call_deferred("queue_free")
+
+
+func _can_fire() -> bool:
+	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
+		return false
+
+	return _get_time_seconds() - _last_shot_time >= fire_cooldown
+
+
+func _get_fire_origin() -> Vector2:
+	if muzzle_marker:
+		return muzzle_marker.global_position
+	return global_position
+
+
+func _get_aim_direction(fire_origin: Vector2) -> Vector2:
+	if _using_touch:
+		var touch_direction := right_stick.get_value()
+		if touch_direction.length() > 0.1:
+			return touch_direction.normalized()
+
+	var mouse_direction := get_global_mouse_position() - fire_origin
+	if mouse_direction.length() > 0.001:
+		return mouse_direction.normalized()
+
+	return Vector2.RIGHT.rotated(global_rotation)
+
+
+func _build_shot_data(fire_origin: Vector2, aim_direction: Vector2) -> Dictionary:
+	var impact_position := fire_origin + aim_direction * shot_range
+	var target_path := NodePath()
+
+	if shot_raycast:
+		shot_raycast.global_position = fire_origin
+		shot_raycast.global_rotation = aim_direction.angle()
+		shot_raycast.target_position = Vector2(shot_range, 0.0)
+		shot_raycast.force_raycast_update()
+
+		if shot_raycast.is_colliding():
+			impact_position = shot_raycast.get_collision_point()
+			var collider := shot_raycast.get_collider()
+			if collider is Node and (collider as Node).is_in_group("bots"):
+				target_path = (collider as Node).get_path()
+
+	return {
+		"origin": fire_origin,
+		"impact_position": impact_position,
+		"target_path": target_path,
+		"height_level": current_height_level,
+		"visual_speed": projectile_visual_speed
+	}
+
+
+func _configure_shot_raycast_for_current_level() -> void:
+	if not shot_raycast:
+		return
+
+	var layer_offset := current_height_level * 3
+	var wall_bit := 1 << (0 + layer_offset)
+	var character_bit := 1 << (1 + layer_offset)
+	shot_raycast.collision_mask = wall_bit | character_bit
+
+
+func _can_apply_projectile_impacts() -> bool:
+	if not multiplayer.has_multiplayer_peer():
+		return true
+	return multiplayer.is_server()
+
+
+func _get_time_seconds() -> float:
+	return Time.get_ticks_msec() / 1000.0
 
 
 func _setup_shader_materials() -> void:
@@ -216,7 +367,6 @@ func _collect_canvas_items(node: Node, canvas_items: Array[CanvasItem]) -> void:
 
 	for child in node.get_children():
 		_collect_canvas_items(child, canvas_items)
-
 
 
 #Organizzazione collisioni fisiche, layer, maschere e navigation.

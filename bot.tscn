@@ -2,12 +2,16 @@
 
 [ext_resource type="Script" uid="uid://d2a1pgut2fvrx" path="res://Scripts/bot_prototype.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://bc5goqdv2thqf" path="res://icon.svg" id="2_texture"]
+[ext_resource type="Texture2D" path="res://Assets/Lighting/ao_radial.tres" id="3_ao"]
+[ext_resource type="Texture2D" path="res://Assets/Lighting/glow_radial.tres" id="4_glow"]
+[ext_resource type="Material" path="res://Assets/Lighting/additive_glow_material.tres" id="5_glow_mat"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_bot"]
 radius = 64.0
 
 [node name="Bot" type="CharacterBody2D" unique_id=1855505913]
-collision_mask = 69
+collision_layer = 2
+collision_mask = 3
 script = ExtResource("1_script")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=737851986]
@@ -17,6 +21,29 @@ texture = ExtResource("2_texture")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=40185088]
 shape = SubResource("CircleShape2D_bot")
 
+[node name="AmbientOcclusion" type="Sprite2D" parent="."]
+z_index = -1
+show_behind_parent = true
+position = Vector2(0, 34)
+scale = Vector2(0.78, 0.34)
+texture = ExtResource("3_ao")
+modulate = Color(1, 1, 1, 0.7)
+
+[node name="Glow" type="Sprite2D" parent="."]
+z_index = -1
+show_behind_parent = true
+scale = Vector2(1.45, 1.45)
+texture = ExtResource("4_glow")
+material = ExtResource("5_glow_mat")
+modulate = Color(1, 0.45, 0.4, 0.42)
+
+[node name="PointLight2D" type="PointLight2D" parent="."]
+texture = ExtResource("4_glow")
+color = Color(1, 0.42, 0.42, 1)
+energy = 1.15
+shadow_enabled = true
+texture_scale = 1.9
+
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=1749740855]
 path_desired_distance = 1.0
 target_desired_distance = 1.0
@@ -25,6 +52,7 @@ radius = 24.0
 neighbor_distance = 96.0
 
 [node name="Line2D" type="Line2D" parent="." unique_id=1694131522]
+visible = false
 show_behind_parent = true
 width = 12.0
 default_color = Color(1, 0.08, 0.58, 0.45)
@@ -34,4 +62,5 @@ end_cap_mode = 2
 antialiased = true
 
 [node name="RayCast2D" type="RayCast2D" parent="." unique_id=446621666]
-target_position = Vector2(128, 0)
+visible = false
+target_position = Vector2(256, 0)

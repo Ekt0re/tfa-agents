@@ -3,6 +3,9 @@
 [ext_resource type="Script" uid="uid://07bf0y1fqgxh" path="res://Scripts/ramp.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://tf8awjmnuo61" path="res://Assets/TilesetCell256x256.png" id="2_texture"]
 [ext_resource type="Shader" uid="uid://c1mng6r2pnrri" path="res://Shaders/ramp_glow.gdshader" id="3_shader"]
+[ext_resource type="Texture2D" path="res://Assets/Lighting/ao_radial.tres" id="4_ao"]
+[ext_resource type="Texture2D" path="res://Assets/Lighting/glow_radial.tres" id="5_glow"]
+[ext_resource type="Material" path="res://Assets/Lighting/additive_glow_material.tres" id="6_glow_mat"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ramp"]
 shader = ExtResource("3_shader")
@@ -17,6 +20,11 @@ region = Rect2(1791.0908, 513.72723, 253.09082, 253.81818)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ramp"]
 size = Vector2(256, 256)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_ramp"]
+polygon = PackedVector2Array(-120, -120, 120, -120, 120, 120, -120, 120)
+closed = true
+cull_mode = 0
 
 [node name="Ramp" type="Area2D" unique_id=266899831]
 z_index = 10
@@ -33,3 +41,29 @@ texture = SubResource("AtlasTexture_ramp")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=288520488]
 shape = SubResource("RectangleShape2D_ramp")
+
+[node name="AmbientOcclusion" type="Sprite2D" parent="."]
+z_index = -1
+show_behind_parent = true
+position = Vector2(0, 48)
+scale = Vector2(1.2, 0.55)
+texture = ExtResource("4_ao")
+modulate = Color(1, 1, 1, 0.75)
+
+[node name="Glow" type="Sprite2D" parent="."]
+z_index = -1
+show_behind_parent = true
+scale = Vector2(2.0, 2.0)
+texture = ExtResource("5_glow")
+material = ExtResource("6_glow_mat")
+modulate = Color(1, 0.56, 0.25, 0.38)
+
+[node name="PointLight2D" type="PointLight2D" parent="."]
+texture = ExtResource("5_glow")
+color = Color(1, 0.58, 0.28, 1)
+energy = 1.1
+shadow_enabled = true
+texture_scale = 2.4
+
+[node name="LightOccluder2D" type="LightOccluder2D" parent="."]
+occluder = SubResource("OccluderPolygon2D_ramp")
