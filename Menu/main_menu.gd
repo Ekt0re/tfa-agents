@@ -37,6 +37,8 @@ func _ready() -> void:
 	_download_progress_bar.visible = false
 	_download_progress_label.visible = false
 	_changelog_overlay.visible = false
+	_changelog_body.bbcode_enabled = true
+	_changelog_body.fit_content = true
 	_update_version_label()
 	_refresh_texts()
 	_global_settings.language_changed.connect(_on_language_changed)
@@ -162,7 +164,7 @@ func _refresh_changelog_overlay() -> void:
 	var changelog_body: String = _global_settings.get_changelog_for_version(current_version, String(current_release.get("body", "")))
 	_changelog_title_label.text = _tr_text("changelog_title", [current_version])
 	_changelog_subtitle_label.text = _tr_text("release_notes")
-	_changelog_body.text = changelog_body
+	_changelog_body.text = MarkdownToBBCode.convert(changelog_body)
 
 
 func _on_release_check_completed(info: Dictionary) -> void:

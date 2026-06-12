@@ -61,6 +61,7 @@ var release_info: Dictionary = {
 	"error": "",
 	"has_update": false,
 	"latest_release": {},
+	"current_release": {},
 }
  
 var _theme_resource: Theme = preload("res://Assets/UI/global_theme.tres")
@@ -209,6 +210,7 @@ func request_release_check(force := false) -> void:
 		"error": "",
 		"has_update": false,
 		"latest_release": {},
+		"current_release": {},
 	}
 	_release_thread = Thread.new()
 	_release_thread.start(Callable(self, "_release_check_worker"))
@@ -469,7 +471,8 @@ func _fetch_release_info() -> Dictionary:
 		"status": "error",
 		"error": "",
 		"has_update": false,
-		"latest_release": {}
+		"latest_release": {},
+		"current_release": {}
 	}
 
 	var client := HTTPClient.new()
@@ -540,6 +543,8 @@ func _fetch_release_info() -> Dictionary:
 		return output
 
 	var latest_release := {}
+	var current_release := {}
+	var current_version := get_current_version()
 
 	for release in releases:
 		if typeof(release) != TYPE_DICTIONARY:
@@ -548,20 +553,28 @@ func _fetch_release_info() -> Dictionary:
 		if bool(release.get("draft", false)):
 			continue
 
-		latest_release = {
+		var r_data := {
 			"tag_name": String(release.get("tag_name", "")),
 			"name": String(release.get("name", "")),
 			"body": String(release.get("body", "")),
 			"html_url": String(release.get("html_url", ""))
 		}
 
-		break
+		if latest_release.is_empty():
+			latest_release = r_data
+			
+		var tag := String(release.get("tag_name", ""))
+		if tag == current_version or tag == ("v" + current_version):
+			current_release = r_data
+
+		if not latest_release.is_empty() and not current_release.is_empty():
+			break
 
 	output["status"] = "success"
 	output["latest_release"] = latest_release
+	output["current_release"] = current_release
 
 	if not latest_release.is_empty():
-		var current_version := get_current_version()
 		var latest_tag := String(latest_release["tag_name"]).replace("v", "")
 
 		output["has_update"] = _is_version_newer(

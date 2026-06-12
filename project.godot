@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="tfa-agents"
-config/version="0.1.6"
+config/version="0.1.7"
 run/main_scene="uid://deb727qfvrtx4"
 config/features=PackedStringArray("4.6", "Mobile")
 boot_splash/bg_color=Color(0, 0, 0, 1)

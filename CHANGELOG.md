@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.8
+- Bug fix
+- Migliorata stabilità del menu principale.
+- Sincronizzazione tra changelog locale e github.
+
+## 0.1.7
+- Introduzione sistema di PowerUp, collezionabili ecc.
+
 ## 0.1.6
 - Introduzione sistema di mine
 
