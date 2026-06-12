@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.6
+- Introduzione sistema di mine
+
+## 0.1.5
+- Aggiunto oggetto cassa
+- Aggiunto oggetto barile esplosivo
+- Aggiunta animazione esplosione
+- Bug fix
+
 ## 0.1.4
 
 - Sistema di aggiornamento collegato a git hub

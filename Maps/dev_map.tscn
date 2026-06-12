@@ -10,6 +10,7 @@
 [ext_resource type="NavigationPolygon" uid="uid://dt86qinqcr3w4" path="res://Maps/Nav1/Piano2.tres" id="4_to1ab"]
 [ext_resource type="PackedScene" uid="uid://b7hfb3856gr2p" path="res://Game/Oggetti/oggetto.tscn" id="7_p200p"]
 [ext_resource type="PackedScene" uid="uid://yy2t6t2gu7ec" path="res://bot_simple.tscn" id="8_rd1f1"]
+[ext_resource type="PackedScene" uid="uid://g8cm505rhk5y" path="res://Game/Oggetti/Mina.tscn" id="8_v11qg"]
 [ext_resource type="PackedScene" uid="uid://dvg8adsjxd6tt" path="res://Menu/pause_menu.tscn" id="9_pause_menu"]
 
 [node name="DevMap" type="Node2D" unique_id=73936262]
@@ -107,7 +108,6 @@ arrival_level = 2
 position = Vector2(1936, 1664)
 collision_layer = 1
 collision_mask = 2
-tipo = 1
 explosion_damage = 200.0
 explosion_radius = 250.0
 
@@ -122,7 +122,6 @@ explosion_radius = 250.0
 position = Vector2(1992, 2144)
 collision_layer = 1
 collision_mask = 6
-tipo = 1
 explosion_radius = 250.0
 
 [node name="Oggetto2" parent="Oggetti" unique_id=782442241 instance=ExtResource("7_p200p")]
@@ -153,7 +152,6 @@ explosion_radius = 250.0
 position = Vector2(1576, 2016)
 collision_layer = 1
 collision_mask = 6
-tipo = 1
 explosion_radius = 250.0
 
 [node name="Oggetto8" parent="Oggetti" unique_id=1628543564 instance=ExtResource("7_p200p")]
@@ -174,7 +172,6 @@ explosion_radius = 250.0
 position = Vector2(1776, 2312)
 collision_layer = 1
 collision_mask = 6
-tipo = 1
 explosion_radius = 250.0
 
 [node name="Oggetto11" parent="Oggetti" unique_id=1781140773 instance=ExtResource("7_p200p")]
@@ -188,7 +185,6 @@ explosion_radius = 250.0
 position = Vector2(1232, 1813)
 collision_layer = 1
 collision_mask = 6
-tipo = 1
 explosion_damage = 200.0
 explosion_radius = 250.0
 
@@ -457,38 +453,76 @@ explosion_damage = 200.0
 explosion_radius = 250.0
 
 [node name="Oggetto46" parent="Oggetti" unique_id=2072908207 instance=ExtResource("7_p200p")]
-position = Vector2(-1088, 3712)
+position = Vector2(-272, 2752)
 collision_layer = 1
 collision_mask = 6
 tipo = 1
 explosion_damage = 200.0
 explosion_radius = 250.0
 
-[node name="Oggetto47" parent="Oggetti" unique_id=2138343760 instance=ExtResource("7_p200p")]
-position = Vector2(-830, 3712)
-collision_layer = 1
-collision_mask = 6
-tipo = 1
-explosion_damage = 200.0
-explosion_radius = 250.0
+[node name="Mine" type="Node2D" parent="." unique_id=1577837299]
 
-[node name="Oggetto48" parent="Oggetti" unique_id=51749111 instance=ExtResource("7_p200p")]
-position = Vector2(-576, 3712)
-collision_layer = 1
-collision_mask = 6
-tipo = 1
-explosion_damage = 200.0
-explosion_radius = 250.0
+[node name="Mina" parent="Mine" unique_id=1646128512 instance=ExtResource("8_v11qg")]
+z_index = 1
+position = Vector2(376, 1928)
 
-[node name="Oggetto49" parent="Oggetti" unique_id=1769886073 instance=ExtResource("7_p200p")]
-position = Vector2(-318, 3712)
-collision_layer = 1
-collision_mask = 6
-tipo = 1
-explosion_damage = 200.0
-explosion_radius = 250.0
+[node name="Mina2" parent="Mine" unique_id=2117669288 instance=ExtResource("8_v11qg")]
+z_index = 21
+position = Vector2(-760, 128)
+collision_layer = 64
+collision_mask = 128
+livello = 2
 
-[node name="Player" parent="." unique_id=1004030284 instance=ExtResource("2_ien3m")]
+[node name="Mina3" parent="Mine" unique_id=57081137 instance=ExtResource("8_v11qg")]
+z_index = 11
+position = Vector2(3072, 3344)
+collision_layer = 8
+collision_mask = 16
+livello = 1
+
+[node name="Mina4" parent="Mine" unique_id=524269852 instance=ExtResource("8_v11qg")]
+z_index = 1
+position = Vector2(376, 1664)
+collision_layer = 1
+
+[node name="Mina5" parent="Mine" unique_id=781411529 instance=ExtResource("8_v11qg")]
+z_index = 1
+position = Vector2(2464, 1368)
+collision_layer = 1
+team_id = 1
+
+[node name="Mina6" parent="Mine" unique_id=1756999461 instance=ExtResource("8_v11qg")]
+z_index = 1
+position = Vector2(2744, 1416)
+collision_layer = 1
+team_id = 1
+
+[node name="Mina7" parent="Mine" unique_id=664841100 instance=ExtResource("8_v11qg")]
+z_index = 1
+position = Vector2(376, 896)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Mina8" parent="Mine" unique_id=877509171 instance=ExtResource("8_v11qg")]
+z_index = 1
+position = Vector2(1680, 784)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Mina9" parent="Mine" unique_id=682264001 instance=ExtResource("8_v11qg")]
+z_index = 1
+position = Vector2(3584, 512)
+collision_layer = 1
+collision_mask = 2
+
+[node name="Mina10" parent="Mine" unique_id=995955986 instance=ExtResource("8_v11qg")]
+z_index = 21
+position = Vector2(4968, 3448)
+collision_layer = 64
+collision_mask = 128
+livello = 2
+
+[node name="Player" parent="." unique_id=1004030284 groups=["team_1"] instance=ExtResource("2_ien3m")]
 position = Vector2(2288, 1594)
 
 [node name="Bot" parent="." unique_id=1855505913 instance=ExtResource("4_kuufh")]
@@ -505,9 +539,7 @@ position = Vector2(4944, 1792)
 current_height_level = 3
 
 [node name="Bot4" parent="." unique_id=569209035 instance=ExtResource("8_rd1f1")]
-z_index = 2
-position = Vector2(3112, 3216)
-current_height_level = 2
+position = Vector2(2672, 1153)
 
 [node name="Bot5" parent="." unique_id=1473197367 instance=ExtResource("8_rd1f1")]
 z_index = 4
