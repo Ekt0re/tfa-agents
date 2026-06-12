@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="tfa-agents"
-config/version="0.1.5"
+config/version="0.1.6"
 run/main_scene="uid://deb727qfvrtx4"
 config/features=PackedStringArray("4.6", "Mobile")
 boot_splash/bg_color=Color(0, 0, 0, 1)
@@ -22,6 +22,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+GameEvents="*res://Scripts/game_events.gd"
 RampEvents="*res://Scripts/ramp_events.gd"
 GlobalSettings="*res://Scripts/global_settings.gd"
 

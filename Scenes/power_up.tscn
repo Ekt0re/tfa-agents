@@ -1,0 +1,124 @@
+[gd_scene format=3 uid="uid://t12n16npgxtc"]
+
+[ext_resource type="Script" uid="uid://dm0ddgki0gcqm" path="res://Scripts/power_up.gd" id="1_c7nxa"]
+[ext_resource type="Texture2D" uid="uid://ddisqx81ecvhf" path="res://Assets/PowerUp.png" id="2_a8bxo"]
+[ext_resource type="Texture2D" uid="uid://ci7i8wom6kuag" path="res://Assets/Lighting/glow_radial.tres" id="3_glow"]
+
+[sub_resource type="Shader" id="Shader_6otjv"]
+code = "
+shader_type canvas_item;
+uniform float intensity : hint_range(0.0, 5.0) = 0.0;
+void fragment() {
+	vec4 c = texture(TEXTURE, UV);
+	COLOR = c + c * intensity * c.a;
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5dy3k"]
+shader = SubResource("Shader_6otjv")
+shader_parameter/intensity = 0.6890723387054363
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p3i06"]
+atlas = ExtResource("2_a8bxo")
+region = Rect2(512, 256, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6otjv"]
+atlas = ExtResource("2_a8bxo")
+region = Rect2(0, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5dy3k"]
+atlas = ExtResource("2_a8bxo")
+region = Rect2(256, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_iil6j"]
+atlas = ExtResource("2_a8bxo")
+region = Rect2(0, 256, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q2kqf"]
+atlas = ExtResource("2_a8bxo")
+region = Rect2(512, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e61te"]
+atlas = ExtResource("2_a8bxo")
+region = Rect2(256, 256, 256, 256)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_7djbq"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p3i06")
+}],
+"loop": true,
+"name": &"Armi",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6otjv")
+}],
+"loop": true,
+"name": &"Collezionabile",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5dy3k")
+}],
+"loop": true,
+"name": &"Crediti",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_iil6j")
+}],
+"loop": true,
+"name": &"Cura",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_q2kqf")
+}],
+"loop": true,
+"name": &"Mistero",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e61te")
+}],
+"loop": true,
+"name": &"Munizioni",
+"speed": 5.0
+}, {
+"frames": [],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_pu123"]
+radius = 72.443085
+
+[node name="PowerUp" type="Area2D" unique_id=726182247]
+z_index = 1
+collision_mask = 2
+script = ExtResource("1_c7nxa")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=486966297]
+material = SubResource("ShaderMaterial_5dy3k")
+scale = Vector2(1.0229691, 1.0229691)
+sprite_frames = SubResource("SpriteFrames_7djbq")
+animation = &"Cura"
+frame_progress = 0.63311434
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2026217604]
+shape = SubResource("CircleShape2D_pu123")
+
+[node name="PointLight2D" type="PointLight2D" parent="." unique_id=1543028402]
+color = Color(1, 0.95, 0.8, 1)
+energy = 0.9378145
+shadow_enabled = true
+texture = ExtResource("3_glow")
+texture_scale = 0.5

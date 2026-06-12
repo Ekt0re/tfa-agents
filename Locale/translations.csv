@@ -68,3 +68,9 @@ release_progress,Scaricati %s di %s (%d%%),Downloaded %s of %s (%d%%)
 release_progress_unknown,Scaricati %s,Downloaded %s
 changelog_title,Changelog %s,Changelog %s
 changelog_empty,Nessun changelog disponibile per questa build.,No changelog is available for this build.
+POWERUP_COLLECTED_HEAL,Hai raccolto: Cura!,You collected: Heal!
+POWERUP_COLLECTED_AMMO,Hai raccolto: Munizioni!,You collected: Ammo!
+POWERUP_COLLECTED_MONEY,Hai raccolto: Crediti!,You collected: Credits!
+POWERUP_COLLECTED_CHEST,Hai raccolto: Cassa Armi!,You collected: Weapon Chest!
+POWERUP_COLLECTED_STAR,Hai raccolto: Stella Collezionabile!,You collected: Collectible Star!
+POWERUP_COLLECTED_MYSTERY,Hai raccolto: Bonus Misterioso!,You collected: Mystery Bonus!
