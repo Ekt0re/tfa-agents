@@ -19,6 +19,8 @@ const NAV_REGION_NODE_NAMES := [
 @export var stop_smoothing: float = 10.0
 @export var arrival_distance: float = 18.0
 @export var look_smoothing: float = 10.0
+@export var vita_max: float = 100.0
+var vita: float = 100.0
 @export var debug_pathfinding: bool = true
 
 @onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D if has_node("NavigationAgent2D") else null
@@ -36,6 +38,7 @@ var _last_look_direction: Vector2 = Vector2.RIGHT
 
 func _ready() -> void:
 	add_to_group("bots")
+	add_to_group("damageable")
 	call_deferred("_initialize_bot")
 
 
@@ -285,6 +288,13 @@ func _find_navigation_region(region_name: String) -> NavigationRegion2D:
 	if not current_scene:
 		return null
 	return current_scene.find_child(region_name, true, false) as NavigationRegion2D
+
+
+func apply_damage(amount: float) -> void:
+	vita = maxf(vita - amount, 0.0)
+	print("BotSimple subisce ", amount, " danni. Vita rimanente: ", vita)
+	if vita <= 0.0:
+		queue_free()
 
 
 func _get_time_seconds() -> float:

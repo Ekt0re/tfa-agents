@@ -79,6 +79,7 @@ func _on_settings_back_requested() -> void:
 
 func _on_download_release_pressed() -> void:
 	var latest_release: Dictionary = _last_release_info.get("latest_release", {})
+	$ReleaseBanner.visible = false
 	if latest_release.is_empty():
 		return
 	_global_settings.begin_release_update(latest_release)
@@ -130,19 +131,19 @@ func _refresh_release_ui() -> void:
 		"error":
 			_release_status_label.text = _tr_text("release_error")
 		"success":
-			var releases: Array = _last_release_info.get("releases", [])
-			if bool(_last_release_info.get("has_update", false)):
-				var latest_release: Dictionary = _last_release_info.get("latest_release", {})
+			var latest_release: Dictionary = _last_release_info.get("latest_release", {})
+			var has_update: bool = bool(_last_release_info.get("has_update", false))
+			if has_update:
 				var latest_tag := String(latest_release.get("tag_name", "?"))
 				var current_version: String = _global_settings.get_current_version()
 				_release_banner.visible = true
 				_release_banner_title.text = _tr_text("release_available_title")
 				_release_banner_body.text = _tr_text("release_available_body", [latest_tag, current_version])
 				_release_status_label.text = ""
-			elif releases.is_empty():
-				_release_status_label.text = _tr_text("release_none")
-			else:
+			elif not latest_release.is_empty():
 				_release_status_label.text = _tr_text("release_latest")
+			else:
+				_release_status_label.text = _tr_text("release_none")
 		_:
 			_release_status_label.text = ""
 
@@ -165,6 +166,7 @@ func _refresh_changelog_overlay() -> void:
 
 
 func _on_release_check_completed(info: Dictionary) -> void:
+	print("DEBUG: Dati ricevuti da GlobalSettings: ", info)
 	_last_release_info = info.duplicate(true)
 	_refresh_release_ui()
 	_update_version_label()
@@ -218,9 +220,12 @@ func _tr_text(key: String, args: Array = []) -> String:
 func _build_download_details(progress: float, downloaded_bytes: int, total_bytes: int) -> String:
 	if downloaded_bytes < 0:
 		return _tr_text("release_downloading")
-	if total_bytes > 0 and progress >= 0.0:
-		return _tr_text("release_progress", [_format_bytes(downloaded_bytes), _format_bytes(total_bytes), int(round(progress * 100.0))])
-	return _tr_text("release_progress_unknown", [_format_bytes(downloaded_bytes)])
+	if total_bytes > 0:
+		# Converte i byte in Megabyte per una lettura più comoda
+		var mb_downloaded := downloaded_bytes / 1024.0 / 1024.0
+		var mb_total := total_bytes / 1024.0 / 1024.0
+		return "%.2f MB / %.2f MB (%.1f%%)" % [mb_downloaded, mb_total, progress * 100.0]
+	return "%d bytes scaricati" % downloaded_bytes
 
 
 func _format_bytes(byte_count: int) -> String:

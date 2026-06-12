@@ -25,6 +25,8 @@ const NAV_REGION_NODE_NAMES := [
 @export var arrival_distance: float = 20.0
 @export var look_at_target_distance: float = 220.0
 @export var ramp_transition_cost: float = 64.0
+@export var vita_max: float = 100.0
+var vita: float = 100.0
 
 var wants_ramp_teleport: bool = false
 
@@ -54,6 +56,7 @@ var _navigation_layer_masks_by_level: Dictionary = {}
 func _ready() -> void:
 	add_to_group("bots")
 	add_to_group("enemy")
+	add_to_group("damageable")
 	call_deferred("_initialize_bot")
 
 
@@ -78,6 +81,13 @@ func _initialize_bot() -> void:
 
 func destroy_from_projectile() -> void:
 	queue_free()
+
+
+func apply_damage(amount: float) -> void:
+	vita = maxf(vita - amount, 0.0)
+	print("BotPrototype subisce ", amount, " danni. Vita rimanente: ", vita)
+	if vita <= 0.0:
+		destroy_from_projectile()
 
 
 func _physics_process(delta: float) -> void:

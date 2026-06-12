@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="tfa-agents"
-config/version="0.1.1-dev"
+config/version="0.1.4"
 run/main_scene="uid://deb727qfvrtx4"
 config/features=PackedStringArray("4.6", "Mobile")
 config/icon="res://icon.svg"
@@ -48,6 +48,7 @@ pointing/emulate_touch_from_mouse=true
 
 [internationalization]
 
+locale/translations=PackedStringArray("res://Locale/translations.en.translation", "res://Locale/translations.it.translation")
 locale/include_text_server_data=true
 locale/fallback="it"
 
@@ -74,6 +75,7 @@ locale/fallback="it"
 
 [rendering]
 
+textures/canvas_textures/default_texture_filter=0
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="mobile"
 textures/vram_compression/import_etc2_astc=true

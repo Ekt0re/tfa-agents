@@ -1,0 +1,70 @@
+keys,it,en
+back,Indietro,Back
+close,Chiudi,Close
+download,Download,Download
+later,Più tardi,Later
+reset_defaults,Ripristina predefiniti,Reset defaults
+enabled,Attivo,Enabled
+disabled,Disattivato,Disabled
+main_menu_eyebrow,AGENTE QGG - TED,QGG AGENT - TED
+main_menu_play,Play,Play
+main_menu_settings,Impostazioni,Settings
+main_menu_exit,Esci dal gioco,Exit game
+main_menu_info,Le impostazioni globali vengono applicate in tempo reale.,Global settings are applied in real time.
+settings_title,IMPOSTAZIONI,SETTINGS
+settings_subtitle,Configura audio grafica e interfaccia con effetti reali e persistenti.,Configure audio graphics and interface with real persistent effects.
+settings_section_audio,Audio,Audio
+settings_section_graphics,Grafica,Graphics
+settings_section_interface,Interfaccia,Interface
+settings_master_volume,Volume master,Master volume
+settings_window_mode,Modalità finestra,Window mode
+settings_vsync,VSync,VSync
+settings_fps_limit,Limite fotogrammi,Frame rate limit
+settings_graphics_preset,Preset grafico,Graphics preset
+settings_ui_scale,Scala UI,UI scale
+settings_language,Lingua,Language
+settings_show_fps,Mostra FPS,Show FPS
+settings_subtitles,Sottotitoli azioni,Action subtitles
+settings_screen_shake,Shake camera,Camera shake
+settings_footer_hint,Le modifiche vengono salvate automaticamente e applicate subito.,Changes are saved automatically and applied immediately.
+window_mode_windowed,Finestra,Windowed
+window_mode_borderless,Borderless,Borderless
+window_mode_fullscreen,Schermo intero,Fullscreen
+fps_limit_unlimited,Illimitato,Unlimited
+graphics_low,Basso,Low
+graphics_medium,Medio,Medium
+graphics_high,Alto,High
+graphics_ultra,Ultra,Ultra
+ui_scale_small,Piccola,Small
+ui_scale_normal,Normale,Normal
+ui_scale_large,Grande,Large
+ui_scale_huge,Molto grande,Huge
+language_italian,Italiano,Italiano
+language_english,English,English
+pause_button,Pausa,Pause
+pause_title,PARTITA IN PAUSA,GAME PAUSED
+pause_resume,Riprendi,Resume
+pause_settings,Impostazioni,Settings
+pause_main_menu,Menu principale,Main menu
+pause_hint,Premi ESC oppure usa il pulsante in alto a destra per aprire o chiudere il menu.,Press ESC or use the top-right button to open or close the menu.
+pause_mode_singleplayer,Pausa completa: IA fisica e timer sono sospesi.,Full pause: AI physics and timers are suspended.
+pause_mode_multiplayer,Pausa multiplayer: il menu si apre senza congelare la simulazione.,Multiplayer pause: the menu opens without freezing the simulation.
+fps_counter,FPS: %d,FPS: %d
+subtitle_level_changed,Piano operativo %d attivo,Operational floor %d active
+subtitle_weapon_fired,Fuoco!,Weapons free!
+subtitle_enemy_down,Bersaglio neutralizzato,Target neutralized
+release_checking,Controllo aggiornamenti in corso...,Checking for updates...
+release_available_title,Nuova release disponibile,New release available
+release_available_body,È disponibile %s. La tua build attuale è %s.,Version %s is available. Your current build is %s.
+release_download,Scarica release,Download release
+release_downloading,Download aggiornamento in corso...,Downloading update...
+release_installing,Installazione aggiornamento in corso...,Installing update...
+release_install_prompt,APK scaricato: completa l'installazione da Android.,APK downloaded: complete installation from Android.
+release_latest,Stai già usando la versione più recente disponibile.,You are already using the latest available release.
+release_none,Nessuna release GitHub pubblicata al momento.,No GitHub releases are currently published.
+release_error,Impossibile controllare le release GitHub in questo momento.,Unable to check GitHub releases right now.
+release_notes,Note release,Release notes
+release_progress,Scaricati %s di %s (%d%%),Downloaded %s of %s (%d%%)
+release_progress_unknown,Scaricati %s,Downloaded %s
+changelog_title,Changelog %s,Changelog %s
+changelog_empty,Nessun changelog disponibile per questa build.,No changelog is available for this build.

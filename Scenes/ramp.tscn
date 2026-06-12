@@ -3,9 +3,7 @@
 [ext_resource type="Script" uid="uid://07bf0y1fqgxh" path="res://Scripts/ramp.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://tf8awjmnuo61" path="res://Assets/TilesetCell256x256.png" id="2_texture"]
 [ext_resource type="Shader" uid="uid://c1mng6r2pnrri" path="res://Shaders/ramp_glow.gdshader" id="3_shader"]
-[ext_resource type="Texture2D" uid="uid://d03lsdgxwrmjc" path="res://Assets/Lighting/ao_radial.tres" id="4_ao"]
 [ext_resource type="Texture2D" uid="uid://ci7i8wom6kuag" path="res://Assets/Lighting/glow_radial.tres" id="5_glow"]
-[ext_resource type="Material" path="res://Assets/Lighting/additive_glow_material.tres" id="6_glow_mat"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ramp"]
 shader = ExtResource("3_shader")
@@ -31,27 +29,11 @@ script = ExtResource("1_script")
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1664099517]
 material = SubResource("ShaderMaterial_ramp")
 rotation = -1.5707964
-scale = Vector2(0.97294027, 0.97294027)
+scale = Vector2(1.0794655, 1.0794655)
 texture = SubResource("AtlasTexture_ramp")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=288520488]
 shape = SubResource("RectangleShape2D_ramp")
-
-[node name="AmbientOcclusion" type="Sprite2D" parent="." unique_id=191136174]
-modulate = Color(1, 1, 1, 0.75)
-show_behind_parent = true
-z_index = -1
-position = Vector2(0, 48)
-scale = Vector2(1.2, 0.55)
-texture = ExtResource("4_ao")
-
-[node name="Glow" type="Sprite2D" parent="." unique_id=2005905959]
-modulate = Color(1, 0.56, 0.25, 0.38)
-show_behind_parent = true
-z_index = -1
-material = ExtResource("6_glow_mat")
-scale = Vector2(2, 2)
-texture = ExtResource("5_glow")
 
 [node name="PointLight2D" type="PointLight2D" parent="." unique_id=1124521452]
 color = Color(1, 0.58, 0.28, 1)

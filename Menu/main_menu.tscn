@@ -101,6 +101,7 @@ layout_mode = 2
 text = "Esci dal gioco"
 
 [node name="InfoLabel" type="Label" parent="MainContent/CenterContainer/MenuCard/CardMargin/VBox" unique_id=2141293697]
+visible = false
 modulate = Color(0.8, 0.88, 1, 0.66)
 layout_mode = 2
 text = "Le impostazioni globali vengono applicate in tempo reale."
@@ -119,11 +120,10 @@ autowrap_mode = 3
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
-offset_left = 24.0
-offset_top = 24.0
-offset_right = 420.0
-offset_bottom = 184.0
-grow_horizontal = 0
+offset_left = 388.0
+offset_top = 234.0
+offset_right = 784.0
+offset_bottom = 406.0
 
 [node name="BannerMargin" type="MarginContainer" parent="ReleaseBanner" unique_id=209666878]
 layout_mode = 2
@@ -167,16 +167,13 @@ text = "Più tardi"
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
-max_value = 100.0
 show_percentage = false
-value = 0.0
 
 [node name="DownloadProgressLabel" type="Label" parent="ReleaseBanner/BannerMargin/BannerVBox" unique_id=20510011]
 unique_name_in_owner = true
 visible = false
 modulate = Color(0.8, 0.88, 1, 0.72)
 layout_mode = 2
-text = ""
 autowrap_mode = 3
 
 [node name="VersionLabel" type="Label" parent="." unique_id=1]

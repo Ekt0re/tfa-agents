@@ -1,24 +1,22 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene format=3 uid="uid://dvg8adsjxd6tt"]
 
-[ext_resource type="Script" path="res://Menu/pause_menu.gd" id="1_script"]
-[ext_resource type="Theme" path="res://Assets/UI/global_theme.tres" id="2_theme"]
+[ext_resource type="Script" uid="uid://tq5pjkwvqj4o" path="res://Menu/pause_menu.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://Menu/settings_panel.tscn" id="3_settings_panel"]
 
-[node name="PauseMenu" type="CanvasLayer"]
+[node name="PauseMenu" type="CanvasLayer" unique_id=1272762349]
 layer = 100
-theme = ExtResource("2_theme")
 script = ExtResource("1_script")
 
 [node name="PauseButton" type="Button" parent="." unique_id=1]
 unique_name_in_owner = true
-layout_mode = 3
-anchors_preset = 9
+anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -188.0
-offset_top = 24.0
-offset_right = -24.0
+offset_left = -200.0
+offset_top = 16.0
+offset_right = -25.444458
 offset_bottom = 80.0
+grow_horizontal = 0
 text = "Pausa"
 
 [node name="Overlay" type="Control" parent="." unique_id=2]
@@ -32,7 +30,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
 
-[node name="Dim" type="ColorRect" parent="Overlay"]
+[node name="Dim" type="ColorRect" parent="Overlay" unique_id=1696575914]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -41,7 +39,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.0117647, 0.0196078, 0.0352941, 0.78)
 
-[node name="CenterContainer" type="CenterContainer" parent="Overlay"]
+[node name="CenterContainer" type="CenterContainer" parent="Overlay" unique_id=1883996576]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -54,50 +52,51 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(520, 0)
 layout_mode = 2
 
-[node name="MenuMargin" type="MarginContainer" parent="Overlay/CenterContainer/MenuPanel"]
+[node name="MenuMargin" type="MarginContainer" parent="Overlay/CenterContainer/MenuPanel" unique_id=1954039144]
 layout_mode = 2
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="VBox" type="VBoxContainer" parent="Overlay/CenterContainer/MenuPanel/MenuMargin"]
+[node name="VBox" type="VBoxContainer" parent="Overlay/CenterContainer/MenuPanel/MenuMargin" unique_id=214033817]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="TitleLabel" type="Label" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox"]
+[node name="TitleLabel" type="Label" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox" unique_id=84451367]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "PARTITA IN PAUSA"
 
 [node name="ModeLabel" type="Label" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox" unique_id=4]
 unique_name_in_owner = true
-layout_mode = 2
 modulate = Color(0.835294, 0.909804, 1, 0.78)
+layout_mode = 2
 text = "Pausa completa: IA, fisica e timer sono sospesi."
 autowrap_mode = 3
 
-[node name="ResumeButton" type="Button" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox"]
+[node name="ResumeButton" type="Button" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox" unique_id=1102531805]
 layout_mode = 2
 text = "Riprendi"
 
-[node name="SettingsButton" type="Button" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox"]
+[node name="SettingsButton" type="Button" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox" unique_id=634655030]
 layout_mode = 2
 text = "Impostazioni"
 
-[node name="MainMenuButton" type="Button" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox"]
+[node name="MainMenuButton" type="Button" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox" unique_id=1926848656]
 layout_mode = 2
 text = "Menu principale"
 
-[node name="HintLabel" type="Label" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox"]
-layout_mode = 2
+[node name="HintLabel" type="Label" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox" unique_id=5126961]
 modulate = Color(0.8, 0.88, 1, 0.66)
+layout_mode = 2
 text = "Premi ESC oppure usa il pulsante in alto a destra per aprire/chiudere il menu."
 autowrap_mode = 3
 
 [node name="SettingsPanel" parent="Overlay/CenterContainer" unique_id=5 instance=ExtResource("3_settings_panel")]
 unique_name_in_owner = true
 visible = false
+layout_mode = 2
 
 [connection signal="pressed" from="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox/ResumeButton" to="." method="_on_resume_pressed"]
 [connection signal="pressed" from="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox/SettingsButton" to="." method="_on_settings_pressed"]

@@ -12,6 +12,8 @@ const PROJECTILE_VISUAL_SCENE := preload("res://Scenes/projectile_visual.tscn")
 @export var shot_range: float = 1600.0
 @export var touch_auto_fire_range: float = 900.0
 @export var projectile_visual_speed: float = 2200.0
+@export var vita_max: float = 100.0
+var vita: float = 100.0
 
 @onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D if has_node("NavigationAgent2D") else null
 @onready var joystick: VirtualJoystickPlus = $InputManager/left_stick
@@ -20,6 +22,8 @@ const PROJECTILE_VISUAL_SCENE := preload("res://Scenes/projectile_visual.tscn")
 @onready var shot_raycast: RayCast2D = $ShotRayCast2D if has_node("ShotRayCast2D") else null
 @onready var camera_2d: Camera2D = $Camera2D if has_node("Camera2D") else null
 @onready var global_settings: Node = get_node_or_null("/root/GlobalSettings")
+
+@export var projectile_damage: float = 25.0
 
 var level_shader := preload("res://Shaders/level_transition.gdshader")
 var _using_touch := false
@@ -33,6 +37,7 @@ var _shake_strength := 0.0
 
 func _ready() -> void:
 	add_to_group("players")
+	add_to_group("damageable")
 	if shot_raycast:
 		shot_raycast.enabled = true
 		shot_raycast.add_exception(self)
@@ -206,19 +211,25 @@ func _on_projectile_impact(target_path: NodePath) -> void:
 	if not target or not is_instance_valid(target):
 		return
 
-	if not _is_enemy_target(target):
-		return
+	if target.has_method("apply_damage"):
+		target.call_deferred("apply_damage", projectile_damage)
 
-	if target.has_method("destroy_from_projectile"):
+	elif target.has_method("destroy_from_projectile"):
 		target.call_deferred("destroy_from_projectile")
-	else:
+
+	elif _is_enemy_target(target):
 		target.call_deferred("queue_free")
 
 	if _can_apply_local_feedback():
 		_trigger_screen_shake(7.0, 0.16)
-		if global_settings:
-			global_settings.call("show_subtitle_key", "subtitle_enemy_down", [], 1.0)
 
+		if global_settings:
+			global_settings.call(
+				"show_subtitle_key",
+				"subtitle_enemy_down",
+				[],
+				1.0
+			)
 
 func _can_fire() -> bool:
 	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
@@ -241,7 +252,7 @@ func _get_aim_direction(fire_origin: Vector2) -> Vector2:
 		if _last_touch_aim_direction.length() > 0.1:
 			return _last_touch_aim_direction.normalized()
 
-	var mouse_direction := get_global_mouse_position() - fire_origin
+	var mouse_direction := get_global_mouse_position() - global_position
 	if mouse_direction.length() > 0.001:
 		return mouse_direction.normalized()
 
@@ -294,8 +305,16 @@ func _has_enemy_target_in_direction(fire_origin: Vector2, aim_direction: Vector2
 
 
 func _is_enemy_target(target: Variant) -> bool:
-	return target is Node and ((target as Node).is_in_group("enemy") or (target as Node).is_in_group("bots"))
+	if not (target is Node):
+		return false
 
+	var node := target as Node
+
+	return (
+		node.is_in_group("enemy")
+		or node.is_in_group("bots")
+		or node.is_in_group("damageable")
+	)
 
 func _build_shot_data(fire_origin: Vector2, aim_direction: Vector2) -> Dictionary:
 	var impact_position := fire_origin + aim_direction * shot_range
@@ -309,9 +328,18 @@ func _build_shot_data(fire_origin: Vector2, aim_direction: Vector2) -> Dictionar
 
 		if shot_raycast.is_colliding():
 			impact_position = shot_raycast.get_collision_point()
+
 			var collider := shot_raycast.get_collider()
-			if collider is Node and _is_enemy_target(collider):
-				target_path = (collider as Node).get_path()
+
+			if collider is Node:
+				var node := collider as Node
+
+				if (
+					node.is_in_group("enemy")
+					or node.is_in_group("bots")
+					or node.is_in_group("damageable")
+				):
+					target_path = node.get_path()
 
 	return {
 		"origin": fire_origin,
@@ -480,6 +508,13 @@ func _collect_canvas_items(node: Node, canvas_items: Array[CanvasItem]) -> void:
 
 	for child in node.get_children():
 		_collect_canvas_items(child, canvas_items)
+
+
+func apply_damage(amount: float) -> void:
+	vita = maxf(vita - amount, 0.0)
+	print("Player subisce ", amount, " danni. Vita rimanente: ", vita)
+	if vita <= 0.0:
+		print("Player è morto!")
 
 
 #Organizzazione collisioni fisiche, layer, maschere e navigation.

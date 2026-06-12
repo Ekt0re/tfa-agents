@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" uid="uid://d2a1pgut2fvrx" path="res://Scripts/bot_prototype.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://bc5goqdv2thqf" path="res://icon.svg" id="2_texture"]
-[ext_resource type="Texture2D" path="res://Assets/Lighting/ao_radial.tres" id="3_ao"]
-[ext_resource type="Texture2D" path="res://Assets/Lighting/glow_radial.tres" id="4_glow"]
+[ext_resource type="Texture2D" uid="uid://d03lsdgxwrmjc" path="res://Assets/Lighting/ao_radial.tres" id="3_ao"]
+[ext_resource type="Texture2D" uid="uid://ci7i8wom6kuag" path="res://Assets/Lighting/glow_radial.tres" id="4_glow"]
 [ext_resource type="Material" path="res://Assets/Lighting/additive_glow_material.tres" id="5_glow_mat"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_bot"]
@@ -13,6 +13,7 @@ radius = 64.0
 collision_layer = 2
 collision_mask = 3
 script = ExtResource("1_script")
+debug_pathfinding = false
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=737851986]
 modulate = Color(1, 0.25, 0.25, 1)
@@ -21,27 +22,27 @@ texture = ExtResource("2_texture")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=40185088]
 shape = SubResource("CircleShape2D_bot")
 
-[node name="AmbientOcclusion" type="Sprite2D" parent="."]
-z_index = -1
+[node name="AmbientOcclusion" type="Sprite2D" parent="." unique_id=1640498625]
+modulate = Color(1, 1, 1, 0.7)
 show_behind_parent = true
+z_index = -1
 position = Vector2(0, 34)
 scale = Vector2(0.78, 0.34)
 texture = ExtResource("3_ao")
-modulate = Color(1, 1, 1, 0.7)
 
-[node name="Glow" type="Sprite2D" parent="."]
-z_index = -1
+[node name="Glow" type="Sprite2D" parent="." unique_id=1198719052]
+modulate = Color(1, 0.45, 0.4, 0.42)
 show_behind_parent = true
+z_index = -1
+material = ExtResource("5_glow_mat")
 scale = Vector2(1.45, 1.45)
 texture = ExtResource("4_glow")
-material = ExtResource("5_glow_mat")
-modulate = Color(1, 0.45, 0.4, 0.42)
 
-[node name="PointLight2D" type="PointLight2D" parent="."]
-texture = ExtResource("4_glow")
+[node name="PointLight2D" type="PointLight2D" parent="." unique_id=1209636131]
 color = Color(1, 0.42, 0.42, 1)
 energy = 1.15
 shadow_enabled = true
+texture = ExtResource("4_glow")
 texture_scale = 1.9
 
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=1749740855]
