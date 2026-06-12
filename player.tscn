@@ -129,6 +129,7 @@ position = Vector2(120, -8)
 
 [node name="ShotRayCast2D" type="RayCast2D" parent="." unique_id=241123055]
 target_position = Vector2(1600, 0)
+collide_with_areas = true
 
 [node name="Arama" type="AnimatedSprite2D" parent="." unique_id=1589357251]
 position = Vector2(144.00002, -23.999998)

@@ -49,7 +49,6 @@ var _point_light: PointLight2D
 @onready var _col_explosion: CollisionShape2D = $CollisionExplosione
 @onready var _particles: CPUParticles2D = $ExplosionParticles
 @onready var _col_mina: CollisionShape2D = $CollisionMina
-@onready var _static_body: StaticBody2D = $StaticBody2D
 
 # ---------------------------------------------------------------------------
 # Ciclo di vita
@@ -186,12 +185,6 @@ func _on_body_entered(body: Node2D) -> void:
 func apply_damage(amount: float, source: Node = null) -> void:
 	if _exploded or vita <= 0.0:
 		return
-		
-	# Se il danno proviene da un alleato dello stesso team, lo ignoriamo
-	if source != null:
-		var source_team := _get_team_id(source)
-		if source_team != -1 and source_team == team_id:
-			return
 
 	vita = maxf(vita - amount, 0.0)
 	if vita <= 0.0:
@@ -236,8 +229,6 @@ func _explode() -> void:
 	# Disabilita collisioni fisiche
 	set_deferred("collision_layer", 0)
 	set_deferred("collision_mask", 0)
-	if _static_body:
-		_static_body.set_deferred("collision_layer", 0)
 		
 	# Nasconde immediatamente indicatori e luci
 	if _danger_indicator:
@@ -302,12 +293,6 @@ func _apply_collision_layers() -> void:
 	# L'Area2D non ha collisioni fisiche, solo rilevamento
 	collision_layer = wall_bit
 	collision_mask = character_bit
-	
-	# Configura lo StaticBody2D per essere rilevato dai RayCast (proiettili)
-	# collision_mask = 0 garantisce nessuna collisione fisica
-	if _static_body:
-		_static_body.collision_layer = wall_bit
-		_static_body.collision_mask = 0
 
 # ---------------------------------------------------------------------------
 # Gruppi livello

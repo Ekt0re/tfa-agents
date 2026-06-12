@@ -63,3 +63,4 @@ antialiased = true
 
 [node name="RayCast2D" type="RayCast2D" parent="." unique_id=446621666]
 target_position = Vector2(256, 0)
+collide_with_areas = true

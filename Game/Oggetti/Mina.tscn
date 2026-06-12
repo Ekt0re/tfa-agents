@@ -177,14 +177,17 @@ animations = [{
 "name": &"MinaViola",
 "speed": 1.0
 }, {
-"frames": [],
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cntp1")
+}],
 "loop": true,
 "name": &"default",
 "speed": 5.0
 }]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_71vna"]
-radius = 328.09753
+radius = 280.45676
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_explosion"]
 radius = 402.86972
@@ -199,18 +202,10 @@ collision_layer = 438
 collision_mask = 438
 script = ExtResource("1_4lha1")
 
-[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=664841101]
-collision_layer = 438
-collision_mask = 0
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
-shape = SubResource("CircleShape2D_71vna")
-
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=344235598]
 position = Vector2(4, 36.000004)
 scale = Vector2(4.7450004, 4.7450004)
 sprite_frames = SubResource("SpriteFrames_60qnc")
-animation = &"Esplosione"
 
 [node name="CollisionMina" type="CollisionShape2D" parent="." unique_id=1709883780]
 shape = SubResource("CircleShape2D_71vna")
