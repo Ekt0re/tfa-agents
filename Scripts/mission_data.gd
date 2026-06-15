@@ -35,3 +35,31 @@ enum Type {
 
 ## Mostra una progress bar al posto del counter numerico
 @export var show_progress_bar: bool = false
+
+# ---------------------------------------------------------------------------
+# Flow System — branching e comandi (usato dal Mission Flow Editor)
+# ---------------------------------------------------------------------------
+
+## ID della missione successiva da avviare in caso di successo (vuoto = nessuna)
+@export var on_success_next: String = ""
+
+## ID della missione successiva da avviare in caso di fallimento (vuoto = nessuna)
+@export var on_fail_next: String = ""
+
+## Comandi da eseguire al completamento (successo)
+@export var on_complete_commands: Array[Resource] = []
+
+## Comandi da eseguire al fallimento
+@export var on_fail_commands: Array[Resource] = []
+
+## Condizioni di fallimento opzionali (es. timer, vita player)
+@export var fail_condition: String = ""
+
+## Tempo limite in secondi per completare la missione (0 = nessun limite)
+@export var time_limit: float = 0.0
+
+## Posizione del nodo nel graph editor (salvata nel flusso)
+@export var graph_position: Vector2 = Vector2.ZERO
+
+## Gruppo / tag per categorizzare la missione (usato nel flow editor)
+@export var tags: PackedStringArray = PackedStringArray()

@@ -67,6 +67,7 @@ func _ready() -> void:
 
 	add_to_group("objects")
 	add_to_group("damageable")
+	add_to_group("item")
 	
 	
 	_apply_tipo()

@@ -48,7 +48,7 @@ func _ready() -> void:
 	_connect_to_player()
 	
 	add_to_group(str(type))
-	print(str(type))
+	add_to_group("item")
 
 func _setup_shader() -> void:
 	_glow_material = ShaderMaterial.new()

@@ -75,3 +75,17 @@ POWERUP_COLLECTED_CHEST,Hai raccolto: Cassa Armi!,You collected: Weapon Chest!
 POWERUP_COLLECTED_STAR,Hai raccolto: Stella Collezionabile!,You collected: Collectible Star!
 POWERUP_COLLECTED_MYSTERY,Hai raccolto: Bonus Misterioso!,You collected: Mystery Bonus!
 subtitle_reloading,Ricarica in corso!,Reloading!!!
+mission_completed,COMPLETATA,COMPLETED
+mission_failed,FALLITA,FAILED
+mission_neutralize,NEUTRALIZZA,NEUTRALIZE
+mission_collect,RACCOGLI %s,COLLECT %s
+mission_reach,RAGGIUNGI %s,REACH %s
+mission_activate,ATTIVA %s,ACTIVATE %s
+mission_survive,SOPRAVVIVI,SURVIVE
+mission_tutorial_move,USA WASD PER MUOVERTI,USE WASD TO MOVE
+mission_tutorial_aim,USA IL MOUSE PER MIRARE,USE MOUSE TO AIM
+mission_tutorial_fire,PREMI TASTO SINISTRO PER SPARARE,PRESS LEFT CLICK TO FIRE
+mission_tutorial_eliminate,ELIMINA TUTTI I NEMICI,ELIMINATE ALL ENEMIES
+mission_tutorial_collect,RACCOGLI TUTTI GLI ITEM,COLLECT ALL ITEMS
+mission_tutorial_destroy,DISTRUGGI TUTTI I BARILI,DESTROY ALL BARRELS
+mission_tutorial_done,TUTORIAL COMPLETATO!,TUTORIAL COMPLETE!

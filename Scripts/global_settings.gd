@@ -278,10 +278,11 @@ func _apply_master_volume(percent: float) -> void:
  
 func _apply_window_mode(index: int) -> void:
 	var window := get_tree().root
-	if window == null or OS.get_name() == "Android":
+	if window == null:
 		return
-	# FIX #8: indice 2 ora usa EXCLUSIVE_FULLSCREEN (fullscreen vero) invece di
-	# WINDOW_MODE_FULLSCREEN che in Godot 4 e' il borderless windowed
+	# Android non supporta exclusive fullscreen, ma gli altri modi sì
+	if OS.get_name() == "Android" and index == 2:
+		return
 	match index:
 		0: DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 		1: DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MAXIMIZED)

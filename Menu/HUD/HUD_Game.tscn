@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://mfmw6fr6a6k8" path="res://Menu/HUD/hud_game.gd" id="1_script"]
 [ext_resource type="Script" uid="uid://ckaybg77h3bl5" path="res://Scripts/mission_panel.gd" id="2_4y3q6"]
 [ext_resource type="Script" uid="uid://30hg28ovfcy0" path="res://Menu/HUD/minimap.gd" id="2_minimap"]
+[ext_resource type="Shader" uid="uid://c6td4m5mrvyvo" path="res://Shaders/HUD/mission_progress_bar.gdshader" id="4_bj4vp"]
 [ext_resource type="Texture2D" uid="uid://cnyuu81bbjcvo" path="res://addons/virtual_joystick_plus/resources/textures/stick_texture_5.png" id="4_medal_icon"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
@@ -26,6 +27,11 @@ bg_color = Color(0.0470588, 0.0784314, 0.12549, 0.784314)
 border_width_bottom = 2
 corner_detail = 1
 expand_margin_bottom = 2.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_e8wgn"]
+shader = ExtResource("4_bj4vp")
+shader_parameter/fill_pct = 0.0
+shader_parameter/mission_state = 0.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pausa"]
 bg_color = Color(0, 0.898039, 1, 1)
@@ -89,7 +95,7 @@ custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
 theme_override_styles/background = SubResource("StyleBoxFlat_bg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_fill")
-value = 75.0
+value = 100.0
 show_percentage = false
 
 [node name="TopCenter" type="MarginContainer" parent="HUD" unique_id=1416369034]
@@ -97,50 +103,66 @@ layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -130.0
+offset_left = -160.0
 offset_top = 16.0
-offset_right = 130.0
-offset_bottom = 60.0
+offset_right = 160.0
+offset_bottom = 72.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("2_4y3q6")
 
-[node name="Panel" type="PanelContainer" parent="HUD/TopCenter" unique_id=148407000]
+[node name="MissionPanelInner" type="PanelContainer" parent="HUD/TopCenter" unique_id=148407000]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel_dark")
 
-[node name="Margin" type="MarginContainer" parent="HUD/TopCenter/Panel" unique_id=2056225354]
+[node name="Margin" type="MarginContainer" parent="HUD/TopCenter/MissionPanelInner" unique_id=2056225354]
 layout_mode = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 6
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 6
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 8
 
-[node name="HBox" type="HBoxContainer" parent="HUD/TopCenter/Panel/Margin" unique_id=1075033650]
+[node name="VBox" type="VBoxContainer" parent="HUD/TopCenter/MissionPanelInner/Margin" unique_id=1433943536]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="HBox" type="HBoxContainer" parent="HUD/TopCenter/MissionPanelInner/Margin/VBox" unique_id=1075033650]
 layout_mode = 2
 theme_override_constants/separation = 8
 alignment = 1
 
-[node name="MissionLabel" type="Label" parent="HUD/TopCenter/Panel/Margin/HBox" unique_id=1062685471]
+[node name="MissionLabel" type="Label" parent="HUD/TopCenter/MissionPanelInner/Margin/VBox/HBox" unique_id=1062685471]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.686275, 0.72549, 0.768627, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 12
 text = "ENEMIES_REMAINING"
 
-[node name="MissionCounter" type="Label" parent="HUD/TopCenter/Panel/Margin/HBox" unique_id=524945728]
+[node name="MissionCounter" type="Label" parent="HUD/TopCenter/MissionPanelInner/Margin/VBox/HBox" unique_id=524945728]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.988235, 0.380392, 0.156863, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 14
 text = "14"
 
-[node name="ProgressBar" type="ProgressBar" parent="HUD/TopCenter/Panel/Margin" unique_id=1102487778]
+[node name="MissionProgressBar" type="ProgressBar" parent="HUD/TopCenter/MissionPanelInner/Margin/VBox" unique_id=1102487778]
+unique_name_in_owner = true
 visible = false
+material = SubResource("ShaderMaterial_e8wgn")
+custom_minimum_size = Vector2(0, 8)
 layout_mode = 2
+show_percentage = false
 
-[node name="MissionStatus" type="Label" parent="HUD/TopCenter/Panel/Margin" unique_id=845302386]
+[node name="MissionStatus" type="Label" parent="HUD/TopCenter/MissionPanelInner/Margin/VBox" unique_id=845302386]
+unique_name_in_owner = true
 layout_mode = 2
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 1
+
+[node name="MissionAnim" type="AnimationPlayer" parent="HUD/TopCenter/MissionPanelInner" unique_id=1918220323]
+unique_name_in_owner = true
 
 [node name="TopRight" type="MarginContainer" parent="HUD" unique_id=695236634]
 layout_mode = 1

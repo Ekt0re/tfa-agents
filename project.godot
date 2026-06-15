@@ -36,6 +36,7 @@ enabled=PackedStringArray("res://addons/shader-previewer/plugin.cfg", "res://add
 team_2="Gruppo dei nemici del player PVE"
 item=""
 team_1="Gruppo del player nel PVE"
+powerup="Item PowerUp"
 
 [gui]
 

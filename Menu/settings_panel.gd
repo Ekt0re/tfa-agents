@@ -132,7 +132,6 @@ func _apply_settings_to_controls(settings: Dictionary) -> void:
 	_refresh_slider_labels()
 	_refresh_toggle_texts()
 	_is_loading = false
-	settings_changed.emit(settings)
 
 
 func _collect_settings() -> Dictionary:
