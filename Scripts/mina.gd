@@ -183,7 +183,7 @@ func _on_body_entered(body: Node2D) -> void:
 # Danno e distruzione
 # ---------------------------------------------------------------------------
 
-func apply_damage(amount: float, source: Node = null) -> void:
+func apply_damage(amount: float, _source: Node = null) -> void:
 	if _exploded or vita <= 0.0:
 		return
 

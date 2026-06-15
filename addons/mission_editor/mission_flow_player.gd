@@ -71,8 +71,12 @@ func _process(delta: float) -> void:
 
 ## Avvia un flusso di missioni
 func start_flow(flow: Resource) -> void:
-	if flow == null or flow.missions.is_empty():
-		push_warning("MissionFlowPlayer: Flow is null or empty")
+	if flow == null:
+		push_warning("MissionFlowPlayer: Flow is null")
+		return
+	var missions_array: Array = flow.get("missions")
+	if missions_array.is_empty():
+		push_warning("MissionFlowPlayer: Flow has no missions")
 		return
 	stop_flow()
 	_current_flow = flow
@@ -199,38 +203,41 @@ func _execute_commands(commands: Array[Resource]) -> void:
 	for cmd_res: Resource in commands:
 		if cmd_res == null:
 			continue
-		var cmd: Resource = cmd_res
-		if not cmd.enabled:
+		var cmd_enabled: bool = cmd_res.get("enabled") if cmd_res else true
+		if not cmd_enabled:
 			continue
-		if cmd.delay > 0.0:
-			await get_tree().create_timer(cmd.delay).timeout
-		await _execute_single_command(cmd)
-		command_executed.emit(cmd)
+		var cmd_delay: float = float(cmd_res.get("delay")) if cmd_res else 0.0
+		if cmd_delay > 0.0:
+			await get_tree().create_timer(cmd_delay).timeout
+		await _execute_single_command(cmd_res)
+		command_executed.emit(cmd_res)
 
 
 func _execute_single_command(cmd: Resource) -> void:
 	var CT := MissionCommandType.CommandType
-	match cmd.command_type:
+	var cmd_type: int = int(cmd.get("command_type")) if cmd else 0
+	var params: Dictionary = cmd.get("parameters") if cmd else {}
+	match cmd_type:
 		CT.PLAY_SOUND:
-			_cmd_play_sound(cmd.parameters)
+			_cmd_play_sound(params)
 		CT.CHANGE_SCENE:
-			_cmd_change_scene(cmd.parameters)
+			_cmd_change_scene(params)
 		CT.SPAWN_ENEMIES:
-			_cmd_spawn_enemies(cmd.parameters)
+			_cmd_spawn_enemies(params)
 		CT.PLAY_ANIMATION:
-			_cmd_play_animation(cmd.parameters)
+			_cmd_play_animation(params)
 		CT.SET_VARIABLE:
-			_cmd_set_variable(cmd.parameters)
+			_cmd_set_variable(params)
 		CT.CALL_METHOD:
-			_cmd_call_method(cmd.parameters)
+			_cmd_call_method(params)
 		CT.SHOW_DIALOG:
-			await _cmd_show_dialog(cmd.parameters)
+			await _cmd_show_dialog(params)
 		CT.ENABLE_CHECKPOINT:
-			_cmd_toggle_checkpoint(cmd.parameters.get("checkpoint_id", ""), true)
+			_cmd_toggle_checkpoint(str(params.get("checkpoint_id", "")), true)
 		CT.DISABLE_CHECKPOINT:
-			_cmd_toggle_checkpoint(cmd.parameters.get("checkpoint_id", ""), false)
+			_cmd_toggle_checkpoint(str(params.get("checkpoint_id", "")), false)
 		CT.DELAY:
-			await get_tree().create_timer(cmd.parameters.get("seconds", 1.0)).timeout
+			await get_tree().create_timer(float(params.get("seconds", 1.0))).timeout
 
 
 func _cmd_play_sound(params: Dictionary) -> void:
@@ -321,11 +328,20 @@ func _cmd_show_dialog(params: Dictionary) -> void:
 	var duration: float = float(params.get("duration", 3.0))
 	if text.is_empty():
 		return
-	# Usa MissionManager per mostrare il testo come missione custom temporanea
+	# Salva la missione corrente del flusso prima di mostrare il dialog
+	var flow_mission_id := _current_mission_id
 	var data := MissionManager.make_custom(text, 0, Color(0.7, 0.7, 1.0))
 	MissionManager.start(data)
 	await get_tree().create_timer(duration).timeout
-	MissionManager.complete()
+	# Ripristina la missione del flusso se è ancora attiva
+	if _current_mission_id == flow_mission_id:
+		var flow_mission: Resource = _current_flow.get_mission_by_id(flow_mission_id) if _current_flow else null
+		if flow_mission:
+			MissionManager.start(flow_mission as MissionData)
+		else:
+			MissionManager.clear()
+	else:
+		MissionManager.complete()
 
 
 func _cmd_toggle_checkpoint(checkpoint_id: String, enable: bool) -> void:

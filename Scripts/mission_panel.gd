@@ -37,7 +37,8 @@ func _ready() -> void:
 			gs.settings_changed.connect(_on_settings_changed)
 
 	# Crea le animazioni via codice (in base alla qualità)
-	_build_animations()
+	# Differito: il layout deve calcolare le dimensioni di _panel prima di usare size nelle keyframe
+	call_deferred("_build_animations")
 
 	# Connetti i segnali di MissionManager
 	MissionManager.mission_started.connect(_on_mission_started)
@@ -56,7 +57,6 @@ func _on_mission_started(data: MissionData) -> void:
 		_anim.stop()
 	# Ripristina proprietà che slide_out potrebbe aver lasciato alterate
 	modulate = Color(1, 1, 1, 1)
-	scale = Vector2(1, 1)
 
 	if _status_label:
 		_status_label.hide()
@@ -175,13 +175,14 @@ func _on_settings_changed(new_settings: Dictionary) -> void:
 		_build_animations()
 
 # ---------------------------------------------------------------------------
-# Animazioni — create via codice (root_node = "../.." → TopCenter)
+# Animazioni — create via codice (root_node = TopCenter, track prefisso MissionPanelInner:)
 # ---------------------------------------------------------------------------
 func _build_animations() -> void:
 	if not _anim:
 		return
 
-	# Root node = nonno dell'AnimationPlayer: TopCenter (MarginContainer con questo script).
+	# Root node = TopCenter (MarginContainer), due livelli sopra l'AnimationPlayer.
+	# Le track includono il prefisso "MissionPanelInner:" per risolvere correttamente.
 	_anim.root_node = "../.."
 
 	var lib_name := ""
@@ -206,7 +207,7 @@ func _build_animations() -> void:
 
 	# Posizione Y
 	var t := si.add_track(Animation.TYPE_VALUE)
-	si.track_set_path(t, "offset_top")
+	si.track_set_path(t, "MissionPanelInner:offset_top")
 	if _quality_level >= 2:
 		si.track_insert_key(t, 0.0,  -60.0)
 		si.track_insert_key(t, 0.25,   5.0)
@@ -218,7 +219,7 @@ func _build_animations() -> void:
 
 	# Opacità
 	t = si.add_track(Animation.TYPE_VALUE)
-	si.track_set_path(t, "modulate")
+	si.track_set_path(t, "MissionPanelInner:modulate")
 	if _quality_level >= 2:
 		si.track_insert_key(t, 0.0,  Color(1, 1, 1, 0.0))
 		si.track_insert_key(t, 0.12, Color(1, 1, 1, 0.7))
@@ -227,18 +228,14 @@ func _build_animations() -> void:
 		si.track_insert_key(t, 0.0,  Color(1, 1, 1, 0.0))
 		si.track_insert_key(t, 0.3,  Color(1, 1, 1, 1.0))
 
-	# Scala (solo High/Ultra)
-	if _quality_level >= 2:
+	# Size bounce (solo High/Ultra) — sostituisce scale non supportato su Control
+	if _quality_level >= 2 and _panel and _panel.size != Vector2.ZERO:
+		var base_size: Vector2 = _panel.size
 		t = si.add_track(Animation.TYPE_VALUE)
-		si.track_set_path(t, "scale:x")
-		si.track_insert_key(t, 0.0,  0.92)
-		si.track_insert_key(t, 0.30, 1.03)
-		si.track_insert_key(t, 0.45, 1.0)
-		t = si.add_track(Animation.TYPE_VALUE)
-		si.track_set_path(t, "scale:y")
-		si.track_insert_key(t, 0.0,  0.92)
-		si.track_insert_key(t, 0.30, 1.03)
-		si.track_insert_key(t, 0.45, 1.0)
+		si.track_set_path(t, "MissionPanelInner:size")
+		si.track_insert_key(t, 0.0,  base_size * 0.92)
+		si.track_insert_key(t, 0.30, base_size * 1.03)
+		si.track_insert_key(t, 0.45, base_size)
 
 	lib.add_animation("slide_in", si)
 
@@ -249,24 +246,21 @@ func _build_animations() -> void:
 	so.length = 0.3 if _quality_level >= 2 else 0.2
 
 	t = so.add_track(Animation.TYPE_VALUE)
-	so.track_set_path(t, "offset_top")
+	so.track_set_path(t, "MissionPanelInner:offset_top")
 	so.track_insert_key(t, 0.0,  0.0)
 	so.track_insert_key(t, so.length, -50.0 if _quality_level >= 2 else -30.0)
 
 	t = so.add_track(Animation.TYPE_VALUE)
-	so.track_set_path(t, "modulate")
+	so.track_set_path(t, "MissionPanelInner:modulate")
 	so.track_insert_key(t, 0.0,  Color(1, 1, 1, 1.0))
 	so.track_insert_key(t, so.length, Color(1, 1, 1, 0.0))
 
-	if _quality_level >= 2:
+	if _quality_level >= 2 and _panel and _panel.size != Vector2.ZERO:
+		var base_size: Vector2 = _panel.size
 		t = so.add_track(Animation.TYPE_VALUE)
-		so.track_set_path(t, "scale:x")
-		so.track_insert_key(t, 0.0, 1.0)
-		so.track_insert_key(t, 0.3, 0.95)
-		t = so.add_track(Animation.TYPE_VALUE)
-		so.track_set_path(t, "scale:y")
-		so.track_insert_key(t, 0.0, 1.0)
-		so.track_insert_key(t, 0.3, 0.95)
+		so.track_set_path(t, "MissionPanelInner:size")
+		so.track_insert_key(t, 0.0, base_size)
+		so.track_insert_key(t, 0.3, base_size * 0.95)
 
 	lib.add_animation("slide_out", so)
 
@@ -288,21 +282,15 @@ func _build_animations() -> void:
 	cf.track_insert_key(t, 0.50, Color(1.05, 1.05, 1.05, 1.0))
 	cf.track_insert_key(t, 0.7,  Color(1.0, 1.0, 1.0, 1.0))
 
-	t = cf.add_track(Animation.TYPE_VALUE)
-	cf.track_set_path(t, "scale:x")
-	cf.track_insert_key(t, 0.0,  1.0)
-	cf.track_insert_key(t, 0.10, 1.04)
-	cf.track_insert_key(t, 0.25, 0.98)
-	cf.track_insert_key(t, 0.40, 1.01)
-	cf.track_insert_key(t, 0.55, 1.0)
-
-	t = cf.add_track(Animation.TYPE_VALUE)
-	cf.track_set_path(t, "scale:y")
-	cf.track_insert_key(t, 0.0,  1.0)
-	cf.track_insert_key(t, 0.10, 1.04)
-	cf.track_insert_key(t, 0.25, 0.98)
-	cf.track_insert_key(t, 0.40, 1.01)
-	cf.track_insert_key(t, 0.55, 1.0)
+	if _panel and _panel.size != Vector2.ZERO:
+		var base_size: Vector2 = _panel.size
+		t = cf.add_track(Animation.TYPE_VALUE)
+		cf.track_set_path(t, "MissionPanelInner:size")
+		cf.track_insert_key(t, 0.0,  base_size)
+		cf.track_insert_key(t, 0.10, base_size * 1.04)
+		cf.track_insert_key(t, 0.25, base_size * 0.98)
+		cf.track_insert_key(t, 0.40, base_size * 1.01)
+		cf.track_insert_key(t, 0.55, base_size)
 
 	lib.add_animation("complete_flash", cf)
 
@@ -319,14 +307,16 @@ func _build_animations() -> void:
 	ff.track_insert_key(t, 0.30, Color(1.2, 0.7, 0.7, 1.0))
 	ff.track_insert_key(t, 0.6,  Color(1.0, 1.0, 1.0, 1.0))
 
-	t = ff.add_track(Animation.TYPE_VALUE)
-	ff.track_set_path(t, "scale:x")
-	ff.track_insert_key(t, 0.0,  1.0)
-	ff.track_insert_key(t, 0.08, 1.015)
-	ff.track_insert_key(t, 0.16, 0.985)
-	ff.track_insert_key(t, 0.24, 1.008)
-	ff.track_insert_key(t, 0.32, 0.995)
-	ff.track_insert_key(t, 0.40, 1.0)
+	if _panel and _panel.size != Vector2.ZERO:
+		var base_size: Vector2 = _panel.size
+		t = ff.add_track(Animation.TYPE_VALUE)
+		ff.track_set_path(t, "MissionPanelInner:size")
+		ff.track_insert_key(t, 0.0,  base_size)
+		ff.track_insert_key(t, 0.08, base_size * 1.015)
+		ff.track_insert_key(t, 0.16, base_size * 0.985)
+		ff.track_insert_key(t, 0.24, base_size * 1.008)
+		ff.track_insert_key(t, 0.32, base_size * 0.995)
+		ff.track_insert_key(t, 0.40, base_size)
 
 	lib.add_animation("fail_flash", ff)
 
@@ -355,7 +345,7 @@ func _set_shader_state(state: float) -> void:
 		_progress_bar.material.set_shader_parameter("mission_state", state)
 		
 # ---------------------------------------------------------------------------
-func _on_mission_started_shader_patch(data: MissionData) -> void:
+func _on_mission_started_shader_patch(_data: MissionData) -> void:
 	_set_shader_state(0.0)   # stato normale
 
 func _on_mission_completed_shader_patch(_data: MissionData) -> void:

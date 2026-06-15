@@ -268,7 +268,7 @@ func _get_fire_origin() -> Vector2:
 	return global_position
 
 
-func _get_aim_direction(fire_origin: Vector2) -> Vector2:
+func _get_aim_direction(_fire_origin: Vector2) -> Vector2:
 	if _using_touch:
 		var touch_direction := right_stick.get_value()
 		if touch_direction.length() > 0.1:

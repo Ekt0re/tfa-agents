@@ -19,7 +19,7 @@ static func create_flow() -> Resource:
 	var flow: Resource = MissionFlowScript.new()
 	flow.set("flow_id", "tutorial_flow")
 	flow.set("flow_name", "Tutorial Flow")
-	flow.set("description", "Tutorial sequence: move, aim, fire, eliminate, collect, destroy")
+	flow.set("description", "Tutorial: move, aim, fire, eliminate, collect, destroy, reach portal → main menu")
 
 	# ── Missione 1: Muovi con WASD ──
 	var m1: Resource = MissionDataScript.new()
@@ -60,7 +60,7 @@ static func create_flow() -> Resource:
 	m4.set("label", "mission_tutorial_eliminate")
 	m4.set("type", 0)  # ELIMINATE
 	m4.set("target", 5)
-	m4.set("show_progress_bar", true)
+	m4.set("show_progress_bar", false)
 	m4.set("accent_color", Color(0.988, 0.38, 0.157, 1.0))
 	m4.set("on_success_next", "tutorial_collect")
 	m4.set("on_fail_next", "tutorial_retry_combat")
@@ -91,7 +91,7 @@ static func create_flow() -> Resource:
 	m5.set("label", "mission_tutorial_collect")
 	m5.set("type", 1)  # COLLECT
 	m5.set("target", 3)
-	m5.set("show_progress_bar", true)
+	m5.set("show_progress_bar", false)
 	m5.set("accent_color", Color(0.2, 0.9, 0.4, 1.0))
 	m5.set("on_success_next", "tutorial_destroy")
 	m5.set("graph_position", Vector2(1250, 50))
@@ -103,28 +103,50 @@ static func create_flow() -> Resource:
 	m6.set("label", "mission_tutorial_destroy")
 	m6.set("type", 0)  # ELIMINATE (barili)
 	m6.set("target", 4)
-	m6.set("show_progress_bar", true)
+	m6.set("show_progress_bar", false)
 	m6.set("accent_color", Color(1.0, 0.5, 0.0, 1.0))
 	m6.set("on_success_next", "tutorial_done")
 	m6.set("graph_position", Vector2(1550, 50))
-	# Comando: cambia scena dopo il completamento
-	var cmd_scene: Resource = MissionCmdScript.new()
-	cmd_scene.set("command_type", 1)  # CHANGE_SCENE
-	cmd_scene.set("parameters", {"scene_path": "res://Maps/dev_map.tscn"})
-	cmd_scene.set("delay", 2.0)
-	cmd_scene.set("description", "Go to main map after tutorial")
-	m6.get("on_complete_commands").append(cmd_scene)
 	flow.get("missions").append(m6)
 
-	# ── Missione 7: Tutorial completato ──
+	# ── Missione 7: Vai al portale (auto-avanza dopo 1.5s) ──
 	var m7: Resource = MissionDataScript.new()
 	m7.set("mission_id", "tutorial_done")
 	m7.set("label", "mission_tutorial_done")
 	m7.set("type", 5)  # CUSTOM
 	m7.set("target", 0)
 	m7.set("accent_color", Color(0.3, 1.0, 0.3, 1.0))
+	m7.set("on_success_next", "tutorial_reach_portal")
 	m7.set("graph_position", Vector2(1850, 50))
 	flow.get("missions").append(m7)
+
+	# ── Missione 8: Raggiungi il portale ──
+	var m8: Resource = MissionDataScript.new()
+	m8.set("mission_id", "tutorial_reach_portal")
+	m8.set("label", "mission_tutorial_reach_portal")
+	m8.set("type", 2)  # REACH
+	m8.set("target", 0)
+	m8.set("accent_color", Color(0.0, 0.917, 0.878, 1.0))
+	m8.set("on_success_next", "tutorial_complete")
+	m8.set("graph_position", Vector2(2150, 50))
+	flow.get("missions").append(m8)
+
+	# ── Missione 9: Tutorial completato + ritorno al menu ──
+	var m9: Resource = MissionDataScript.new()
+	m9.set("mission_id", "tutorial_complete")
+	m9.set("label", "mission_tutorial_complete")
+	m9.set("type", 5)  # CUSTOM
+	m9.set("target", 0)
+	m9.set("accent_color", Color(0.3, 1.0, 0.3, 1.0))
+	m9.set("graph_position", Vector2(2450, 50))
+	# Comando: torna al menu principale dopo il completamento
+	var cmd_menu: Resource = MissionCmdScript.new()
+	cmd_menu.set("command_type", 1)  # CHANGE_SCENE
+	cmd_menu.set("parameters", {"scene_path": "res://Menu/main_menu.tscn"})
+	cmd_menu.set("delay", 2.5)
+	cmd_menu.set("description", "Return to main menu")
+	m9.get("on_complete_commands").append(cmd_menu)
+	flow.get("missions").append(m9)
 
 	flow.set("start_mission_id", "tutorial_move")
 	return flow

@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" uid="uid://t12n16npgxtc" path="res://Scenes/power_up.tscn" id="9_xqe5x"]
 [ext_resource type="PackedScene" uid="uid://bu1osy1fuhlin" path="res://Menu/HUD/HUD_Game.tscn" id="10_hud_game"]
 [ext_resource type="Script" uid="uid://ww1xf8dthkt1" path="res://Scripts/dev_map_tutorial.gd" id="11_tutorial"]
+[ext_resource type="Script" uid="uid://bw6vqldcyr1p5" path="res://addons/mission_editor/checkpoint.gd" id="16_8o1ly"]
 
 [node name="DevMap" type="Node2D" unique_id=73936262]
 script = ExtResource("1_lighting")
@@ -558,6 +559,38 @@ collision_layer = 8
 collision_mask = 16
 livello = 1
 
+[node name="PowerUp9" parent="PowerUp" unique_id=1233877221 instance=ExtResource("9_xqe5x")]
+z_index = 11
+position = Vector2(-768, 3848)
+collision_layer = 8
+collision_mask = 16
+type = 1
+livello = 1
+
+[node name="PowerUp10" parent="PowerUp" unique_id=1672358486 instance=ExtResource("9_xqe5x")]
+z_index = 11
+position = Vector2(-512, 3840)
+collision_layer = 8
+collision_mask = 16
+type = 1
+livello = 1
+
+[node name="PowerUp11" parent="PowerUp" unique_id=925910288 instance=ExtResource("9_xqe5x")]
+z_index = 11
+position = Vector2(-63, 3840)
+collision_layer = 8
+collision_mask = 16
+type = 1
+livello = 1
+
+[node name="PowerUp12" parent="PowerUp" unique_id=1113455789 instance=ExtResource("9_xqe5x")]
+z_index = 11
+position = Vector2(-312, 3840)
+collision_layer = 8
+collision_mask = 16
+type = 1
+livello = 1
+
 [node name="Player" parent="." unique_id=1004030284 groups=["team_1"] instance=ExtResource("2_ien3m")]
 position = Vector2(2288, 1594)
 
@@ -588,3 +621,14 @@ current_height_level = 3
 
 [node name="Tutorial" type="Node" parent="." unique_id=999422702]
 script = ExtResource("11_tutorial")
+
+[node name="CheckPoint" type="Area2D" parent="." unique_id=1574406180]
+position = Vector2(-1280, 3840)
+scale = Vector2(1.7215786, 1.7215786)
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("16_8o1ly")
+checkpoint_id = "tutorial_reach_portal"
+checkpoint_color = Color(0, 0.91607726, 0.87884396, 0.6)
+display_label = "Raggiungi il portale!"
+metadata/_custom_type_script = "uid://bw6vqldcyr1p5"

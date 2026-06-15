@@ -31,7 +31,7 @@ class_name CheckPoint
 @export var is_active: bool = true:
 	set(value):
 		is_active = value
-		monitoring = is_active
+		set_deferred("monitoring", is_active)
 		_update_visual()
 
 # Nodi interni
@@ -180,10 +180,15 @@ func _draw() -> void:
 
 ## Script dinamico per il disegno editor
 func _get_draw_script() -> GDScript:
+	var r_val: float = radius
+	var c_hex: String = checkpoint_color.to_html(true)
 	var script_src := """extends Node2D
 func _draw():
-	get_parent()._draw_checkpoint_visual()
-"""
+	var r: float = %s
+	var c: Color = Color("%s")
+	draw_arc(Vector2.ZERO, r, 0, TAU, 64, c, 2.0)
+	draw_circle(Vector2.ZERO, 8.0, c)
+""" % [str(r_val), c_hex]
 	var script := GDScript.new()
 	script.source_code = script_src
 	script.reload()
@@ -211,7 +216,7 @@ func _draw():
 	return script
 
 
-## Chiamato dal Visual node per disegnare
+## Chiamato dal Visual node per disegnare (runtime)
 func _draw_checkpoint_visual() -> void:
 	if _visual:
 		_visual.draw_arc(Vector2.ZERO, radius, 0, TAU, 64, checkpoint_color, 2.0)

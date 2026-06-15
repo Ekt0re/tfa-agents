@@ -11,21 +11,12 @@ signal quality_changed(level: int)
 @onready var subtitle_label: Label = %SubtitleLabel
 @onready var pause_btn: Button = %PauseBtn
 @onready var _top_left: MarginContainer = $HUD/TopLeft
-@onready var _minimap: Control = $HUD/TopRight/VBox/Minimap
-@onready var _mission_panel_inner: PanelContainer = %MissionPanelInner
 
 var player: CharacterBody2D = null
 var _subtitle_time_left := 0.0
-var _quality_level: int = 2  # default High
-
-# Shaders (loaded once)
-var _health_shader: Shader
-var _minimap_shader: Shader
-var _panel_shader: Shader
 
 # Materials (created/destroyed based on quality)
 var _health_material: ShaderMaterial
-var _minimap_material: ShaderMaterial
 
 const HEALTH_Y_DEFAULT: int = 16
 const HEALTH_Y_FPS_OFFSET: int = 88  # abbassa di 28px quando FPS panel è visibile
@@ -34,11 +25,6 @@ func _ready() -> void:
 	# Nascondi i sottotitoli all'inizio
 	if subtitle_panel:
 		subtitle_panel.visible = false
-
-	# Carica gli shader
-	_health_shader  = load("res://Shaders/HUD/health_bar.gdshader")
-	_minimap_shader = load("res://Shaders/HUD/minimap_overlay.gdshader")
-	_panel_shader   = load("res://Shaders/HUD/mission_panel.gdshader")
 
 	# Connetti pulsante pausa
 	if pause_btn:
@@ -173,7 +159,5 @@ func _on_settings_changed(new_settings: Dictionary) -> void:
 
 
 func _apply_quality(level: int) -> void:
-	_quality_level = level
-	
 	# Propagate quality level to child scripts
 	quality_changed.emit(level)

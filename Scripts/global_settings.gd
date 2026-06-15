@@ -87,7 +87,7 @@ func _ready() -> void:
 	_load_config()
  
  
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if bool(settings.get("show_fps", false)):
 		_update_fps_text()
 

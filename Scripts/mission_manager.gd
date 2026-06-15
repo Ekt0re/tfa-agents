@@ -31,6 +31,7 @@ signal mission_cleared()
 # ---------------------------------------------------------------------------
 var _active: MissionData = null
 var _progress: int       = 0
+var _completed: bool     = false
 
 # ---------------------------------------------------------------------------
 # Proprietà di sola lettura
@@ -49,6 +50,7 @@ var progress: int:
 func start(data: MissionData) -> void:
 	_active   = data
 	_progress = 0
+	_completed = false
 	emit_signal("mission_started", data)
 	# Per missioni senza counter (REACH, ACTIVATE) non serve progress
 	if data.target > 0:
@@ -74,8 +76,9 @@ func set_progress(value: int) -> void:
 
 ## Forza il completamento della missione attiva.
 func complete() -> void:
-	if _active == null:
+	if _active == null or _completed:
 		return
+	_completed = true
 	var completed: MissionData = _active
 	emit_signal("mission_completed", completed)
 	# Non chiama clear() automaticamente: l'HUD mostra "COMPLETATA" poi il
@@ -83,14 +86,16 @@ func complete() -> void:
 
 ## Forza il fallimento della missione attiva.
 func fail() -> void:
-	if _active == null:
+	if _active == null or _completed:
 		return
+	_completed = true
 	emit_signal("mission_failed", _active)
 
 ## Rimuove la missione attiva e nasconde il pannello HUD.
 func clear() -> void:
 	_active   = null
 	_progress = 0
+	_completed = false
 	emit_signal("mission_cleared")
 
 # ---------------------------------------------------------------------------

@@ -1,7 +1,6 @@
 extends PanelContainer
 
 signal back_requested
-signal settings_changed(settings: Dictionary)
 
 @onready var _global_settings = get_node("/root/GlobalSettings")
 @onready var _title_label: Label = %TitleLabel

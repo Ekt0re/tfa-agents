@@ -114,7 +114,7 @@ func _generate_unique_id() -> String:
 		if get_mission_by_id(candidate) == null:
 			return candidate
 		counter += 1
-	return base + str(counter)
+	return "%s%03d" % [base, counter]  # Fallback (unreachable)
 
 
 ## Pulisce connessioni che referenziano un ID rimosso
