@@ -26,10 +26,11 @@ GameEvents="*res://Scripts/game_events.gd"
 RampEvents="*res://Scripts/ramp_events.gd"
 GlobalSettings="*res://Global.tscn"
 MissionManager="*uid://yjcluspn5mm2"
+MissionFlowPlayer="*uid://brdvie860f4ap"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/shader-previewer/plugin.cfg", "res://addons/virtual_joystick_plus/plugin.cfg")
+enabled=PackedStringArray("res://addons/mission_editor/plugin.cfg", "res://addons/shader-previewer/plugin.cfg", "res://addons/virtual_joystick_plus/plugin.cfg")
 
 [global_group]
 
