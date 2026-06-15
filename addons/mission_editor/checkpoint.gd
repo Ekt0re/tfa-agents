@@ -101,6 +101,13 @@ func _setup_runtime() -> void:
 		_label_node.add_theme_color_override("font_color", checkpoint_color)
 		add_child(_label_node)
 
+	# Visualizzazione runtime: cerchio semi-trasparente
+	_visual = get_node_or_null("Visual")
+	if not _visual:
+		_visual = Node2D.new()
+		_visual.name = "Visual"
+		add_child(_visual)
+	_visual.set_script(_get_runtime_draw_script())
 	_update_visual()
 
 
@@ -176,6 +183,27 @@ func _get_draw_script() -> GDScript:
 	var script_src := """extends Node2D
 func _draw():
 	get_parent()._draw_checkpoint_visual()
+"""
+	var script := GDScript.new()
+	script.source_code = script_src
+	script.reload()
+	return script
+
+
+## Script runtime per il disegno del checkpoint
+func _get_runtime_draw_script() -> GDScript:
+	var script_src := """extends Node2D
+var _parent_ref: Area2D = null
+
+func _ready():
+	_parent_ref = get_parent()
+
+func _draw():
+	if _parent_ref and _parent_ref.is_active:
+		var r: float = _parent_ref.radius
+		var c: Color = _parent_ref.checkpoint_color
+		draw_arc(Vector2.ZERO, r, 0, TAU, 64, c, 2.0)
+		draw_circle(Vector2.ZERO, 6.0, c)
 """
 	var script := GDScript.new()
 	script.source_code = script_src
