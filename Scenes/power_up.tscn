@@ -16,7 +16,7 @@ void fragment() {
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_5dy3k"]
 shader = SubResource("Shader_6otjv")
-shader_parameter/intensity = 0.6890723387054363
+shader_parameter/intensity = 0.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_p3i06"]
 atlas = ExtResource("2_a8bxo")
@@ -101,24 +101,24 @@ animations = [{
 [sub_resource type="CircleShape2D" id="CircleShape2D_pu123"]
 radius = 72.443085
 
-[node name="PowerUp" type="Area2D" unique_id=726182247]
+[node name="PowerUp" type="Area2D" unique_id=726182247 groups=["item"]]
 z_index = 1
 collision_mask = 2
 script = ExtResource("1_c7nxa")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=486966297]
 material = SubResource("ShaderMaterial_5dy3k")
-scale = Vector2(1.0229691, 1.0229691)
+scale = Vector2(0.95342934, 0.95342934)
 sprite_frames = SubResource("SpriteFrames_7djbq")
 animation = &"Cura"
-frame_progress = 0.63311434
+frame_progress = 0.2638062
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2026217604]
 shape = SubResource("CircleShape2D_pu123")
 
 [node name="PointLight2D" type="PointLight2D" parent="." unique_id=1543028402]
 color = Color(1, 0.95, 0.8, 1)
-energy = 0.9378145
+energy = 0.52057606
 shadow_enabled = true
 texture = ExtResource("3_glow")
 texture_scale = 0.5

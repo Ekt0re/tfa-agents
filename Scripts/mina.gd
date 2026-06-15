@@ -105,7 +105,8 @@ func _ready() -> void:
 
 	add_to_group("objects")
 	add_to_group("damageable")
-
+	add_to_group("team_" + str(team_id))
+	
 	_refresh_level_membership()
 	_apply_collision_layers()
 	_connect_to_player()

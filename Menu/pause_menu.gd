@@ -22,6 +22,7 @@ signal main_menu_requested
 @onready var _hint_label: Label = $Overlay/CenterContainer/MenuPanel/MenuMargin/VBox/HintLabel
 
 var _menu_is_open := false
+var _hud_present := false
 
 
 func _ready() -> void:
@@ -32,6 +33,15 @@ func _ready() -> void:
 	_menu_panel.visible = true
 	_refresh_texts()
 	_global_settings.language_changed.connect(_on_language_changed)
+	call_deferred("_check_hud_presence")
+
+
+func _check_hud_presence() -> void:
+	if get_tree() and get_tree().current_scene:
+		var hud = get_tree().current_scene.find_child("HudGame", true, false)
+		if hud:
+			_hud_present = true
+			_pause_button.visible = false
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -50,7 +60,7 @@ func _open_pause_menu() -> void:
 	_overlay.visible = true
 	_menu_panel.visible = true
 	_settings_panel.visible = false
-	if disable_pause_button_when_open:
+	if disable_pause_button_when_open or _hud_present:
 		_pause_button.visible = false
 	if _should_freeze_game():
 		get_tree().paused = true
@@ -67,7 +77,8 @@ func _close_pause_menu() -> void:
 	_overlay.visible = false
 	_menu_panel.visible = true
 	_settings_panel.visible = false
-	_pause_button.visible = true
+	if not _hud_present:
+		_pause_button.visible = true
 	pause_closed.emit()
 
 

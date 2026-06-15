@@ -67,7 +67,8 @@ func _ready() -> void:
 
 	add_to_group("objects")
 	add_to_group("damageable")
-
+	
+	
 	_apply_tipo()
 	_setup_crack_shader()
 	_refresh_level_membership()
@@ -88,11 +89,13 @@ func _apply_tipo() -> void:
 			_sprite.animation = &"Cassa"
 			_col_cassa.disabled  = false
 			_col_barile.disabled = true
+			add_to_group("Cassa")
 
 		Tipo.BARILE_ESPLOSIVO:
 			_sprite.animation = &"Barile"
 			_col_barile.disabled = false
 			_col_cassa.disabled  = true
+			add_to_group("Barile")
 
 	if not Engine.is_editor_hint():
 		_sprite.play()

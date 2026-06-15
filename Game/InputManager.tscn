@@ -1,44 +1,45 @@
 [gd_scene format=3 uid="uid://bv23agle1jwqg"]
 
 [ext_resource type="Script" uid="uid://du65plwnxxes" path="res://addons/virtual_joystick_plus/virtual_joystick_plus.gd" id="1_6bkw0"]
-[ext_resource type="Texture2D" uid="uid://c0icr5bxu2uwu" path="res://addons/virtual_joystick_plus/resources/textures/joystick_texture_2.png" id="2_6bkw0"]
+[ext_resource type="Texture2D" uid="uid://dfch8645clve0" path="res://addons/virtual_joystick_plus/resources/textures/joystick_texture_3.png" id="2_8njbw"]
 [ext_resource type="Texture2D" uid="uid://cnyuu81bbjcvo" path="res://addons/virtual_joystick_plus/resources/textures/stick_texture_5.png" id="3_dunbb"]
+[ext_resource type="Texture2D" uid="uid://c7bf583nwd1gy" path="res://addons/virtual_joystick_plus/resources/textures/joystick_texture_4.png" id="4_dunbb"]
 
 [node name="InputManager" type="CanvasLayer" unique_id=2080147043]
 
 [node name="left_stick" type="Control" parent="." unique_id=1736506250]
-visible = false
 custom_minimum_size = Vector2(300, 300)
 layout_mode = 3
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_top = 64.0
-pivot_offset = Vector2(288, 292)
+offset_top = 128.0
+pivot_offset = Vector2(288, 260)
 script = ExtResource("1_6bkw0")
 joystick_mode = 1
 only_mobile = true
 relative_position = Vector2(0.2, 0.8)
-joystick_preset_texture = 2
-joystick_texture = ExtResource("2_6bkw0")
+joystick_preset_texture = 3
+joystick_texture = ExtResource("2_8njbw")
+joystick_color = Color(0.09649939, 0.34729165, 0.37518093, 1)
 stick_texture = ExtResource("3_dunbb")
+stick_color = Color(0.03137255, 0.3882353, 0.41568628, 1)
 metadata/_custom_type_script = "uid://du65plwnxxes"
 
 [node name="right_stick" type="Control" parent="." unique_id=1165139053]
-visible = false
 custom_minimum_size = Vector2(300, 300)
 layout_mode = 3
 anchor_left = 0.5
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 64.0
-pivot_offset = Vector2(288, 292)
+offset_top = 224.0
+pivot_offset = Vector2(288, 212)
 script = ExtResource("1_6bkw0")
 joystick_mode = 1
 only_mobile = true
 relative_position = Vector2(0.8, 0.8)
-joystick_preset_texture = 2
-joystick_texture = ExtResource("2_6bkw0")
-joystick_color = Color(1, 0, 0.23921569, 1)
+joystick_preset_texture = 4
+joystick_texture = ExtResource("4_dunbb")
+joystick_color = Color(0.9843137, 0.3372549, 0.101960786, 1)
 stick_texture = ExtResource("3_dunbb")
-stick_color = Color(0.9269253, 0.8287307, 0.5883088, 1)
+stick_color = Color(0.9490196, 0.33333334, 0.101960786, 1)
 metadata/_custom_type_script = "uid://du65plwnxxes"

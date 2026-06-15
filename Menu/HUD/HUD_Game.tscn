@@ -1,0 +1,274 @@
+[gd_scene format=3 uid="uid://bu1osy1fuhlin"]
+
+[ext_resource type="Script" uid="uid://mfmw6fr6a6k8" path="res://Menu/HUD/hud_game.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://ckaybg77h3bl5" path="res://Scripts/mission_panel.gd" id="2_4y3q6"]
+[ext_resource type="Script" uid="uid://30hg28ovfcy0" path="res://Menu/HUD/minimap.gd" id="2_minimap"]
+[ext_resource type="Texture2D" uid="uid://cnyuu81bbjcvo" path="res://addons/virtual_joystick_plus/resources/textures/stick_texture_5.png" id="4_medal_icon"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
+bg_color = Color(0.12, 0.15, 0.12, 0.6)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_detail = 1
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fill"]
+bg_color = Color(0.588235, 0.898039, 0.0588235, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_detail = 1
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel_dark"]
+bg_color = Color(0.0470588, 0.0784314, 0.12549, 0.784314)
+border_width_bottom = 2
+corner_detail = 1
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pausa"]
+bg_color = Color(0, 0.898039, 1, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pausa_hover"]
+bg_color = Color(0.3, 0.95, 1, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_subtitle"]
+bg_color = Color(0.05, 0.07, 0.1, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="HudGame" type="CanvasLayer" unique_id=1846594380]
+script = ExtResource("1_script")
+
+[node name="HUD" type="Control" parent="." unique_id=1287518993]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TopLeft" type="MarginContainer" parent="HUD" unique_id=1471942099]
+layout_mode = 1
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 260.0
+offset_bottom = 70.0
+mouse_filter = 2
+
+[node name="VBox" type="VBoxContainer" parent="HUD/TopLeft" unique_id=1891429605]
+layout_mode = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="Label" type="Label" parent="HUD/TopLeft/VBox" unique_id=1534394005]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.588235, 0.898039, 0.0588235, 1)
+theme_override_font_sizes/font_size = 11
+text = "BIO_INTEGRITY"
+
+[node name="HealthBar" type="ProgressBar" parent="HUD/TopLeft/VBox" unique_id=1083569784]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_fill")
+value = 75.0
+show_percentage = false
+
+[node name="TopCenter" type="MarginContainer" parent="HUD" unique_id=1416369034]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -130.0
+offset_top = 16.0
+offset_right = 130.0
+offset_bottom = 60.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_4y3q6")
+
+[node name="Panel" type="PanelContainer" parent="HUD/TopCenter" unique_id=148407000]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel_dark")
+
+[node name="Margin" type="MarginContainer" parent="HUD/TopCenter/Panel" unique_id=2056225354]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 6
+
+[node name="HBox" type="HBoxContainer" parent="HUD/TopCenter/Panel/Margin" unique_id=1075033650]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="MissionLabel" type="Label" parent="HUD/TopCenter/Panel/Margin/HBox" unique_id=1062685471]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.686275, 0.72549, 0.768627, 1)
+theme_override_font_sizes/font_size = 11
+text = "ENEMIES_REMAINING"
+
+[node name="MissionCounter" type="Label" parent="HUD/TopCenter/Panel/Margin/HBox" unique_id=524945728]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.988235, 0.380392, 0.156863, 1)
+theme_override_font_sizes/font_size = 13
+text = "14"
+
+[node name="ProgressBar" type="ProgressBar" parent="HUD/TopCenter/Panel/Margin" unique_id=1102487778]
+visible = false
+layout_mode = 2
+
+[node name="MissionStatus" type="Label" parent="HUD/TopCenter/Panel/Margin" unique_id=845302386]
+layout_mode = 2
+
+[node name="TopRight" type="MarginContainer" parent="HUD" unique_id=695236634]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -252.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 420.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="VBox" type="VBoxContainer" parent="HUD/TopRight" unique_id=295365208]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PauseBtn" type="Button" parent="HUD/TopRight/VBox" unique_id=761117802]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.05, 0.05, 0.05, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0.1, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_pausa")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_pausa")
+theme_override_styles/hover = SubResource("StyleBoxFlat_pausa_hover")
+text = "PAUSA"
+
+[node name="Minimap" type="Control" parent="HUD/TopRight/VBox" unique_id=128494310]
+custom_minimum_size = Vector2(220, 160)
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("2_minimap")
+
+[node name="MapLocLabel" type="Label" parent="HUD/TopRight/VBox" unique_id=347735123]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0, 0.898039, 1, 1)
+theme_override_font_sizes/font_size = 9
+text = "MAP_LOC: SECTOR_07"
+horizontal_alignment = 1
+
+[node name="WeaponBox" type="HBoxContainer" parent="HUD/TopRight/VBox" unique_id=843709757]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+alignment = 2
+
+[node name="WeaponInfo" type="VBoxContainer" parent="HUD/TopRight/VBox/WeaponBox" unique_id=1499651991]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="WeaponNameLabel" type="Label" parent="HUD/TopRight/VBox/WeaponBox/WeaponInfo" unique_id=84098495]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.686275, 0.72549, 0.768627, 1)
+theme_override_font_sizes/font_size = 11
+text = "ASSAULT_RIFLE_M4"
+horizontal_alignment = 2
+
+[node name="AmmoBox" type="HBoxContainer" parent="HUD/TopRight/VBox/WeaponBox/WeaponInfo" unique_id=433771831]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
+alignment = 2
+
+[node name="AmmoCurrentLabel" type="Label" parent="HUD/TopRight/VBox/WeaponBox/WeaponInfo/AmmoBox" unique_id=999146274]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.898039, 1, 1)
+theme_override_font_sizes/font_size = 28
+text = "30"
+
+[node name="AmmoTotalLabel" type="Label" parent="HUD/TopRight/VBox/WeaponBox/WeaponInfo/AmmoBox" unique_id=654509320]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 16
+text = " / 90"
+
+[node name="MedalIcon" type="TextureRect" parent="HUD/TopRight/VBox/WeaponBox" unique_id=581121456]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("4_medal_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SubtitleContainer" type="MarginContainer" parent="HUD" unique_id=1456070360]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -320.0
+offset_top = -116.0
+offset_right = 320.0
+offset_bottom = -36.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="SubtitlePanel" type="PanelContainer" parent="HUD/SubtitleContainer" unique_id=883646353]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_subtitle")
+
+[node name="Margin" type="MarginContainer" parent="HUD/SubtitleContainer/SubtitlePanel" unique_id=212215417]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 8
+
+[node name="SubtitleLabel" type="Label" parent="HUD/SubtitleContainer/SubtitlePanel/Margin" unique_id=1714761387]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_font_sizes/font_size = 14
+text = "Messaggio sottotitoli di esempio"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3

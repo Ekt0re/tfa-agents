@@ -64,12 +64,13 @@ var release_info: Dictionary = {
 	"current_release": {},
 }
  
+signal subtitle_requested(message: String, duration: float)
+
 var _theme_resource: Theme = preload("res://Assets/UI/global_theme.tres")
-var _fps_panel: PanelContainer
-var _fps_label: Label
-var _subtitle_panel: PanelContainer
-var _subtitle_label: Label
-var _subtitle_time_left := 0.0
+
+@onready var _fps_panel: PanelContainer = $FpsOverlay if has_node("FpsOverlay") else null
+@onready var _fps_label: Label = $FpsOverlay/MarginContainer/Label if has_node("FpsOverlay/MarginContainer/Label") else null
+
 var _release_thread: Thread
 var _release_check_running := false
 var _last_fps_text := ""
@@ -81,8 +82,6 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 256
 	_cache_theme_baseline()
-	_build_fps_overlay()
-	_build_subtitle_overlay()
 	if get_tree() and not get_tree().node_added.is_connected(_on_tree_node_added):
 		get_tree().node_added.connect(_on_tree_node_added)
 	_load_config()
@@ -91,10 +90,6 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if bool(settings.get("show_fps", false)):
 		_update_fps_text()
-	if _subtitle_time_left > 0.0:
-		_subtitle_time_left = maxf(0.0, _subtitle_time_left - delta)
-		if _subtitle_time_left <= 0.0 and _subtitle_panel:
-			_subtitle_panel.visible = false
 
  
  
@@ -159,11 +154,7 @@ func text(key: String, args: Array = []) -> String:
 func show_subtitle(message: String, duration := 2.5) -> void:
 	if not bool(settings.get("subtitles", true)):
 		return
-	if _subtitle_panel == null or _subtitle_label == null:
-		return
-	_subtitle_label.text = message
-	_subtitle_panel.visible = true
-	_subtitle_time_left = maxf(0.5, duration)
+	subtitle_requested.emit(message, duration)
  
  
 func show_subtitle_key(key: String, args: Array = [], duration := 2.5) -> void:
@@ -350,11 +341,8 @@ func _apply_show_fps(enabled: bool) -> void:
  
  
 func _apply_subtitles(enabled: bool) -> void:
-	if enabled:
-		return
-	if _subtitle_panel:
-		_subtitle_panel.visible = false
-		_subtitle_time_left = 0.0
+	if not enabled:
+		subtitle_requested.emit("", 0.0)
  
  
 func _percent_to_db(percent: float) -> float:
@@ -363,60 +351,8 @@ func _percent_to_db(percent: float) -> float:
 	return linear_to_db(percent / 100.0)
  
  
-func _build_fps_overlay() -> void:
-	_fps_panel = PanelContainer.new()
-	_fps_panel.name = "FpsOverlay"
-	_fps_panel.visible = false
-	_fps_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_fps_panel.anchor_left = 0.0
-	_fps_panel.anchor_top = 0.0
-	_fps_panel.anchor_right = 0.0
-	_fps_panel.anchor_bottom = 0.0
-	_fps_panel.offset_left = 16.0
-	_fps_panel.offset_top = 16.0
-	_fps_panel.offset_right = 144.0
-	_fps_panel.offset_bottom = 56.0
-	add_child(_fps_panel)
- 
-	var margin := MarginContainer.new()
-	margin.set("theme_override_constants/margin_left", 8)
-	margin.set("theme_override_constants/margin_top", 4)
-	margin.set("theme_override_constants/margin_right", 8)
-	margin.set("theme_override_constants/margin_bottom", 4)
-	_fps_panel.add_child(margin)
- 
-	_fps_label = Label.new()
-	_fps_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_fps_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	margin.add_child(_fps_label)
- 
- 
-func _build_subtitle_overlay() -> void:
-	_subtitle_panel = PanelContainer.new()
-	_subtitle_panel.name = "SubtitleOverlay"
-	_subtitle_panel.visible = false
-	_subtitle_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_subtitle_panel.anchor_left = 0.5
-	_subtitle_panel.anchor_top = 1.0
-	_subtitle_panel.anchor_right = 0.5
-	_subtitle_panel.anchor_bottom = 1.0
-	_subtitle_panel.offset_left = -320.0
-	_subtitle_panel.offset_top = -96.0
-	_subtitle_panel.offset_right = 320.0
-	_subtitle_panel.offset_bottom = -28.0
-	add_child(_subtitle_panel)
- 
-	var margin := MarginContainer.new()
-	margin.set("theme_override_constants/margin_left", 12)
-	margin.set("theme_override_constants/margin_top", 8)
-	margin.set("theme_override_constants/margin_right", 12)
-	margin.set("theme_override_constants/margin_bottom", 8)
-	_subtitle_panel.add_child(margin)
- 
-	_subtitle_label = Label.new()
-	_subtitle_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_subtitle_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	margin.add_child(_subtitle_label)
+# Le funzioni programmatiche _build_fps_overlay e _build_subtitle_overlay sono state rimosse 
+# in quanto i nodi dell'FPS sono ora definiti nella scena Global.tscn e i sottotitoli in HUD_Game.tscn.
  
  
 func _update_fps_text() -> void:

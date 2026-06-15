@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://g8cm505rhk5y" path="res://Game/Oggetti/Mina.tscn" id="8_v11qg"]
 [ext_resource type="PackedScene" uid="uid://dvg8adsjxd6tt" path="res://Menu/pause_menu.tscn" id="9_pause_menu"]
 [ext_resource type="PackedScene" uid="uid://t12n16npgxtc" path="res://Scenes/power_up.tscn" id="9_xqe5x"]
+[ext_resource type="PackedScene" uid="uid://bu1osy1fuhlin" path="res://Menu/HUD/HUD_Game.tscn" id="10_hud_game"]
 
 [node name="DevMap" type="Node2D" unique_id=73936262]
 script = ExtResource("1_lighting")
@@ -498,6 +499,7 @@ team_id = 1
 position = Vector2(376, 896)
 collision_layer = 1
 collision_mask = 2
+team_id = 1
 
 [node name="Mina8" parent="Mine" unique_id=877509171 instance=ExtResource("8_v11qg")]
 position = Vector2(1680, 784)
@@ -542,37 +544,43 @@ position = Vector2(2432, 392)
 type = 5
 
 [node name="PowerUp7" parent="PowerUp" unique_id=44109655 instance=ExtResource("9_xqe5x")]
-z_index = 3
+z_index = 21
 position = Vector2(381, -640)
+collision_layer = 64
+collision_mask = 128
 livello = 2
 
 [node name="PowerUp8" parent="PowerUp" unique_id=268521512 instance=ExtResource("9_xqe5x")]
-z_index = 1
+z_index = 11
 position = Vector2(3712, 2440)
+collision_layer = 8
+collision_mask = 16
 livello = 1
 
 [node name="Player" parent="." unique_id=1004030284 groups=["team_1"] instance=ExtResource("2_ien3m")]
 position = Vector2(2288, 1594)
 
-[node name="Bot" parent="." unique_id=1855505913 instance=ExtResource("4_kuufh")]
+[node name="Bot" parent="." unique_id=1855505913 groups=["team_2"] instance=ExtResource("4_kuufh")]
 modulate = Color(1, 1, 0, 1)
 self_modulate = Color(1, 1, 0, 1)
 position = Vector2(1536, 1536)
 
-[node name="Bot2" parent="." unique_id=738434768 instance=ExtResource("8_rd1f1")]
+[node name="Bot2" parent="." unique_id=738434768 groups=["team_2"] instance=ExtResource("8_rd1f1")]
 position = Vector2(1168, 2056)
 
-[node name="Bot3" parent="." unique_id=312616154 instance=ExtResource("8_rd1f1")]
+[node name="Bot3" parent="." unique_id=312616154 groups=["team_2"] instance=ExtResource("8_rd1f1")]
 z_index = 4
 position = Vector2(4944, 1792)
 current_height_level = 3
 
-[node name="Bot4" parent="." unique_id=569209035 instance=ExtResource("8_rd1f1")]
+[node name="Bot4" parent="." unique_id=569209035 groups=["team_2"] instance=ExtResource("8_rd1f1")]
 position = Vector2(2672, 1153)
 
-[node name="Bot5" parent="." unique_id=1473197367 instance=ExtResource("8_rd1f1")]
+[node name="Bot5" parent="." unique_id=1473197367 groups=["team_2"] instance=ExtResource("8_rd1f1")]
 z_index = 4
 position = Vector2(-1200, -160)
 current_height_level = 3
 
 [node name="PauseMenu" parent="." unique_id=1983389635 instance=ExtResource("9_pause_menu")]
+
+[node name="HudGame" parent="." unique_id=935661790 instance=ExtResource("10_hud_game")]

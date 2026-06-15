@@ -2,6 +2,8 @@ extends CharacterBody2D
 class_name PlayerPrototype
 
 signal height_level_changed(new_level: int)
+signal health_changed(current: float, max_val: float)
+signal ammo_changed(current: int, total: int)
 
 const PROJECTILE_VISUAL_SCENE := preload("res://Scenes/projectile_visual.tscn")
 
@@ -14,6 +16,11 @@ const PROJECTILE_VISUAL_SCENE := preload("res://Scenes/projectile_visual.tscn")
 @export var projectile_visual_speed: float = 2200.0
 @export var vita_max: float = 100.0
 var vita: float = 100.0
+
+@export var colpi_correnti: int = 30
+@export var colpi_totali: int = 90
+@export var capacita_caricatore: int = 30
+@export var nome_arma: String = "ASSAULT_RIFLE_M4"
 
 @onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D if has_node("NavigationAgent2D") else null
 @onready var joystick: VirtualJoystickPlus = $InputManager/left_stick
@@ -38,6 +45,9 @@ var _shake_strength := 0.0
 func _ready() -> void:
 	add_to_group("players")
 	add_to_group("damageable")
+	# Emetti i segnali iniziali per l'HUD
+	health_changed.emit(vita, vita_max)
+	ammo_changed.emit(colpi_correnti, colpi_totali)
 	if shot_raycast:
 		shot_raycast.enabled = true
 		shot_raycast.add_exception(self)
@@ -57,6 +67,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		var next_level := (current_height_level + 1) % total_levels
 		change_height_level(next_level)
 		return
+
+	if event is InputEventKey and event.pressed:
+		var key_event := event as InputEventKey
+		if key_event.physical_keycode == KEY_R:
+			_try_reload()
+			return
 
 	if event is InputEventMouseButton:
 		var mouse_event := event as InputEventMouseButton
@@ -163,6 +179,11 @@ func _try_fire_in_direction(aim_direction: Vector2) -> void:
 	var fire_origin := _get_fire_origin()
 	var shot_data := _build_shot_data(fire_origin, aim_direction.normalized())
 	_last_shot_time = _get_time_seconds()
+	
+	# Consuma colpo e aggiorna HUD
+	colpi_correnti -= 1
+	ammo_changed.emit(colpi_correnti, colpi_totali)
+
 	if _can_apply_local_feedback():
 		_trigger_screen_shake(3.5, 0.12)
 		if global_settings:
@@ -233,6 +254,9 @@ func _on_projectile_impact(target_path: NodePath) -> void:
 
 func _can_fire() -> bool:
 	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
+		return false
+
+	if colpi_correnti <= 0:
 		return false
 
 	return _get_time_seconds() - _last_shot_time >= fire_cooldown
@@ -513,8 +537,33 @@ func _collect_canvas_items(node: Node, canvas_items: Array[CanvasItem]) -> void:
 func apply_damage(amount: float) -> void:
 	vita = maxf(vita - amount, 0.0)
 	print("Player subisce ", amount, " danni. Vita rimanente: ", vita)
+	health_changed.emit(vita, vita_max)
 	if vita <= 0.0:
 		print("Player è morto!")
+
+
+func _try_reload() -> void:
+	if colpi_correnti == capacita_caricatore or colpi_totali <= 0:
+		return
+	var da_ricaricare = capacita_caricatore - colpi_correnti
+	var effettivi = min(da_ricaricare, colpi_totali)
+	colpi_correnti += effettivi
+	colpi_totali -= effettivi
+	ammo_changed.emit(colpi_correnti, colpi_totali)
+	if global_settings:
+		global_settings.call("show_subtitle_key", "subtitle_reloading", [], 1.0)
+
+
+func heal(amount: float) -> void:
+	vita = minf(vita + amount, vita_max)
+	print("Player si cura di ", amount, ". Vita corrente: ", vita)
+	health_changed.emit(vita, vita_max)
+
+
+func add_ammo(amount: int) -> void:
+	colpi_totali += amount
+	print("Player aggiunge ", amount, " munizioni. Colpi totali: ", colpi_totali)
+	ammo_changed.emit(colpi_correnti, colpi_totali)
 
 
 #Organizzazione collisioni fisiche, layer, maschere e navigation.

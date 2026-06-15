@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://cxswlhpxuwh4g"]
+
+[ext_resource type="Script" uid="uid://ucfswlhpxuwh" path="res://Scripts/global_settings.gd" id="1_settings"]
+[ext_resource type="Theme" uid="uid://du6vlm3j6xlwy" path="res://Assets/UI/global_theme.tres" id="2_theme"]
+
+[node name="GlobalSettings" type="CanvasLayer" unique_id=497257375]
+process_mode = 3
+layer = 128
+script = ExtResource("1_settings")
+
+[node name="FpsOverlay" type="PanelContainer" parent="." unique_id=99309627]
+visible = false
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 144.0
+offset_bottom = 56.0
+mouse_filter = 2
+theme = ExtResource("2_theme")
+
+[node name="MarginContainer" type="MarginContainer" parent="FpsOverlay" unique_id=969991954]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 4
+
+[node name="Label" type="Label" parent="FpsOverlay/MarginContainer" unique_id=223406942]
+layout_mode = 2
+text = "FPS: 60"
+horizontal_alignment = 1
+vertical_alignment = 1

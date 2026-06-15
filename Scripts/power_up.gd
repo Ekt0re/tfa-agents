@@ -46,6 +46,9 @@ func _ready() -> void:
 	
 	_apply_collision_layers()
 	_connect_to_player()
+	
+	add_to_group(str(type))
+	print(str(type))
 
 func _setup_shader() -> void:
 	_glow_material = ShaderMaterial.new()
