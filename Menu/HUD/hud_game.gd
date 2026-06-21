@@ -14,6 +14,8 @@ signal quality_changed(level: int)
 
 var player: CharacterBody2D = null
 var _subtitle_time_left := 0.0
+var _reload_flash_tween: Tween = null
+var _ammo_default_color: Color = Color(0, 0.898039, 1, 1)
 
 # Materials (created/destroyed based on quality)
 var _health_material: ShaderMaterial
@@ -65,6 +67,8 @@ func _setup_player(p: CharacterBody2D) -> void:
 		player.health_changed.connect(_on_player_health_changed)
 	if player.has_signal("ammo_changed") and not player.ammo_changed.is_connected(_on_player_ammo_changed):
 		player.ammo_changed.connect(_on_player_ammo_changed)
+	if player.has_signal("reload_started") and not player.reload_started.is_connected(_on_player_reload_started):
+		player.reload_started.connect(_on_player_reload_started)
 
 	# Aggiorna subito lo stato iniziale
 	if "vita" in player and "vita_max" in player:
@@ -97,6 +101,24 @@ func _on_player_ammo_changed(current: int, total: int) -> void:
 		ammo_current_label.text = str(current)
 	if ammo_total_label:
 		ammo_total_label.text = " / " + str(total)
+
+
+func _on_player_reload_started(duration: float) -> void:
+	if not ammo_current_label:
+		return
+	# Kill any running flash tween
+	if _reload_flash_tween and _reload_flash_tween.is_valid():
+		_reload_flash_tween.kill()
+
+	var warn_color := Color(1.0, 0.45, 0.1, 1.0)
+	_reload_flash_tween = create_tween()
+	_reload_flash_tween.set_loops(int(duration / 0.3) + 1)
+	_reload_flash_tween.tween_property(ammo_current_label, "theme_override_colors/font_color", warn_color, 0.12)
+	_reload_flash_tween.tween_property(ammo_current_label, "theme_override_colors/font_color", _ammo_default_color, 0.12)
+	# Ensure final color is restored
+	var restore_tw: Tween = create_tween()
+	restore_tw.tween_interval(duration + 0.05)
+	restore_tw.tween_property(ammo_current_label, "theme_override_colors/font_color", _ammo_default_color, 0.1)
 
 func _on_subtitle_requested(message: String, duration: float) -> void:
 	if subtitle_panel and subtitle_label:

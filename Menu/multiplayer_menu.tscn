@@ -1,0 +1,140 @@
+[gd_scene format=3 uid="uid://multiplayer_menu"]
+
+[ext_resource type="Script" path="res://Menu/multiplayer_menu.gd" id="1_script"]
+[ext_resource type="Theme" path="res://Assets/UI/global_theme.tres" id="2_theme"]
+
+[node name="MultiplayerMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="BG" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.05, 0.07, 0.12, 1)
+
+[node name="MainMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 80
+
+[node name="Card" type="PanelContainer" parent="MainMargin"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 4
+
+[node name="CardMargin" type="MarginContainer" parent="MainMargin/Card"]
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="MainMargin/Card/CardMargin"]
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="MainMargin/Card/CardMargin/VBox"]
+text = "MULTIGIOCATORE"
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
+
+[node name="PlayerNameField" type="LineEdit" parent="MainMargin/Card/CardMargin/VBox"]
+unique_name_in_owner = true
+placeholder_text = "Il tuo nome (es. Soldato)"
+custom_minimum_size = Vector2(0, 40)
+
+[node name="TabContainer" type="TabContainer" parent="MainMargin/Card/CardMargin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 300)
+
+[node name="Crea Lobby" type="VBoxContainer" parent="MainMargin/Card/CardMargin/VBox/TabContainer"]
+theme_override_constants/separation = 14
+
+[node name="PortaLabel" type="Label" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby"]
+text = "Porta"
+
+[node name="HostPortField" type="LineEdit" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby"]
+unique_name_in_owner = true
+text = "7777"
+custom_minimum_size = Vector2(0, 38)
+
+[node name="MaxPlayersLabel" type="Label" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby"]
+unique_name_in_owner = true
+text = "12"
+
+[node name="MaxPlayersSlider" type="HSlider" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby"]
+unique_name_in_owner = true
+min_value = 2.0
+max_value = 20.0
+step = 1.0
+value = 12.0
+custom_minimum_size = Vector2(0, 30)
+
+[node name="TeamModeLabel" type="Label" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby"]
+text = "Modalità"
+
+[node name="TeamModeOption" type="OptionButton" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
+
+[node name="TeamCountLabel" type="Label" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby"]
+text = "Numero squadre"
+
+[node name="TeamCountSpin" type="SpinBox" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby"]
+unique_name_in_owner = true
+min_value = 2.0
+max_value = 10.0
+value = 2.0
+
+[node name="CreateButton" type="Button" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby"]
+unique_name_in_owner = true
+text = "CREA LOBBY"
+custom_minimum_size = Vector2(0, 50)
+
+[node name="Unisciti" type="VBoxContainer" parent="MainMargin/Card/CardMargin/VBox/TabContainer"]
+theme_override_constants/separation = 14
+
+[node name="IPLabel" type="Label" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Unisciti"]
+text = "Indirizzo IP host"
+
+[node name="JoinIPField" type="LineEdit" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Unisciti"]
+unique_name_in_owner = true
+placeholder_text = "es. 192.168.1.10"
+custom_minimum_size = Vector2(0, 38)
+
+[node name="PortaLabel2" type="Label" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Unisciti"]
+text = "Porta"
+
+[node name="JoinPortField" type="LineEdit" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Unisciti"]
+unique_name_in_owner = true
+text = "7777"
+custom_minimum_size = Vector2(0, 38)
+
+[node name="JoinButton" type="Button" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Unisciti"]
+unique_name_in_owner = true
+text = "CONNETTI"
+custom_minimum_size = Vector2(0, 50)
+
+[node name="StatusLabel" type="Label" parent="MainMargin/Card/CardMargin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 20)
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="BackButton" type="Button" parent="MainMargin/Card/CardMargin/VBox"]
+unique_name_in_owner = true
+text = "← Indietro"
+custom_minimum_size = Vector2(0, 40)
+
+[connection signal="value_changed" from="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby/MaxPlayersSlider" to="." method="_on_max_players_slider_value_changed"]
+[connection signal="item_selected" from="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby/TeamModeOption" to="." method="_on_team_mode_option_item_selected"]
+[connection signal="pressed" from="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby/CreateButton" to="." method="_on_create_button_pressed"]
+[connection signal="pressed" from="MainMargin/Card/CardMargin/VBox/TabContainer/Unisciti/JoinButton" to="." method="_on_join_button_pressed"]
+[connection signal="pressed" from="MainMargin/Card/CardMargin/VBox/BackButton" to="." method="_on_back_button_pressed"]

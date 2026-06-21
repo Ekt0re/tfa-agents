@@ -31,6 +31,9 @@ var _time_remaining: float = 0.0
 var _checkpoints: Dictionary = {}  # id -> Area2D node reference
 var _audio_players: Array[AudioStreamPlayer] = []
 
+var last_checkpoint_id: String = ""
+var last_checkpoint_mission_id: String = ""
+
 # ---------------------------------------------------------------------------
 # Proprietà
 # ---------------------------------------------------------------------------
@@ -53,6 +56,12 @@ func _ready() -> void:
 		return
 	MissionManager.mission_completed.connect(_on_mission_completed)
 	MissionManager.mission_failed.connect(_on_mission_failed)
+	
+	checkpoint_reached.connect(func(cp_id: String):
+		last_checkpoint_id = cp_id
+		last_checkpoint_mission_id = _current_mission_id
+		print("MissionFlowPlayer: Checkpoint registrato -> ", cp_id, " (Missione: ", _current_mission_id, ")")
+	)
 
 
 func _process(delta: float) -> void:
@@ -69,6 +78,12 @@ func _process(delta: float) -> void:
 # API pubblica
 # ---------------------------------------------------------------------------
 
+func clear_checkpoint_data() -> void:
+	last_checkpoint_id = ""
+	last_checkpoint_mission_id = ""
+	print("MissionFlowPlayer: Dati checkpoint resettati.")
+
+
 ## Avvia un flusso di missioni
 func start_flow(flow: Resource) -> void:
 	if flow == null:
@@ -82,10 +97,21 @@ func start_flow(flow: Resource) -> void:
 	_current_flow = flow
 	_is_playing = true
 	flow_started.emit(flow)
-	# Avvia la prima missione
-	var start_mission: Resource = flow.get_start_mission()
-	if start_mission and start_mission is MissionData:
-		_start_mission(start_mission as MissionData)
+	
+	# Verifica se riprendere dal checkpoint salvato
+	var resumed := false
+	if not last_checkpoint_mission_id.is_empty():
+		var mission = flow.get_mission_by_id(last_checkpoint_mission_id)
+		if mission:
+			print("MissionFlowPlayer: Ripresa del flusso dalla missione: ", last_checkpoint_mission_id)
+			_start_mission(mission as MissionData)
+			resumed = true
+			
+	if not resumed:
+		# Avvia la prima missione
+		var start_mission: Resource = flow.get_start_mission()
+		if start_mission and start_mission is MissionData:
+			_start_mission(start_mission as MissionData)
 
 
 ## Ferma il flusso corrente

@@ -105,7 +105,7 @@ static func create_flow() -> Resource:
 	m6.set("target", 4)
 	m6.set("show_progress_bar", false)
 	m6.set("accent_color", Color(1.0, 0.5, 0.0, 1.0))
-	m6.set("on_success_next", "tutorial_done")
+	m6.set("on_success_next", "tutorial_complete")
 	m6.set("graph_position", Vector2(1550, 50))
 	flow.get("missions").append(m6)
 

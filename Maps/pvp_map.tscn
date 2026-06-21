@@ -1,15 +1,12 @@
-[gd_scene format=4 uid="uid://eednrdxv8xdm"]
+[gd_scene format=4 uid="uid://ctcitlq6h78hm"]
 
-[ext_resource type="Script" uid="uid://dbfdauan77i1h" path="res://Scripts/dev_map_lighting.gd" id="1_lighting"]
+[ext_resource type="Script" uid="uid://4jcotbunct2w" path="res://Scripts/pvp_map.gd" id="1_lighting"]
 [ext_resource type="NavigationPolygon" uid="uid://dsh462vrrp8fu" path="res://Maps/Nav1/Piano0.tres" id="2_3fjw8"]
-[ext_resource type="PackedScene" uid="uid://c7t8r6j8v4vj2" path="res://player.tscn" id="2_ien3m"]
 [ext_resource type="TileSet" uid="uid://blwvbrtt23g2r" path="res://Scenes/TileSet/Tile_set_prototype.tres" id="3_5wu4l"]
 [ext_resource type="PackedScene" uid="uid://cb3avrpy8pd06" path="res://Scenes/ramp.tscn" id="3_ramp"]
 [ext_resource type="NavigationPolygon" uid="uid://cgajmvdxovfds" path="res://Maps/Nav1/Piano1.tres" id="3_rd1f1"]
-[ext_resource type="PackedScene" uid="uid://buu621fan5j1a" path="res://bot.tscn" id="4_kuufh"]
 [ext_resource type="NavigationPolygon" uid="uid://dt86qinqcr3w4" path="res://Maps/Nav1/Piano2.tres" id="4_to1ab"]
 [ext_resource type="PackedScene" uid="uid://b7hfb3856gr2p" path="res://Game/Oggetti/oggetto.tscn" id="7_p200p"]
-[ext_resource type="PackedScene" uid="uid://yy2t6t2gu7ec" path="res://bot_simple.tscn" id="8_rd1f1"]
 [ext_resource type="PackedScene" uid="uid://g8cm505rhk5y" path="res://Game/Oggetti/Mina.tscn" id="8_v11qg"]
 [ext_resource type="PackedScene" uid="uid://dvg8adsjxd6tt" path="res://Menu/pause_menu.tscn" id="9_pause_menu"]
 [ext_resource type="PackedScene" uid="uid://t12n16npgxtc" path="res://Scenes/power_up.tscn" id="9_xqe5x"]
@@ -21,6 +18,68 @@ script = ExtResource("1_lighting")
 
 [node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=1099175156]
 color = Color(0.38, 0.4, 0.46, 1)
+
+[node name="SpawnPoints" type="Node2D" parent="." unique_id=1927648396]
+
+[node name="Spawn1" type="Marker2D" parent="SpawnPoints" unique_id=1893140317]
+position = Vector2(2900, 1900)
+
+[node name="Spawn2" type="Marker2D" parent="SpawnPoints" unique_id=1588546869]
+position = Vector2(1500, 1500)
+
+[node name="Spawn3" type="Marker2D" parent="SpawnPoints" unique_id=1028360763]
+position = Vector2(1000, 2000)
+
+[node name="Spawn4" type="Marker2D" parent="SpawnPoints" unique_id=436039043]
+position = Vector2(3000, 2500)
+
+[node name="Spawn5" type="Marker2D" parent="SpawnPoints" unique_id=1213213539]
+position = Vector2(-1142, -816)
+
+[node name="Spawn6" type="Marker2D" parent="SpawnPoints" unique_id=1528155443]
+position = Vector2(2728, 2304)
+
+[node name="Spawn7" type="Marker2D" parent="SpawnPoints" unique_id=1822887062]
+position = Vector2(368, 2448)
+
+[node name="Spawn8" type="Marker2D" parent="SpawnPoints" unique_id=159274823]
+position = Vector2(2320, 500)
+
+[node name="Spawn9" type="Marker2D" parent="SpawnPoints" unique_id=576827955]
+position = Vector2(3838, 1000)
+
+[node name="Spawn10" type="Marker2D" parent="SpawnPoints" unique_id=794957383]
+position = Vector2(4000, 2000)
+
+[node name="Spawn11" type="Marker2D" parent="SpawnPoints" unique_id=688323307]
+position = Vector2(-32, 4104)
+
+[node name="Spawn12" type="Marker2D" parent="SpawnPoints" unique_id=560791398]
+position = Vector2(3000, 3000)
+
+[node name="Spawn13" type="Marker2D" parent="SpawnPoints" unique_id=685023058]
+position = Vector2(1536, 1288)
+
+[node name="Spawn14" type="Marker2D" parent="SpawnPoints" unique_id=27257967]
+position = Vector2(40, 3032)
+
+[node name="Spawn15" type="Marker2D" parent="SpawnPoints" unique_id=2026147831]
+position = Vector2(2792, 1752)
+
+[node name="Spawn16" type="Marker2D" parent="SpawnPoints" unique_id=2058803453]
+position = Vector2(3840, 1536)
+
+[node name="Spawn17" type="Marker2D" parent="SpawnPoints" unique_id=1670930564]
+position = Vector2(900, 896)
+
+[node name="Spawn18" type="Marker2D" parent="SpawnPoints" unique_id=983442468]
+position = Vector2(2304, 2008)
+
+[node name="Spawn19" type="Marker2D" parent="SpawnPoints" unique_id=231108501]
+position = Vector2(2816, 912)
+
+[node name="Spawn20" type="Marker2D" parent="SpawnPoints" unique_id=1474998726]
+position = Vector2(4000, 3000)
 
 [node name="L0" type="Node2D" parent="." unique_id=1319773082]
 
@@ -573,30 +632,6 @@ type = 1
 [node name="PowerUp12" parent="PowerUp" unique_id=1113455789 instance=ExtResource("9_xqe5x")]
 position = Vector2(-312, 3840)
 type = 1
-
-[node name="Player" parent="." unique_id=1004030284 groups=["team_1"] instance=ExtResource("2_ien3m")]
-position = Vector2(2288, 1594)
-
-[node name="Bot" parent="." unique_id=1855505913 groups=["team_2"] instance=ExtResource("4_kuufh")]
-modulate = Color(1, 1, 0, 1)
-self_modulate = Color(1, 1, 0, 1)
-position = Vector2(1536, 1536)
-
-[node name="Bot2" parent="." unique_id=738434768 groups=["team_2"] instance=ExtResource("8_rd1f1")]
-position = Vector2(1168, 2056)
-
-[node name="Bot3" parent="." unique_id=312616154 groups=["team_2"] instance=ExtResource("8_rd1f1")]
-z_index = 4
-position = Vector2(4944, 1792)
-current_height_level = 3
-
-[node name="Bot4" parent="." unique_id=569209035 groups=["team_2"] instance=ExtResource("8_rd1f1")]
-position = Vector2(2672, 1153)
-
-[node name="Bot5" parent="." unique_id=1473197367 groups=["team_2"] instance=ExtResource("8_rd1f1")]
-z_index = 4
-position = Vector2(-1200, -160)
-current_height_level = 3
 
 [node name="PauseMenu" parent="." unique_id=1983389635 instance=ExtResource("9_pause_menu")]
 

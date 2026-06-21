@@ -8,6 +8,7 @@
 [node name="InputManager" type="CanvasLayer" unique_id=2080147043]
 
 [node name="left_stick" type="Control" parent="." unique_id=1736506250]
+visible = false
 custom_minimum_size = Vector2(300, 300)
 layout_mode = 3
 anchor_right = 0.5
@@ -26,6 +27,7 @@ stick_color = Color(0.03137255, 0.3882353, 0.41568628, 1)
 metadata/_custom_type_script = "uid://du65plwnxxes"
 
 [node name="right_stick" type="Control" parent="." unique_id=1165139053]
+visible = false
 custom_minimum_size = Vector2(300, 300)
 layout_mode = 3
 anchor_left = 0.5

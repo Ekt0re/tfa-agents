@@ -67,7 +67,14 @@ func _connect_to_player() -> void:
 
 	var players = get_tree().get_nodes_in_group("players")
 	if not players.is_empty():
-		_setup_player_connection(players[0])
+		var local_player: Node2D = null
+		for p in players:
+			if p.has_method("is_multiplayer_authority") and p.is_multiplayer_authority():
+				local_player = p
+				break
+		if not local_player:
+			local_player = players[0]
+		_setup_player_connection(local_player)
 	else:
 		get_tree().process_frame.connect(_connect_to_player, CONNECT_ONE_SHOT)
 
@@ -109,6 +116,10 @@ func _on_body_entered(body: Node2D) -> void:
 		return
 	if "wants_ramp_teleport" in body and not body.wants_ramp_teleport:
 		return
+	if body.has_method("is_multiplayer_authority") and multiplayer.has_multiplayer_peer():
+		if not body.is_multiplayer_authority():
+			return
+
 
 	var body_id := body.get_instance_id()
 	if _traversed_bodies.has(body_id) or _cooldowns.has(body_id):

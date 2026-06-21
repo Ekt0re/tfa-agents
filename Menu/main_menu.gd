@@ -1,15 +1,31 @@
-extends Control
+extends Control  # v2 — preloader integrato
 
 signal play_requested
 signal exit_requested
 
 @export_file("*.tscn") var play_scene_path := "res://Maps/dev_map.tscn"
 
+## Risorse da precaricare in background.
+## IMPORTANTE: includere solo le scene "top level", non le loro sub-dipendenze.
+## Godot carica automaticamente player.tscn, bot.tscn ecc. come dipendenze di dev_map.
+var PRELOAD_RESOURCES: Array[String] = [
+	"res://Maps/dev_map.tscn",
+]
+
+## Shader da compilare in anticipo (caricamento sincrono — sono semplici file di testo)
+var PRELOAD_SHADERS: Array[String] = [
+	"res://Shaders/level_transition.gdshader",
+	"res://Shaders/ramp_glow.gdshader",
+	"res://Shaders/crack_shader.gdshader",
+	"res://Shaders/dashed_circle.gdshader",
+]
+
 @onready var _global_settings = get_node("/root/GlobalSettings")
 @onready var _settings_overlay: Control = %SettingsOverlay
 @onready var _version_label: Label = %VersionLabel
 @onready var _eyebrow_label: Label = $MainContent/CenterContainer/MenuCard/CardMargin/VBox/Eyebrow
 @onready var _play_button: Button = $MainContent/CenterContainer/MenuCard/CardMargin/VBox/ButtonsVBox/PlayButton
+var _multiplayer_button: Button = null
 @onready var _settings_button: Button = $MainContent/CenterContainer/MenuCard/CardMargin/VBox/ButtonsVBox/SettingsButton
 @onready var _exit_button: Button = $MainContent/CenterContainer/MenuCard/CardMargin/VBox/ButtonsVBox/ExitButton
 @onready var _info_label: Label = $MainContent/CenterContainer/MenuCard/CardMargin/VBox/InfoLabel
@@ -28,6 +44,13 @@ signal exit_requested
 @onready var _close_changelog_button: Button = %CloseChangelogButton
 
 var _last_release_info: Dictionary = {}
+
+# ---------------------------------------------------------------------------
+# Overlay di caricamento (creato dinamicamente, non richiede nodi in scena)
+# ---------------------------------------------------------------------------
+var _load_overlay: Control = null
+var _load_bar: ProgressBar = null
+var _load_label: Label = null
 
 
 func _ready() -> void:
@@ -49,6 +72,39 @@ func _ready() -> void:
 	else:
 		_on_release_check_completed(_global_settings.release_info)
 
+	# --- Creazione dinamica bottone Multigiocatore ---
+	var buttons_vbox = $MainContent/CenterContainer/MenuCard/CardMargin/VBox/ButtonsVBox
+	if buttons_vbox:
+		_multiplayer_button = Button.new()
+		_multiplayer_button.name = "MultiplayerButton"
+		_multiplayer_button.text = "MULTIGIOCATORE"
+		buttons_vbox.add_child(_multiplayer_button)
+		buttons_vbox.move_child(_multiplayer_button, _play_button.get_index() + 1)
+		_multiplayer_button.pressed.connect(_on_multiplayer_pressed)
+		_multiplayer_button.custom_minimum_size = _play_button.custom_minimum_size
+		_multiplayer_button.theme_type_variation = _play_button.theme_type_variation
+		_refresh_texts()
+
+	# ---------------------------------------------------------------------------
+	# Avvia il precaricamento asincrono di risorse e shader
+	# ---------------------------------------------------------------------------
+	var preloader: Node = get_node_or_null("/root/ResourcePreloader")
+	if preloader:
+		# IMPORTANTE: connetti i segnali PRIMA di chiamare preload_resources.
+		# Se si controlla is_done() prima del preload, è sempre true (stato iniziale)
+		# e i segnali non vengono mai collegati → overlay bloccato al 100%.
+		if not preloader.progress_changed.is_connected(_on_preload_progress):
+			preloader.progress_changed.connect(_on_preload_progress)
+		if not preloader.all_loaded.is_connected(_on_preload_complete):
+			preloader.all_loaded.connect(_on_preload_complete)
+		preloader.preload_resources(PRELOAD_RESOURCES)
+		preloader.preload_shaders(PRELOAD_SHADERS)
+		# Mostra la barra solo se il caricamento è ancora in corso
+		if not preloader.is_done():
+			_build_load_overlay()
+			_update_load_bar(preloader.get_progress())
+
+
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"pause_game"):
@@ -62,8 +118,30 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _on_play_pressed() -> void:
 	play_requested.emit()
-	if not play_scene_path.is_empty():
-		get_tree().change_scene_to_file(play_scene_path)
+	if play_scene_path.is_empty():
+		return
+
+	# Pulisci i dati del checkpoint per una nuova partita
+	var flow_player := get_node_or_null("/root/MissionFlowPlayer")
+	if flow_player and flow_player.has_method("clear_checkpoint_data"):
+		flow_player.call("clear_checkpoint_data")
+
+	var preloader: Node = get_node_or_null("/root/ResourcePreloader")
+	if preloader and not preloader.is_done():
+		# Risorse ancora in caricamento: mostra overlay e aspetta
+		_build_load_overlay()
+		_update_load_bar(preloader.get_progress())
+		preloader.change_scene_when_ready(play_scene_path)
+	else:
+		# Già tutto pronto: cambio istantaneo senza freeze
+		if preloader:
+			preloader.change_scene_when_ready(play_scene_path)
+		else:
+			get_tree().change_scene_to_file(play_scene_path)
+
+
+func _on_multiplayer_pressed() -> void:
+	get_tree().change_scene_to_file("res://Menu/multiplayer_menu.tscn")
 
 
 func _on_settings_pressed() -> void:
@@ -111,6 +189,8 @@ func _update_version_label() -> void:
 func _refresh_texts() -> void:
 	_eyebrow_label.text = _tr_text("main_menu_eyebrow")
 	_play_button.text = _tr_text("main_menu_play")
+	if _multiplayer_button:
+		_multiplayer_button.text = _tr_text("MULTIGIOCATORE") if _tr_text("multiplayer") == "multiplayer" else _tr_text("multiplayer")
 	_settings_button.text = _tr_text("main_menu_settings")
 	_exit_button.text = _tr_text("main_menu_exit")
 	_info_label.text = _tr_text("main_menu_info")
@@ -210,6 +290,97 @@ func _on_language_changed(_language_code: String) -> void:
 	_refresh_texts()
 	if _changelog_overlay.visible:
 		_refresh_changelog_overlay()
+
+
+# ---------------------------------------------------------------------------
+# Overlay di caricamento asincrono
+# ---------------------------------------------------------------------------
+
+## Costruisce programmaticamente un overlay di caricamento minimale.
+## Viene mostrato solo se le risorse non sono ancora pronte al click Play.
+func _build_load_overlay() -> void:
+	if is_instance_valid(_load_overlay):
+		return
+
+	# Sfondo semitrasparente
+	_load_overlay = ColorRect.new()
+	var bg := _load_overlay as ColorRect
+	bg.color = Color(0.04, 0.06, 0.10, 0.88)
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	bg.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(_load_overlay)
+
+	# Contenitore verticale centrato
+	var vbox := VBoxContainer.new()
+	vbox.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	vbox.custom_minimum_size = Vector2(480.0, 0.0)
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_theme_constant_override("separation", 16)
+	_load_overlay.add_child(vbox)
+
+	# Etichetta titolo
+	var title := Label.new()
+	var loading_key := tr("loading_title")
+	title.text = loading_key if loading_key != "loading_title" else "CARICAMENTO IN CORSO"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 20)
+	title.modulate = Color(0.0, 0.9, 1.0, 1.0)
+	vbox.add_child(title)
+
+	# Barra di progresso
+	_load_bar = ProgressBar.new()
+	_load_bar.min_value = 0.0
+	_load_bar.max_value = 1.0
+	_load_bar.value = 0.0
+	_load_bar.show_percentage = false
+	_load_bar.custom_minimum_size = Vector2(480.0, 10.0)
+	vbox.add_child(_load_bar)
+
+	# Etichetta percentuale
+	_load_label = Label.new()
+	_load_label.text = "0%"
+	_load_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_load_label.add_theme_font_size_override("font_size", 14)
+	_load_label.modulate = Color(0.7, 0.85, 1.0, 0.9)
+	vbox.add_child(_load_label)
+
+	# Animazione fade-in dell'overlay
+	_load_overlay.modulate.a = 0.0
+	var tw := create_tween()
+	tw.tween_property(_load_overlay, "modulate:a", 1.0, 0.25)
+
+
+## Aggiorna visivamente la barra di caricamento.
+func _update_load_bar(p: float) -> void:
+	if not is_instance_valid(_load_bar):
+		return
+	p = clampf(p, 0.0, 1.0)
+	_load_bar.value = p
+	if is_instance_valid(_load_label):
+		_load_label.text = "%d%%" % int(p * 100.0)
+
+
+## Nasconde e rimuove l'overlay con animazione fade-out.
+func _hide_load_overlay() -> void:
+	if not is_instance_valid(_load_overlay):
+		return
+	var overlay := _load_overlay
+	_load_overlay = null
+	_load_bar = null
+	_load_label = null
+	var tw := create_tween()
+	tw.tween_property(overlay, "modulate:a", 0.0, 0.3)
+	tw.tween_callback(overlay.queue_free)
+
+
+## Callback da ResourcePreloader.progress_changed
+func _on_preload_progress(overall: float) -> void:
+	_update_load_bar(overall)
+
+
+## Callback da ResourcePreloader.all_loaded
+func _on_preload_complete() -> void:
+	_hide_load_overlay()
 
 
 func _tr_text(key: String, args: Array = []) -> String:

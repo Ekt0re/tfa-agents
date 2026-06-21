@@ -68,7 +68,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
+mouse_filter = 1
 
 [node name="TopLeft" type="MarginContainer" parent="HUD" unique_id=1471942099]
 layout_mode = 1
@@ -76,7 +76,6 @@ offset_left = 16.0
 offset_top = 16.0
 offset_right = 260.0
 offset_bottom = 70.0
-mouse_filter = 2
 
 [node name="VBox" type="VBoxContainer" parent="HUD/TopLeft" unique_id=1891429605]
 layout_mode = 2
@@ -85,6 +84,7 @@ alignment = 1
 
 [node name="Label" type="Label" parent="HUD/TopLeft/VBox" unique_id=1534394005]
 layout_mode = 2
+mouse_filter = 1
 theme_override_colors/font_color = Color(0.588235, 0.898039, 0.0588235, 1)
 theme_override_font_sizes/font_size = 11
 text = "BIO_INTEGRITY"
@@ -93,6 +93,7 @@ text = "BIO_INTEGRITY"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
+mouse_filter = 1
 theme_override_styles/background = SubResource("StyleBoxFlat_bg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_fill")
 value = 100.0
@@ -100,21 +101,20 @@ show_percentage = false
 
 [node name="TopCenter" type="MarginContainer" parent="HUD" unique_id=1416369034]
 layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -160.0
+anchors_preset = -1
+anchor_left = 0.36100003
+anchor_right = 0.63900006
+offset_left = 0.1279602
 offset_top = 16.0
-offset_right = 160.0
+offset_right = -0.12805176
 offset_bottom = 72.0
 grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
 script = ExtResource("2_4y3q6")
 
 [node name="MissionPanelInner" type="PanelContainer" parent="HUD/TopCenter" unique_id=148407000]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 1
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel_dark")
 
 [node name="Margin" type="MarginContainer" parent="HUD/TopCenter/MissionPanelInner" unique_id=2056225354]
@@ -136,6 +136,7 @@ alignment = 1
 [node name="MissionLabel" type="Label" parent="HUD/TopCenter/MissionPanelInner/Margin/VBox/HBox" unique_id=1062685471]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 1
 theme_override_colors/font_color = Color(0.686275, 0.72549, 0.768627, 1)
 theme_override_font_sizes/font_size = 12
 text = "ENEMIES_REMAINING"
@@ -143,6 +144,7 @@ text = "ENEMIES_REMAINING"
 [node name="MissionCounter" type="Label" parent="HUD/TopCenter/MissionPanelInner/Margin/VBox/HBox" unique_id=524945728]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 1
 theme_override_colors/font_color = Color(0.988235, 0.380392, 0.156863, 1)
 theme_override_font_sizes/font_size = 14
 text = "14"
@@ -153,11 +155,13 @@ visible = false
 material = SubResource("ShaderMaterial_e8wgn")
 custom_minimum_size = Vector2(0, 8)
 layout_mode = 2
+mouse_filter = 1
 show_percentage = false
 
 [node name="MissionStatus" type="Label" parent="HUD/TopCenter/MissionPanelInner/Margin/VBox" unique_id=845302386]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 1
 theme_override_font_sizes/font_size = 11
 horizontal_alignment = 1
 
@@ -271,11 +275,11 @@ offset_right = 320.0
 offset_bottom = -36.0
 grow_horizontal = 2
 grow_vertical = 0
-mouse_filter = 2
 
 [node name="SubtitlePanel" type="PanelContainer" parent="HUD/SubtitleContainer" unique_id=883646353]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 1
 theme_override_styles/panel = SubResource("StyleBoxFlat_subtitle")
 
 [node name="Margin" type="MarginContainer" parent="HUD/SubtitleContainer/SubtitlePanel" unique_id=212215417]
@@ -288,6 +292,7 @@ theme_override_constants/margin_bottom = 8
 [node name="SubtitleLabel" type="Label" parent="HUD/SubtitleContainer/SubtitlePanel/Margin" unique_id=1714761387]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 1
 theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
 theme_override_font_sizes/font_size = 14
 text = "Messaggio sottotitoli di esempio"

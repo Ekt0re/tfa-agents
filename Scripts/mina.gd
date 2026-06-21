@@ -160,8 +160,8 @@ func _process(_delta: float) -> void:
 func _on_body_entered(body: Node2D) -> void:
 	if _exploded:
 		return
-		
-	# Rileva se il corpo è un player o bot su cui disabilitare la collisione fisica
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return
 		
 	# Verifica il livello di altezza del target rispetto a questa mina
 	var target_level: int = livello
@@ -177,19 +177,31 @@ func _on_body_entered(body: Node2D) -> void:
 	var body_team := _get_team_id(body)
 	if body_team != team_id:
 		# Nemico o entità non allineata calpesta la mina -> Esplosione!
-		_explode()
+		if multiplayer.has_multiplayer_peer():
+			_trigger_explosion_rpc.rpc()
+		else:
+			_trigger_explosion_rpc()
 
 # ---------------------------------------------------------------------------
 # Danno e distruzione
 # ---------------------------------------------------------------------------
 
 func apply_damage(amount: float, _source: Node = null) -> void:
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return
 	if _exploded or vita <= 0.0:
 		return
 
 	vita = maxf(vita - amount, 0.0)
 	if vita <= 0.0:
-		_explode()
+		if multiplayer.has_multiplayer_peer():
+			_trigger_explosion_rpc.rpc()
+		else:
+			_trigger_explosion_rpc()
+
+@rpc("authority", "call_local", "reliable")
+func _trigger_explosion_rpc() -> void:
+	_explode()
 
 func get_explosion_radius() -> float:
 	if _col_explosion and _col_explosion.shape is CircleShape2D:
@@ -202,30 +214,31 @@ func _explode() -> void:
 	_exploded = true
 	
 	var radius := get_explosion_radius()
-	for body: Node in get_tree().get_nodes_in_group("damageable"):
-		if body == self:
-			continue
-		if not body.has_method("apply_damage"):
-			continue
-		
-		# Verifica il livello di altezza del target rispetto a questa mina
-		var target_level: int = livello
-		if "livello" in body:
-			target_level = body.get("livello")
-		elif "current_height_level" in body:
-			target_level = body.get("current_height_level")
-		
-		if target_level != livello:
-			continue
+	if not multiplayer.has_multiplayer_peer() or multiplayer.is_server():
+		for body: Node in get_tree().get_nodes_in_group("damageable"):
+			if body == self:
+				continue
+			if not body.has_method("apply_damage"):
+				continue
 			
-		var target := body as Node2D
-		if target == null:
-			continue
-		var dist: float = global_position.distance_to(target.global_position)
-		if dist > radius:
-			continue
-		var falloff: float = 1.0 - (dist / radius)
-		body.call("apply_damage", explosion_damage * falloff)
+			# Verifica il livello di altezza del target rispetto a questa mina
+			var target_level: int = livello
+			if "livello" in body:
+				target_level = body.get("livello")
+			elif "current_height_level" in body:
+				target_level = body.get("current_height_level")
+			
+			if target_level != livello:
+				continue
+				
+			var target := body as Node2D
+			if target == null:
+				continue
+			var dist: float = global_position.distance_to(target.global_position)
+			if dist > radius:
+				continue
+			var falloff: float = 1.0 - (dist / radius)
+			body.call("apply_damage", explosion_damage * falloff)
 	
 	# Disabilita collisioni fisiche
 	set_deferred("collision_layer", 0)
@@ -320,7 +333,14 @@ func _connect_to_player() -> void:
 		return
 	var players: Array[Node] = get_tree().get_nodes_in_group("players")
 	if not players.is_empty():
-		_setup_player_connection(players[0] as Node2D)
+		var local_player: Node2D = null
+		for p in players:
+			if p.has_method("is_multiplayer_authority") and p.is_multiplayer_authority():
+				local_player = p
+				break
+		if not local_player:
+			local_player = players[0]
+		_setup_player_connection(local_player)
 	else:
 		get_tree().process_frame.connect(_connect_to_player, CONNECT_ONE_SHOT)
 

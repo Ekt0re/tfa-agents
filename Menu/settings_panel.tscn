@@ -10,14 +10,14 @@ script = ExtResource("1_script")
 
 [node name="ContentMargin" type="MarginContainer" parent="."]
 layout_mode = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 8
+	theme_override_constants/margin_left = 16
+	theme_override_constants/margin_top = 16
+	theme_override_constants/margin_right = 16
+	theme_override_constants/margin_bottom = 16
 
 [node name="RootVBox" type="VBoxContainer" parent="ContentMargin"]
 layout_mode = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 16
 
 [node name="Header" type="HBoxContainer" parent="ContentMargin/RootVBox"]
 layout_mode = 2
@@ -47,7 +47,7 @@ layout_mode = 2
 text = "Indietro"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="ContentMargin/RootVBox"]
-custom_minimum_size = Vector2(0, 460)
+custom_minimum_size = Vector2(0, 380)
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
@@ -62,10 +62,10 @@ layout_mode = 2
 
 [node name="AudioMargin" type="MarginContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection"]
 layout_mode = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 
 [node name="AudioVBox" type="VBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin"]
 layout_mode = 2
@@ -162,10 +162,10 @@ layout_mode = 2
 
 [node name="GraphicsMargin" type="MarginContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection"]
 layout_mode = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 
 [node name="GraphicsVBox" type="VBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin"]
 layout_mode = 2
@@ -237,10 +237,10 @@ layout_mode = 2
 
 [node name="GameplayMargin" type="MarginContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection"]
 layout_mode = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 
 [node name="GameplayVBox" type="VBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin"]
 layout_mode = 2

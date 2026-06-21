@@ -8,7 +8,7 @@
 ## il sequencing automatico, branching e comandi di completamento.
 ##
 ## Flusso: MOVE → AIM → FIRE → ELIMINATE → COLLECT → DESTROY →
-##          DONE → REACH_PORTAL → TUTORIAL_COMPLETE → (main menu)
+##          TUTORIAL_COMPLETE → (main menu)
 extends Node
 
 # ---------------------------------------------------------------------------
@@ -76,12 +76,16 @@ func _find_player() -> void:
 
 
 func _find_checkpoint() -> Area2D:
-	# Cerca per unique name, poi per gruppo/nodo figlio
-	var cp := get_node_or_null("%CheckPoint")
-	if cp:
-		return cp as Area2D
-	# Fallback: cerca tra i figli
-	return find_child("CheckPoint", true, false) as Area2D
+	# CheckPoint è figlio diretto della radice mappa (DevMap), fratello di Tutorial.
+	# NON è figlio di Tutorial → cerca nel parent, non tra i propri figli.
+	# La sintassi %CheckPoint richiede unique_name_in_owner=true che non è attivo.
+	var scene_root := get_parent()
+	if scene_root:
+		var cp := scene_root.get_node_or_null("CheckPoint")
+		if cp is Area2D:
+			return cp as Area2D
+	push_warning("dev_map_tutorial: CheckPoint non trovato nella scena radice!")
+	return null
 
 
 func _input(event: InputEvent) -> void:

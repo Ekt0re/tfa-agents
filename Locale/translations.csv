@@ -91,3 +91,14 @@ mission_tutorial_destroy,DISTRUGGI TUTTI I BARILI,DESTROY ALL BARRELS
 mission_tutorial_done,VAI AL PORTALE!,GO TO THE PORTAL!
 mission_tutorial_reach_portal,RAGGIUNGI IL PORTALE,REACH THE PORTAL
 mission_tutorial_complete,TUTORIAL COMPLETATO!,TUTORIAL COMPLETE!
+game_over_title,GAME OVER,GAME OVER
+game_over_subtitle,La tua partita è terminata.,Your match has ended.
+game_over_restart_checkpoint,Ricomincia dal checkpoint,Restart from checkpoint
+game_over_restart_begin,Ricomincia dall'inizio,Restart from beginning
+game_over_main_menu,Menu principale,Main menu
+game_over_spectator_title,MODALITÀ SPETTATORE,SPECTATOR MODE
+game_over_spectating,Stai osservando: %s,Spectating: %s
+game_over_spectating_no_players,Nessun giocatore rimasto in vita.,No players left alive.
+game_over_prev,< Prec,< Prev
+game_over_next,Succ >,Next >
+game_over_lobby,Torna alla lobby,Return to lobby

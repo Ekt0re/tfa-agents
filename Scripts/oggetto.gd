@@ -134,19 +134,40 @@ func _update_crack_shader() -> void:
 # ---------------------------------------------------------------------------
 
 func apply_damage(amount: float) -> void:
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return
 	if vita <= 0.0:
 		return
 	vita = maxf(vita - amount, 0.0)
-	_update_crack_shader()
+	if multiplayer.has_multiplayer_peer():
+		_sync_vita.rpc(vita)
+	else:
+		_sync_vita(vita)
+	
 	if vita <= 0.0:
 		destroy()
 
+@rpc("authority", "call_local", "reliable")
+func _sync_vita(new_vita: float) -> void:
+	vita = new_vita
+	_update_crack_shader()
+
 func destroy() -> void:
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return
+	if multiplayer.has_multiplayer_peer():
+		_replicate_destroy.rpc()
+	else:
+		_replicate_destroy()
+
+@rpc("authority", "call_local", "reliable")
+func _replicate_destroy() -> void:
 	match tipo:
 		Tipo.CASSA:
 			_destroy_cassa()
 		Tipo.BARILE_ESPLOSIVO:
 			_explode()
+
 
 func _destroy_cassa() -> void:
 	# TODO: particelle legno, suono
@@ -159,30 +180,33 @@ func get_explosion_radius() -> float:
 
 func _explode() -> void:
 	var radius := get_explosion_radius()
-	for body: Node in get_tree().get_nodes_in_group("damageable"):
-		if body == self:
-			continue
-		if not body.has_method("apply_damage"):
-			continue
-		
-		# Verifica il livello di altezza del target rispetto a questo barile
-		var target_level: int = livello
-		if "livello" in body:
-			target_level = body.get("livello")
-		elif "current_height_level" in body:
-			target_level = body.get("current_height_level")
-		
-		if target_level != livello:
-			continue
+	
+	if not multiplayer.has_multiplayer_peer() or multiplayer.is_server():
+		for body: Node in get_tree().get_nodes_in_group("damageable"):
+			if body == self:
+				continue
+			if not body.has_method("apply_damage"):
+				continue
 			
-		var target := body as Node2D
-		if target == null:
-			continue
-		var dist: float = global_position.distance_to(target.global_position)
-		if dist > radius:
-			continue
-		var falloff: float = 1.0 - (dist / radius)
-		body.call("apply_damage", explosion_damage * falloff)
+			# Verifica il livello di altezza del target rispetto a questo barile
+			var target_level: int = livello
+			if "livello" in body:
+				target_level = body.get("livello")
+			elif "current_height_level" in body:
+				target_level = body.get("current_height_level")
+			
+			if target_level != livello:
+				continue
+				
+			var target := body as Node2D
+			if target == null:
+				continue
+			var dist: float = global_position.distance_to(target.global_position)
+			if dist > radius:
+				continue
+			var falloff: float = 1.0 - (dist / radius)
+			body.call("apply_damage", explosion_damage * falloff)
+
 	
 	# Disabilita collisioni fisiche per evitare ulteriori interazioni
 	collision_layer = 0
@@ -260,7 +284,14 @@ func _connect_to_player() -> void:
 		return
 	var players: Array[Node] = get_tree().get_nodes_in_group("players")
 	if not players.is_empty():
-		_setup_player_connection(players[0] as Node2D)
+		var local_player: Node2D = null
+		for p in players:
+			if p.has_method("is_multiplayer_authority") and p.is_multiplayer_authority():
+				local_player = p
+				break
+		if not local_player:
+			local_player = players[0]
+		_setup_player_connection(local_player)
 	else:
 		get_tree().process_frame.connect(_connect_to_player, CONNECT_ONE_SHOT)
 

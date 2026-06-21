@@ -1,12 +1,95 @@
-[gd_scene load_steps=3 format=3 uid="uid://checkpoint_scene"]
+[gd_scene format=3 uid="uid://bb5wxqhg5tdq4"]
 
-[ext_resource type="Script" path="res://addons/mission_editor/checkpoint.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://bw6vqldcyr1p5" path="res://addons/mission_editor/checkpoint.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://bhbxknfdynkr6" path="res://Assets/PORTAL BLUE-Sheet.png" id="2_a174i"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_1"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_srvjn"]
+atlas = ExtResource("2_a174i")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5y0ol"]
+atlas = ExtResource("2_a174i")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_l217l"]
+atlas = ExtResource("2_a174i")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fx6ph"]
+atlas = ExtResource("2_a174i")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kd8id"]
+atlas = ExtResource("2_a174i")
+region = Rect2(256, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_otkqu"]
+atlas = ExtResource("2_a174i")
+region = Rect2(320, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xoepv"]
+atlas = ExtResource("2_a174i")
+region = Rect2(384, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gnpiu"]
+atlas = ExtResource("2_a174i")
+region = Rect2(448, 0, 64, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_j60bx"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_srvjn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5y0ol")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l217l")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fx6ph")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kd8id")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_otkqu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xoepv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gnpiu")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_a174i"]
 radius = 64.0
 
-[node name="CheckPoint" type="Area2D"]
+[sub_resource type="GDScript" id="GDScript_wfwuc"]
+script/source = "extends Node2D
+func _draw():
+	var r: float = 64.0
+	var c: Color = Color(\"00e5ff99\")
+	draw_arc(Vector2.ZERO, r, 0, TAU, 64, c, 2.0)
+	draw_circle(Vector2.ZERO, 8.0, c)
+"
+
+[node name="CheckPoint" type="Area2D" unique_id=1740977169]
 script = ExtResource("1_script")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("CircleShape2D_1")
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1691210479]
+position = Vector2(6.0000005, 0)
+scale = Vector2(2.078125, 2.078125)
+sprite_frames = SubResource("SpriteFrames_j60bx")
+frame_progress = 0.8517815
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1620260921]
+shape = SubResource("CircleShape2D_a174i")
+
+[node name="Visual" type="Node2D" parent="." unique_id=1415532905]
+script = SubResource("GDScript_wfwuc")

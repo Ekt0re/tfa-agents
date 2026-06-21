@@ -97,7 +97,13 @@ func _connect_to_player() -> void:
 		get_tree().process_frame.connect(_connect_to_player, CONNECT_ONE_SHOT)
 		return
 
-	var player := players[0]
+	var player: Node = null
+	for p in players:
+		if p.has_method("is_multiplayer_authority") and p.is_multiplayer_authority():
+			player = p
+			break
+	if not player:
+		player = players[0]
 	if player != _tracked_player:
 		if _tracked_player and is_instance_valid(_tracked_player) and _tracked_player.has_signal("height_level_changed") and _tracked_player.height_level_changed.is_connected(_on_player_height_level_changed):
 			_tracked_player.height_level_changed.disconnect(_on_player_height_level_changed)

@@ -1,0 +1,130 @@
+[gd_scene format=3 uid="uid://lobby_scene"]
+
+[ext_resource type="Script" path="res://Menu/lobby.gd" id="1_script"]
+
+[node name="Lobby" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_script")
+
+[node name="BG" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.05, 0.07, 0.12, 1)
+
+[node name="MainLayout" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/separation = 16
+offset_left = 24.0
+offset_right = -24.0
+offset_top = 24.0
+offset_bottom = -24.0
+
+[node name="LeftPanel" type="VBoxContainer" parent="MainLayout"]
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
+theme_override_constants/separation = 16
+
+[node name="TitleBar" type="HBoxContainer" parent="MainLayout/LeftPanel"]
+
+[node name="LobbyTitle" type="Label" parent="MainLayout/LeftPanel/TitleBar"]
+text = "LOBBY DI ATTESA"
+theme_override_font_sizes/font_size = 22
+size_flags_horizontal = 3
+
+[node name="HostIPLabel" type="Label" parent="MainLayout/LeftPanel/TitleBar"]
+unique_name_in_owner = true
+horizontal_alignment = 2
+size_flags_horizontal = 3
+
+[node name="PlayerListScroll" type="ScrollContainer" parent="MainLayout/LeftPanel"]
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 200)
+
+[node name="PlayerList" type="VBoxContainer" parent="MainLayout/LeftPanel/PlayerListScroll"]
+unique_name_in_owner = true
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="StatusLabel" type="Label" parent="MainLayout/LeftPanel"]
+unique_name_in_owner = true
+text = "In attesa..."
+horizontal_alignment = 1
+
+[node name="ButtonsRow" type="HBoxContainer" parent="MainLayout/LeftPanel"]
+theme_override_constants/separation = 12
+
+[node name="BackButton" type="Button" parent="MainLayout/LeftPanel/ButtonsRow"]
+unique_name_in_owner = true
+text = "← Esci"
+custom_minimum_size = Vector2(120, 44)
+
+[node name="Spacer" type="Control" parent="MainLayout/LeftPanel/ButtonsRow"]
+size_flags_horizontal = 3
+
+[node name="ReadyButton" type="Button" parent="MainLayout/LeftPanel/ButtonsRow"]
+unique_name_in_owner = true
+text = "PRONTO"
+custom_minimum_size = Vector2(140, 44)
+
+[node name="StartButton" type="Button" parent="MainLayout/LeftPanel/ButtonsRow"]
+unique_name_in_owner = true
+text = "▶ AVVIA PARTITA"
+custom_minimum_size = Vector2(180, 44)
+disabled = true
+
+[node name="RightPanel" type="VBoxContainer" parent="MainLayout"]
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.0
+theme_override_constants/separation = 10
+
+[node name="ChatTitle" type="Label" parent="MainLayout/RightPanel"]
+text = "Chat"
+theme_override_font_sizes/font_size = 16
+
+[node name="ChatBg" type="PanelContainer" parent="MainLayout/RightPanel"]
+size_flags_vertical = 3
+
+[node name="ChatBgMargin" type="MarginContainer" parent="MainLayout/RightPanel/ChatBg"]
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="ChatLogScroll" type="ScrollContainer" parent="MainLayout/RightPanel/ChatBg/ChatBgMargin"]
+size_flags_vertical = 3
+
+[node name="ChatLog" type="RichTextLabel" parent="MainLayout/RightPanel/ChatBg/ChatBgMargin/ChatLogScroll"]
+unique_name_in_owner = true
+size_flags_horizontal = 3
+size_flags_vertical = 3
+bbcode_enabled = true
+custom_minimum_size = Vector2(0, 200)
+fit_content = true
+
+[node name="ChatInputRow" type="HBoxContainer" parent="MainLayout/RightPanel"]
+theme_override_constants/separation = 8
+
+[node name="ChatInput" type="LineEdit" parent="MainLayout/RightPanel/ChatInputRow"]
+unique_name_in_owner = true
+size_flags_horizontal = 3
+placeholder_text = "Scrivi un messaggio..."
+custom_minimum_size = Vector2(0, 36)
+
+[node name="SendChatButton" type="Button" parent="MainLayout/RightPanel/ChatInputRow"]
+unique_name_in_owner = true
+text = "Invia"
+custom_minimum_size = Vector2(70, 36)
+
+[connection signal="pressed" from="MainLayout/LeftPanel/ButtonsRow/BackButton" to="." method="_on_back_button_pressed"]
+[connection signal="pressed" from="MainLayout/LeftPanel/ButtonsRow/ReadyButton" to="." method="_on_ready_button_pressed"]
+[connection signal="pressed" from="MainLayout/LeftPanel/ButtonsRow/StartButton" to="." method="_on_start_button_pressed"]
+[connection signal="pressed" from="MainLayout/RightPanel/ChatInputRow/SendChatButton" to="." method="_on_send_chat_button_pressed"]
+[connection signal="text_submitted" from="MainLayout/RightPanel/ChatInputRow/ChatInput" to="." method="_on_chat_input_text_submitted"]

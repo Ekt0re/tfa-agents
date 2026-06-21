@@ -4,12 +4,15 @@ class_name PlayerPrototype
 signal height_level_changed(new_level: int)
 signal health_changed(current: float, max_val: float)
 signal ammo_changed(current: int, total: int)
+signal reload_started(duration: float)
 
 const PROJECTILE_VISUAL_SCENE := preload("res://Scenes/projectile_visual.tscn")
 
 @export var speed: float = 400.0
 @export var current_height_level: int = 0
 @export var total_levels: int = 3
+@export var team_id: int = 1
+@export var skin_index: int = 0
 @export var fire_cooldown: float = 0.12
 @export var shot_range: float = 1600.0
 @export var touch_auto_fire_range: float = 900.0
@@ -31,9 +34,12 @@ var vita: float = 100.0
 @onready var global_settings: Node = get_node_or_null("/root/GlobalSettings")
 
 @export var projectile_damage: float = 25.0
+@export var reload_duration: float = 1.2
 
 var level_shader := preload("res://Shaders/level_transition.gdshader")
 var _using_touch := false
+var _is_reloading: bool = false
+var _reload_tween: Tween = null
 var _last_shot_time: float = -1000.0
 var _last_touch_aim_direction: Vector2 = Vector2.RIGHT
 var _touch_aim_active: bool = false
@@ -41,28 +47,110 @@ var _camera_base_offset := Vector2.ZERO
 var _shake_time_left := 0.0
 var _shake_strength := 0.0
 
+# Sync multiplayer
+var _sync_tick: int = 0
+const _SYNC_EVERY: int = 2  # invia ogni N physics frame (60Hz → ~30 update/s)
+
+
+func _enter_tree() -> void:
+	if name.is_valid_int():
+		set_multiplayer_authority(name.to_int())
+
 
 func _ready() -> void:
 	add_to_group("players")
 	add_to_group("damageable")
+	
+	if camera_2d:
+		if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
+			camera_2d.enabled = false
+		else:
+			camera_2d.make_current()
+			_camera_base_offset = camera_2d.offset
+	
+	var input_mgr = get_node_or_null("InputManager")
+	if input_mgr and multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
+		input_mgr.queue_free() # Rimuove l'input manager remoto
+
 	# Emetti i segnali iniziali per l'HUD
 	health_changed.emit(vita, vita_max)
 	ammo_changed.emit(colpi_correnti, colpi_totali)
 	if shot_raycast:
 		shot_raycast.enabled = true
 		shot_raycast.add_exception(self)
-	if camera_2d:
-		_camera_base_offset = camera_2d.offset
+
+	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+		call_deferred("_sync_initial_state_to_peers")
+	
 	call_deferred("_initialize_level_system")
+
+
+func _sync_initial_state_to_peers() -> void:
+	_receive_initial_state.rpc(team_id, skin_index, nome_arma)
+
+@rpc("any_peer", "call_local", "reliable")
+func _receive_initial_state(p_team_id: int, p_skin_index: int, p_nome_arma: String) -> void:
+	if multiplayer.get_remote_sender_id() != 1 and multiplayer.get_remote_sender_id() != 0:
+		return
+
+	team_id = p_team_id
+	skin_index = p_skin_index
+	nome_arma = p_nome_arma
+	print("Player %s: Ricevuto stato iniziale -> Team: %d, Skin: %d, Arma: %s" % [name, team_id, skin_index, nome_arma])
+	
+	# Mappa nome arma all'animazione
+	var arama = get_node_or_null("Arama")
+	if arama:
+		var anim_name = "mitra" # fallback
+		if arama.sprite_frames.has_animation(nome_arma):
+			anim_name = nome_arma
+		elif nome_arma == "ASSAULT_RIFLE_M4":
+			anim_name = "mitra"
+		arama.play(anim_name)
+
+	
+	var sprite = get_node_or_null("Sprite2D")
+	if sprite and skin_index > 0:
+		pass # In futuro aggiungi logica skin
+
+
 
 
 func _initialize_level_system() -> void:
 	_setup_shader_materials()
 	_configure_shot_raycast_for_current_level()
 	change_height_level(current_height_level, true)
+	await get_tree().process_frame
+	_check_and_restore_checkpoint()
+
+
+func _check_and_restore_checkpoint() -> void:
+	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
+		return
+		
+	var flow_player = get_node_or_null("/root/MissionFlowPlayer")
+	if flow_player and flow_player.get("last_checkpoint_id") != "":
+		var last_cp_id = flow_player.get("last_checkpoint_id")
+		var checkpoints = flow_player.get("_checkpoints")
+		if checkpoints and checkpoints.has(last_cp_id):
+			var cp_node = checkpoints[last_cp_id]
+			if is_instance_valid(cp_node):
+				global_position = cp_node.global_position
+				print("PlayerPrototype: Ripristinato al checkpoint -> ", last_cp_id, " in pos: ", global_position)
+				var level_idx = 0
+				var p = cp_node.get_parent()
+				while p:
+					if p.name.begins_with("L") and p.name.substr(1).is_valid_int():
+						level_idx = p.name.substr(1).to_int()
+						break
+					p = p.get_parent()
+				change_height_level(level_idx, true)
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
+		return
+		
 	if event.is_action_pressed("cambia_piano"):
 		var next_level := (current_height_level + 1) % total_levels
 		change_height_level(next_level)
@@ -81,6 +169,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
+		return
+		
 	if event is InputEventScreenTouch or event is InputEventScreenDrag:
 		_using_touch = true
 	elif event is InputEventMouseMotion or event is InputEventMouseButton:
@@ -88,6 +179,9 @@ func _input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
+		return
+		
 	var direction := Vector2.ZERO
 
 	if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
@@ -121,6 +215,25 @@ func _physics_process(delta: float) -> void:
 		var dir_to_mouse := mouse_pos - global_position
 		if dir_to_mouse.length() > 5.0:
 			rotation = lerp_angle(rotation, dir_to_mouse.angle(), 20.0 * delta)
+	
+	# Invia stato ai peer remoti ogni _SYNC_EVERY frame
+	if multiplayer.has_multiplayer_peer():
+		_sync_tick += 1
+		if _sync_tick >= _SYNC_EVERY:
+			_sync_tick = 0
+			_send_state_to_remotes.rpc(global_position, rotation, current_height_level)
+
+
+## Riceve lo stato del giocatore remoto e lo applica (interpolato).
+@rpc("any_peer", "unreliable")
+func _send_state_to_remotes(remote_pos: Vector2, remote_rot: float, remote_level: int) -> void:
+	# Ignora se siamo noi stessi (non dovrebbe arrivare, ma per sicurezza)
+	if is_multiplayer_authority():
+		return
+	global_position = remote_pos
+	rotation = remote_rot
+	if remote_level != current_height_level:
+		change_height_level(remote_level, true)
 
 
 func _process(delta: float) -> void:
@@ -134,8 +247,8 @@ func change_height_level(new_level: int, force_update: bool = false) -> void:
 		return
 
 	var previous_level := current_height_level
-	if not force_update:
-		remove_from_group("entities_level_" + str(previous_level))
+	# Deve sempre rimuovere dal gruppo per evitare duplicazioni (es: quando si forza un aggiornamento RPC)
+	remove_from_group("entities_level_" + str(previous_level))
 
 	current_height_level = new_level
 	add_to_group("entities_level_" + str(current_height_level))
@@ -154,11 +267,24 @@ func change_height_level(new_level: int, force_update: bool = false) -> void:
 		navigation_agent.navigation_layers = 1 << current_height_level
 
 	height_level_changed.emit(current_height_level)
-	_update_level_visibility_effects()
 	if _can_apply_local_feedback():
+		_update_level_visibility_effects()
 		_trigger_screen_shake(5.0, 0.18)
 		if global_settings:
 			global_settings.call("show_subtitle_key", "subtitle_level_changed", [current_height_level + 1], 1.8)
+	else:
+		# Se è un remote player, allinea istantaneamente la sua visibilità a quella del local player
+		var local_player: Node2D = null
+		var players = get_tree().get_nodes_in_group("players")
+		for p in players:
+			if p.has_method("is_multiplayer_authority") and p.is_multiplayer_authority():
+				local_player = p
+				break
+		if not local_player and not players.is_empty():
+			local_player = players[0]
+			
+		if local_player:
+			self.visible = (self.current_height_level == local_player.current_height_level)
 
 	print("Player cambia piano: " + str(new_level) + " da piano: " + str(previous_level))
 
@@ -171,6 +297,9 @@ func _try_fire() -> void:
 
 func _try_fire_in_direction(aim_direction: Vector2) -> void:
 	if not _can_fire():
+		# Auto-ricarica se il caricatore è vuoto ma ci sono munizioni di riserva
+		if colpi_correnti <= 0 and colpi_totali > 0:
+			_try_reload()
 		return
 
 	if aim_direction.length() <= 0.001:
@@ -234,6 +363,9 @@ func _on_projectile_impact(target_path: NodePath) -> void:
 
 	if target.has_method("apply_damage"):
 		target.call_deferred("apply_damage", projectile_damage)
+	elif target.has_method("receive_damage"):
+		var source_id = multiplayer.get_unique_id() if multiplayer.has_multiplayer_peer() else 1
+		target.call_deferred("receive_damage", projectile_damage, source_id)
 
 	elif target.has_method("destroy_from_projectile"):
 		target.call_deferred("destroy_from_projectile")
@@ -254,6 +386,9 @@ func _on_projectile_impact(target_path: NodePath) -> void:
 
 func _can_fire() -> bool:
 	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
+		return false
+
+	if _is_reloading:
 		return false
 
 	if colpi_correnti <= 0:
@@ -333,6 +468,12 @@ func _is_enemy_target(target: Variant) -> bool:
 		return false
 
 	var node := target as Node
+	
+	if node is PlayerPrototype:
+		var other_team = node.team_id
+		if other_team == self.team_id:
+			return false # No friendly fire
+		return true
 
 	return (
 		node.is_in_group("enemy")
@@ -438,6 +579,8 @@ func _setup_shader_materials() -> void:
 
 
 func _update_player_position_in_shaders() -> void:
+	if not _can_apply_local_feedback():
+		return
 	var screen_pos = get_viewport().get_canvas_transform() * global_position
 
 	var camera = get_viewport().get_camera_2d()
@@ -453,6 +596,8 @@ func _update_player_position_in_shaders() -> void:
 
 
 func _update_level_visibility_effects() -> void:
+	if not _can_apply_local_feedback():
+		return
 	var current_scene = get_tree().current_scene
 	if not current_scene:
 		return
@@ -478,6 +623,8 @@ func _update_level_visibility_effects() -> void:
 
 
 func _update_entity_auras_in_shaders() -> void:
+	if not _can_apply_local_feedback():
+		return
 	var positions: Array[Vector2] = []
 	for entity in get_tree().get_nodes_in_group("entities_level_" + str(current_height_level)):
 		if entity != self and entity is Node2D:
@@ -535,23 +682,172 @@ func _collect_canvas_items(node: Node, canvas_items: Array[CanvasItem]) -> void:
 
 
 func apply_damage(amount: float) -> void:
-	vita = maxf(vita - amount, 0.0)
-	print("Player subisce ", amount, " danni. Vita rimanente: ", vita)
-	health_changed.emit(vita, vita_max)
+	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+		_apply_damage_internal(amount, 0)
+	elif not multiplayer.has_multiplayer_peer():
+		_apply_damage_internal(amount, 0)
+
+@rpc("any_peer", "call_local", "reliable")
+func receive_damage(amount: float, source_peer_id: int) -> void:
+	if not multiplayer.is_server():
+		return
+	
+	var source_player = null
+	var current_scene = get_tree().current_scene
+	if current_scene.has_node("Players"):
+		source_player = current_scene.get_node("Players").get_node_or_null(str(source_peer_id))
+	elif current_scene.has_node(str(source_peer_id)):
+		source_player = current_scene.get_node(str(source_peer_id))
+		
+	if source_player and source_player is PlayerPrototype:
+		if source_player.team_id == self.team_id:
+			return # No friendly fire
+	
+	_apply_damage_internal(amount, source_peer_id)
+
+func _apply_damage_internal(amount: float, source_peer_id: int) -> void:
 	if vita <= 0.0:
-		print("Player è morto!")
+		return
+	vita = maxf(vita - amount, 0.0)
+	print("Player ", name, " subisce ", amount, " danni da ", source_peer_id, ". Vita rimanente: ", vita)
+	_broadcast_health_update.rpc(vita, vita_max)
+	
+	if vita <= 0.0:
+		print("Player ", name, " è morto!")
+		if multiplayer.has_multiplayer_peer():
+			var map = get_tree().current_scene
+			if map.has_method("_on_player_killed"):
+				map._on_player_killed(source_peer_id, int(str(name)))
+		_die.rpc()
+
+@rpc("any_peer", "call_local", "reliable")
+func _broadcast_health_update(new_vita: float, new_vita_max: float) -> void:
+	if multiplayer.has_multiplayer_peer() and multiplayer.get_remote_sender_id() != 1 and multiplayer.get_remote_sender_id() != 0:
+		return
+	vita = new_vita
+	vita_max = new_vita_max
+	health_changed.emit(vita, vita_max)
+
+@rpc("any_peer", "call_local", "reliable")
+func _die() -> void:
+	if multiplayer.has_multiplayer_peer() and multiplayer.get_remote_sender_id() != 1 and multiplayer.get_remote_sender_id() != 0:
+		return
+	# Disattiva controlli e movimento del player locale
+	if not multiplayer.has_multiplayer_peer() or is_multiplayer_authority():
+		set_physics_process(false)
+		set_process(false)
+		set_process_unhandled_input(false)
+		set_process_input(false)
+		
+		# Disattiva collisioni
+		collision_layer = 0
+		collision_mask = 0
+		
+		# Nascondi elementi visivi (sprites) ma mantieni camera attiva per spectating
+		for child in get_children():
+			if child is CanvasItem and child != camera_2d and child.name != "InputManager":
+				child.visible = false
+				
+		var input_mgr = get_node_or_null("InputManager")
+		if input_mgr:
+			input_mgr.visible = false
+			
+		# In PvP siamo in gruppo pvp_all_players → aspetta respawn, non game over
+		if is_in_group("pvp_all_players"):
+			print("In attesa di respawn...")
+		else:
+			_show_game_over()
+
+@rpc("any_peer", "call_local", "reliable")
+func respawn(spawn_pos: Vector2, spawn_level: int) -> void:
+	if multiplayer.has_multiplayer_peer() and multiplayer.get_remote_sender_id() != 1 and multiplayer.get_remote_sender_id() != 0:
+		return
+	vita = vita_max
+	colpi_correnti = capacita_caricatore
+	colpi_totali = 90
+	global_position = spawn_pos
+	
+	health_changed.emit(vita, vita_max)
+	ammo_changed.emit(colpi_correnti, colpi_totali)
+	
+	change_height_level(spawn_level, true)
+	
+	if not multiplayer.has_multiplayer_peer() or is_multiplayer_authority():
+		set_physics_process(true)
+		set_process(true)
+		set_process_unhandled_input(true)
+		set_process_input(true)
+		
+		var layer_offset := current_height_level * 3
+		collision_layer = 1 << (1 + layer_offset)
+		var wall_bit := 1 << (0 + layer_offset)
+		var character_bit := 1 << (1 + layer_offset)
+		collision_mask = wall_bit | character_bit
+		
+		for child in get_children():
+			if child is CanvasItem and child != camera_2d and child.name != "InputManager":
+				child.visible = true
+				
+		var input_mgr = get_node_or_null("InputManager")
+		if input_mgr:
+			input_mgr.visible = true
+	
+	print("Player ", name, " respawnato a ", spawn_pos)
+
+
+func _show_game_over() -> void:
+	if get_tree().current_scene.has_node("GameOverMenu"):
+		return
+		
+	var game_over_scene = load("res://Menu/game_over_menu.tscn")
+	if game_over_scene:
+		var game_over_instance = game_over_scene.instantiate()
+		get_tree().current_scene.add_child(game_over_instance)
+		if game_over_instance.has_method("setup"):
+			game_over_instance.setup(self)
 
 
 func _try_reload() -> void:
+	if _is_reloading:
+		return
 	if colpi_correnti == capacita_caricatore or colpi_totali <= 0:
 		return
-	var da_ricaricare = capacita_caricatore - colpi_correnti
-	var effettivi = min(da_ricaricare, colpi_totali)
+
+	_is_reloading = true
+	reload_started.emit(reload_duration)
+	_play_reload_animation()
+
+	if _reload_tween and _reload_tween.is_valid():
+		_reload_tween.kill()
+	_reload_tween = create_tween()
+	_reload_tween.tween_interval(reload_duration)
+	_reload_tween.tween_callback(_finish_reload)
+
+
+func _finish_reload() -> void:
+	var da_ricaricare: int = capacita_caricatore - colpi_correnti
+	var effettivi: int = min(da_ricaricare, colpi_totali)
 	colpi_correnti += effettivi
 	colpi_totali -= effettivi
+	_is_reloading = false
 	ammo_changed.emit(colpi_correnti, colpi_totali)
 	if global_settings:
 		global_settings.call("show_subtitle_key", "subtitle_reloading", [], 1.0)
+
+
+func _play_reload_animation() -> void:
+	var weapon_sprite: AnimatedSprite2D = get_node_or_null("Arama") as AnimatedSprite2D
+	if not weapon_sprite:
+		return
+	var tw: Tween = create_tween()
+	var original_rotation: float = weapon_sprite.rotation
+	var original_scale: Vector2 = weapon_sprite.scale
+	tw.set_parallel(true)
+	tw.tween_property(weapon_sprite, "rotation", original_rotation + 0.5, reload_duration * 0.25).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	tw.tween_property(weapon_sprite, "scale", original_scale * 0.85, reload_duration * 0.25).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+	tw.chain().tween_property(weapon_sprite, "rotation", original_rotation - 0.3, reload_duration * 0.25).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
+	tw.chain().tween_property(weapon_sprite, "rotation", original_rotation, reload_duration * 0.25).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_ELASTIC)
+	tw.tween_property(weapon_sprite, "scale", original_scale, reload_duration * 0.35).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_ELASTIC).set_delay(reload_duration * 0.15)
 
 
 func heal(amount: float) -> void:

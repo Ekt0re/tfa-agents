@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.9
+- Creazione di un sistema unificato per la gestione delle missioni
+- Stabilizzazione dell'HUD
+
 ## 0.1.8
 - Bug fix
 - Migliorata stabilità del menu principale.

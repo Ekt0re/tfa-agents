@@ -204,7 +204,14 @@ func _connect_to_player() -> void:
 		return
 	var players: Array[Node] = get_tree().get_nodes_in_group("players")
 	if not players.is_empty():
-		_setup_player_connection(players[0] as Node2D)
+		var local_player: Node2D = null
+		for p in players:
+			if p.has_method("is_multiplayer_authority") and p.is_multiplayer_authority():
+				local_player = p
+				break
+		if not local_player:
+			local_player = players[0]
+		_setup_player_connection(local_player)
 	else:
 		get_tree().process_frame.connect(_connect_to_player, CONNECT_ONE_SHOT)
 
