@@ -1,0 +1,1 @@
+Manages all game UI screens, in-game HUD elements, and settings configuration, coordinating scene transitions and global state synchronization.

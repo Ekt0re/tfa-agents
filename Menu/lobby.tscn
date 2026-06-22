@@ -58,6 +58,23 @@ unique_name_in_owner = true
 text = "In attesa..."
 horizontal_alignment = 1
 
+[node name="GameModePanel" type="PanelContainer" parent="MainLayout/LeftPanel"]
+custom_minimum_size = Vector2(0, 60)
+
+[node name="GameModePanelMargin" type="MarginContainer" parent="MainLayout/LeftPanel/GameModePanel"]
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="GameModeVBox" type="VBoxContainer" parent="MainLayout/LeftPanel/GameModePanel/GameModePanelMargin"]
+
+[node name="GameModeInfoLabel" type="Label" parent="MainLayout/LeftPanel/GameModePanel/GameModePanelMargin/GameModeVBox"]
+unique_name_in_owner = true
+text = "Modalità: Deathmatch | Respawn: SÌ (3.0s)"
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+
 [node name="ButtonsRow" type="HBoxContainer" parent="MainLayout/LeftPanel"]
 theme_override_constants/separation = 12
 
@@ -79,6 +96,11 @@ unique_name_in_owner = true
 text = "▶ AVVIA PARTITA"
 custom_minimum_size = Vector2(180, 44)
 disabled = true
+
+[node name="EditSettingsButton" type="Button" parent="MainLayout/LeftPanel/ButtonsRow"]
+unique_name_in_owner = true
+text = "lobby_edit_settings"
+custom_minimum_size = Vector2(160, 44)
 
 [node name="RightPanel" type="VBoxContainer" parent="MainLayout"]
 size_flags_horizontal = 3
@@ -123,8 +145,73 @@ unique_name_in_owner = true
 text = "Invia"
 custom_minimum_size = Vector2(70, 36)
 
+[node name="AdvancedSettingsPopup" type="AcceptDialog" parent="."]
+unique_name_in_owner = true
+title = "advanced_settings_title"
+
+[node name="PopupMargin" type="MarginContainer" parent="AdvancedSettingsPopup"]
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="PopupVBox" type="VBoxContainer" parent="AdvancedSettingsPopup/PopupMargin"]
+theme_override_constants/separation = 14
+
+[node name="PortLabel" type="Label" parent="AdvancedSettingsPopup/PopupMargin/PopupVBox"]
+text = "port_label"
+
+[node name="HostPortField" type="LineEdit" parent="AdvancedSettingsPopup/PopupMargin/PopupVBox"]
+unique_name_in_owner = true
+text = "7777"
+custom_minimum_size = Vector2(0, 38)
+
+[node name="MaxPlayersLabel" type="Label" parent="AdvancedSettingsPopup/PopupMargin/PopupVBox"]
+unique_name_in_owner = true
+text = "max_players_label"
+
+[node name="MaxPlayersSlider" type="HSlider" parent="AdvancedSettingsPopup/PopupMargin/PopupVBox"]
+unique_name_in_owner = true
+min_value = 2.0
+max_value = 20.0
+step = 1.0
+value = 12.0
+custom_minimum_size = Vector2(0, 30)
+
+[node name="TeamModeLabel" type="Label" parent="AdvancedSettingsPopup/PopupMargin/PopupVBox"]
+text = "mode_teams"
+
+[node name="TeamModeOption" type="OptionButton" parent="AdvancedSettingsPopup/PopupMargin/PopupVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
+
+[node name="TeamCountLabel" type="Label" parent="AdvancedSettingsPopup/PopupMargin/PopupVBox"]
+text = "team_count_label"
+
+[node name="TeamCountSpin" type="SpinBox" parent="AdvancedSettingsPopup/PopupMargin/PopupVBox"]
+unique_name_in_owner = true
+min_value = 2.0
+max_value = 10.0
+value = 2.0
+
+[node name="RespawnTimeLabel" type="Label" parent="AdvancedSettingsPopup/PopupMargin/PopupVBox"]
+unique_name_in_owner = true
+text = "respawn_time_setting_label"
+
+[node name="RespawnTimeSlider" type="HSlider" parent="AdvancedSettingsPopup/PopupMargin/PopupVBox"]
+unique_name_in_owner = true
+min_value = 1.0
+max_value = 10.0
+step = 0.5
+value = 3.0
+custom_minimum_size = Vector2(0, 30)
+
 [connection signal="pressed" from="MainLayout/LeftPanel/ButtonsRow/BackButton" to="." method="_on_back_button_pressed"]
 [connection signal="pressed" from="MainLayout/LeftPanel/ButtonsRow/ReadyButton" to="." method="_on_ready_button_pressed"]
 [connection signal="pressed" from="MainLayout/LeftPanel/ButtonsRow/StartButton" to="." method="_on_start_button_pressed"]
+[connection signal="pressed" from="MainLayout/LeftPanel/ButtonsRow/EditSettingsButton" to="." method="_on_edit_settings_button_pressed"]
+[connection signal="value_changed" from="AdvancedSettingsPopup/PopupMargin/PopupVBox/MaxPlayersSlider" to="." method="_on_max_players_slider_value_changed"]
+[connection signal="item_selected" from="AdvancedSettingsPopup/PopupMargin/PopupVBox/TeamModeOption" to="." method="_on_team_mode_option_item_selected"]
+[connection signal="value_changed" from="AdvancedSettingsPopup/PopupMargin/PopupVBox/RespawnTimeSlider" to="." method="_on_respawn_time_slider_value_changed"]
 [connection signal="pressed" from="MainLayout/RightPanel/ChatInputRow/SendChatButton" to="." method="_on_send_chat_button_pressed"]
 [connection signal="text_submitted" from="MainLayout/RightPanel/ChatInputRow/ChatInput" to="." method="_on_chat_input_text_submitted"]

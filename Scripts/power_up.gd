@@ -135,53 +135,62 @@ func _on_body_entered(body: Node2D) -> void:
 		return
 		
 	if body.is_in_group("players") or body.name == "Player":
-		# Emetti il segnale globale (passando il livello come parametro)
-		GameEvents.powerup_collected.emit(type, livello)
+		# Solo il server gestisce la scomparsa logica del power up
+		# Oppure se l'oggetto locale distrugge se stesso
 		
-		# Applica gli effetti locali (se applicabile direttamente al body)
+		# Emetti il segnale globale solo per l'authority
+		if _is_local_authority(body):
+			GameEvents.powerup_collected.emit(type, livello)
+			
+		# Applica gli effetti al player specifico che ha raccolto il power up
 		apply_effect(body)
-		
-		# Distruggi il powerup
+			
+		# Distruggi il powerup localmente e per tutti (via spawner se previsto)
 		queue_free()
 
+func _is_local_authority(body: Node2D) -> bool:
+	if not multiplayer.has_multiplayer_peer(): return true
+	if body.has_method("is_multiplayer_authority") and body.is_multiplayer_authority():
+		return true
+	return false
+
 func apply_effect(player: Node2D) -> void:
-	# Qui va la logica per applicare l'effetto direttamente al giocatore
-	# Ad esempio, chiamare metodi sul player in base al tipo di bonus
-	# Nota: Il bonus ora e' fisso e non dipende dal 'livello' poiche' indica il piano
 	match type:
 		PowerUpType.HEAL:
-			if player.has_method("heal"):
-				player.heal(10) # Valore base
-			print("Debug [PowerUp]: Raccogli Cura (+10 HP)")
-			if GlobalSettings.has_method("show_subtitle"):
-				GlobalSettings.show_subtitle(tr("POWERUP_COLLECTED_HEAL"))
+			if multiplayer.has_multiplayer_peer():
+				if player.has_method("rpc_heal"):
+					player.rpc_heal(10)
+			else:
+				if player.has_method("heal"):
+					player.heal(10)
+			_show_subtitle_if_local(player, "POWERUP_COLLECTED_HEAL")
 		PowerUpType.AMMO:
-			if player.has_method("add_ammo"):
-				player.add_ammo(5)
-			print("Debug [PowerUp]: Raccogli Munizioni (+5)")
-			if GlobalSettings.has_method("show_subtitle"):
-				GlobalSettings.show_subtitle(tr("POWERUP_COLLECTED_AMMO"))
+			if multiplayer.has_multiplayer_peer():
+				if player.has_method("rpc_add_ammo"):
+					player.rpc_add_ammo(5)
+			else:
+				if player.has_method("add_ammo"):
+					player.add_ammo(5)
+			_show_subtitle_if_local(player, "POWERUP_COLLECTED_AMMO")
 		PowerUpType.MONEY:
-			if player.has_method("add_money"):
-				player.add_money(10)
-			print("Debug [PowerUp]: Raccogli Crediti (+10)")
-			if GlobalSettings.has_method("show_subtitle"):
-				GlobalSettings.show_subtitle(tr("POWERUP_COLLECTED_MONEY"))
+			if multiplayer.has_multiplayer_peer():
+				if player.has_method("rpc_add_money"):
+					player.rpc_add_money(10)
+			else:
+				if player.has_method("add_money"):
+					player.add_money(10)
+			_show_subtitle_if_local(player, "POWERUP_COLLECTED_MONEY")
 		PowerUpType.CHEST:
-			# Implementare la logica di cambio arma
-			print("Debug [PowerUp]: Raccogli Cassa Armi (Cambio Arma)")
-			if GlobalSettings.has_method("show_subtitle"):
-				GlobalSettings.show_subtitle(tr("POWERUP_COLLECTED_CHEST"))
+			_show_subtitle_if_local(player, "POWERUP_COLLECTED_CHEST")
 		PowerUpType.STAR:
-			# Implementare la logica per sbloccare collezionabili
-			print("Debug [PowerUp]: Raccogli Stella (Collezionabile Sbloccato)")
-			if GlobalSettings.has_method("show_subtitle"):
-				GlobalSettings.show_subtitle(tr("POWERUP_COLLECTED_STAR"))
+			_show_subtitle_if_local(player, "POWERUP_COLLECTED_STAR")
 		PowerUpType.MYSTERY:
-			# Effetto misterioso
-			print("Debug [PowerUp]: Raccogli Mistero (Effetto Sconosciuto)")
-			if GlobalSettings.has_method("show_subtitle"):
-				GlobalSettings.show_subtitle(tr("POWERUP_COLLECTED_MYSTERY"))
+			_show_subtitle_if_local(player, "POWERUP_COLLECTED_MYSTERY")
+
+func _show_subtitle_if_local(player: Node2D, text_key: String) -> void:
+	if _is_local_authority(player):
+		if GlobalSettings.has_method("show_subtitle"):
+			GlobalSettings.show_subtitle(tr(text_key))
 
 # ---------------------------------------------------------------------------
 # Gestione Piani (Ispirata a mina.gd)

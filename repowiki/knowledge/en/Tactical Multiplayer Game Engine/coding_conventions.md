@@ -1,0 +1,2 @@
+- Scripts use explicit UID tracking (`.uid` sidecar files) for robust resource referencing across the project.
+- Localization is managed via CSV source files (`translations.csv`) compiled into engine-specific `.translation` resources for English and Italian.

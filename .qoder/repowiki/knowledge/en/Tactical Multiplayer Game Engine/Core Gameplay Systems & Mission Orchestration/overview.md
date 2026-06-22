@@ -1,0 +1,1 @@
+Manages asynchronous resource loading, multi-layered entity interactions, mission flow execution, and global application settings.

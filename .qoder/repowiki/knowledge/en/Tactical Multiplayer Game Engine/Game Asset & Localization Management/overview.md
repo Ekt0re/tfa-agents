@@ -1,0 +1,1 @@
+Manages visual, audio, and UI resources alongside bilingual localization data for the game client.

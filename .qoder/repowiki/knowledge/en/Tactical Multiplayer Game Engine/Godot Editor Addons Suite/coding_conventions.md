@@ -1,0 +1,3 @@
+- Plugins use the `@tool` annotation on entry-point scripts to enable editor-time functionality and UI rendering.
+- Custom node types are registered in `_enter_tree()` and cleaned up in `_exit_tree()` using `add_custom_type()` and `remove_custom_type()`.
+- UI components in the mission editor are constructed programmatically via code rather than using `.tscn` scene files for the main dock interface.

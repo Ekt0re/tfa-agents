@@ -52,46 +52,27 @@ custom_minimum_size = Vector2(0, 40)
 
 [node name="TabContainer" type="TabContainer" parent="MainMargin/Card/CardMargin/VBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 300)
+custom_minimum_size = Vector2(0, 200)
 
 [node name="Crea Lobby" type="VBoxContainer" parent="MainMargin/Card/CardMargin/VBox/TabContainer"]
 theme_override_constants/separation = 14
 
-[node name="PortaLabel" type="Label" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby"]
-text = "Porta"
+[node name="GameModeLabel" type="Label" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby"]
+text = "Modalità di gioco"
 
-[node name="HostPortField" type="LineEdit" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby"]
-unique_name_in_owner = true
-text = "7777"
-custom_minimum_size = Vector2(0, 38)
-
-[node name="MaxPlayersLabel" type="Label" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby"]
-unique_name_in_owner = true
-text = "12"
-
-[node name="MaxPlayersSlider" type="HSlider" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby"]
-unique_name_in_owner = true
-min_value = 2.0
-max_value = 20.0
-step = 1.0
-value = 12.0
-custom_minimum_size = Vector2(0, 30)
-
-[node name="TeamModeLabel" type="Label" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby"]
-text = "Modalità"
-
-[node name="TeamModeOption" type="OptionButton" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby"]
+[node name="GameModeOption" type="OptionButton" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 38)
 
-[node name="TeamCountLabel" type="Label" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby"]
-text = "Numero squadre"
-
-[node name="TeamCountSpin" type="SpinBox" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby"]
+[node name="RespawnCheckbox" type="CheckBox" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby"]
 unique_name_in_owner = true
-min_value = 2.0
-max_value = 10.0
-value = 2.0
+text = "Abilita Respawn"
+button_pressed = true
+
+[node name="AdvancedSettingsButton" type="Button" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby"]
+unique_name_in_owner = true
+text = "advanced_settings_button"
+custom_minimum_size = Vector2(0, 40)
 
 [node name="CreateButton" type="Button" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby"]
 unique_name_in_owner = true
@@ -117,6 +98,16 @@ unique_name_in_owner = true
 text = "7777"
 custom_minimum_size = Vector2(0, 38)
 
+[node name="DiscoverButton" type="Button" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Unisciti"]
+unique_name_in_owner = true
+text = "🔍 CERCA SERVER SULLA RETE"
+custom_minimum_size = Vector2(0, 40)
+
+[node name="ServersContainer" type="VBoxContainer" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Unisciti"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+size_flags_vertical = 3
+
 [node name="JoinButton" type="Button" parent="MainMargin/Card/CardMargin/VBox/TabContainer/Unisciti"]
 unique_name_in_owner = true
 text = "CONNETTI"
@@ -128,13 +119,78 @@ custom_minimum_size = Vector2(0, 20)
 horizontal_alignment = 1
 autowrap_mode = 3
 
+[node name="AdvancedSettingsPopup" type="AcceptDialog" parent="."]
+unique_name_in_owner = true
+title = "advanced_settings_title"
+
+[node name="PopupMargin" type="MarginContainer" parent="AdvancedSettingsPopup"]
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="PopupVBox" type="VBoxContainer" parent="AdvancedSettingsPopup/PopupMargin"]
+theme_override_constants/separation = 14
+
+[node name="PortLabel" type="Label" parent="AdvancedSettingsPopup/PopupMargin/PopupVBox"]
+text = "port_label"
+
+[node name="HostPortField" type="LineEdit" parent="AdvancedSettingsPopup/PopupMargin/PopupVBox"]
+unique_name_in_owner = true
+text = "7777"
+custom_minimum_size = Vector2(0, 38)
+
+[node name="MaxPlayersLabel" type="Label" parent="AdvancedSettingsPopup/PopupMargin/PopupVBox"]
+unique_name_in_owner = true
+text = "max_players_label"
+
+[node name="MaxPlayersSlider" type="HSlider" parent="AdvancedSettingsPopup/PopupMargin/PopupVBox"]
+unique_name_in_owner = true
+min_value = 2.0
+max_value = 20.0
+step = 1.0
+value = 12.0
+custom_minimum_size = Vector2(0, 30)
+
+[node name="TeamModeLabel" type="Label" parent="AdvancedSettingsPopup/PopupMargin/PopupVBox"]
+text = "mode_teams"
+
+[node name="TeamModeOption" type="OptionButton" parent="AdvancedSettingsPopup/PopupMargin/PopupVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
+
+[node name="TeamCountLabel" type="Label" parent="AdvancedSettingsPopup/PopupMargin/PopupVBox"]
+text = "team_count_label"
+
+[node name="TeamCountSpin" type="SpinBox" parent="AdvancedSettingsPopup/PopupMargin/PopupVBox"]
+unique_name_in_owner = true
+min_value = 2.0
+max_value = 10.0
+value = 2.0
+
+[node name="RespawnTimeLabel" type="Label" parent="AdvancedSettingsPopup/PopupMargin/PopupVBox"]
+unique_name_in_owner = true
+text = "respawn_time_setting_label"
+
+[node name="RespawnTimeSlider" type="HSlider" parent="AdvancedSettingsPopup/PopupMargin/PopupVBox"]
+unique_name_in_owner = true
+min_value = 1.0
+max_value = 10.0
+step = 0.5
+value = 3.0
+custom_minimum_size = Vector2(0, 30)
+
 [node name="BackButton" type="Button" parent="MainMargin/Card/CardMargin/VBox"]
 unique_name_in_owner = true
 text = "← Indietro"
 custom_minimum_size = Vector2(0, 40)
 
-[connection signal="value_changed" from="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby/MaxPlayersSlider" to="." method="_on_max_players_slider_value_changed"]
-[connection signal="item_selected" from="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby/TeamModeOption" to="." method="_on_team_mode_option_item_selected"]
+[connection signal="value_changed" from="AdvancedSettingsPopup/PopupMargin/PopupVBox/MaxPlayersSlider" to="." method="_on_max_players_slider_value_changed"]
+[connection signal="item_selected" from="AdvancedSettingsPopup/PopupMargin/PopupVBox/TeamModeOption" to="." method="_on_team_mode_option_item_selected"]
+[connection signal="item_selected" from="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby/GameModeOption" to="." method="_on_game_mode_option_item_selected"]
+[connection signal="value_changed" from="AdvancedSettingsPopup/PopupMargin/PopupVBox/RespawnTimeSlider" to="." method="_on_respawn_time_slider_value_changed"]
+[connection signal="pressed" from="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby/AdvancedSettingsButton" to="." method="_on_advanced_settings_button_pressed"]
 [connection signal="pressed" from="MainMargin/Card/CardMargin/VBox/TabContainer/Crea Lobby/CreateButton" to="." method="_on_create_button_pressed"]
+[connection signal="pressed" from="MainMargin/Card/CardMargin/VBox/TabContainer/Unisciti/DiscoverButton" to="." method="_on_discover_button_pressed"]
 [connection signal="pressed" from="MainMargin/Card/CardMargin/VBox/TabContainer/Unisciti/JoinButton" to="." method="_on_join_button_pressed"]
 [connection signal="pressed" from="MainMargin/Card/CardMargin/VBox/BackButton" to="." method="_on_back_button_pressed"]

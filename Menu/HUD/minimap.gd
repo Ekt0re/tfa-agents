@@ -60,39 +60,38 @@ func _draw() -> void:
 	])
 	draw_colored_polygon(points, player_color)
 
-	# Trova tutti i nemici
-	var enemies = get_tree().get_nodes_in_group("team_2")
-	for enemy in enemies:
-		if not is_instance_valid(enemy) or not enemy is Node2D:
+	# Trova tutti i giocatori in multiplayer e i nemici in singleplayer
+	var all_entities: Array[Node] = []
+	all_entities.append_array(get_tree().get_nodes_in_group("pvp_all_players"))
+	all_entities.append_array(get_tree().get_nodes_in_group("team_2")) # Singleplayer
+	all_entities.append_array(get_tree().get_nodes_in_group("team_1")) # Singleplayer
+	
+	for entity in all_entities:
+		if not is_instance_valid(entity) or not entity is Node2D or entity == player:
 			continue
-
-		# Height filtering (solo High/Ultra)
-		if _quality_level >= 2 and "current_height_level" in enemy and "current_height_level" in player:
-			if enemy.current_height_level != player.current_height_level:
+			
+		# Height filtering
+		if "current_height_level" in entity and "current_height_level" in player:
+			if entity.current_height_level != player.current_height_level:
 				continue
-
-		var offset = (enemy.global_position - player.global_position) * scale_factor
-		var enemy_pos = center + offset
-
-		if enemy_pos.x > 3.0 and enemy_pos.x < map_size.x - 3.0 and enemy_pos.y > 3.0 and enemy_pos.y < map_size.y - 3.0:
-			draw_circle(enemy_pos, 3.5, enemy_color)
-
-	# Trova tutti gli amici
-	var friends = get_tree().get_nodes_in_group("team_1")
-	for friend in friends:
-		if not is_instance_valid(friend) or not friend is Node2D:
-			continue
-
-		if _quality_level >= 2 and "current_height_level" in friend and "current_height_level" in player:
-			if friend.current_height_level != player.current_height_level:
-				continue
-
-		var offset = (friend.global_position - player.global_position) * scale_factor
-		var friend_pos = center + offset
-
-		if friend_pos.x > 3.0 and friend_pos.x < map_size.x - 3.0 and friend_pos.y > 3.0 and friend_pos.y < map_size.y - 3.0:
-			draw_circle(friend_pos, 3.5, friend_color)
-
+				
+		var is_friend = false
+		if entity.is_in_group("team_1"):
+			is_friend = true
+		elif "team_id" in entity and "team_id" in player:
+			# Se sono in squadra insieme, ed e' una modalità a squadre (> 0), sono amici
+			if entity.team_id == player.team_id and player.team_id != 0:
+				var mp_man = get_node_or_null("/root/MultiplayerManager")
+				if mp_man and mp_man.get("team_mode") == "teams":
+					is_friend = true
+				
+		var color = friend_color if is_friend else enemy_color
+		
+		var offset = (entity.global_position - player.global_position) * scale_factor
+		var entity_pos = center + offset
+		if entity_pos.x > 3.0 and entity_pos.x < map_size.x - 3.0 and entity_pos.y > 3.0 and entity_pos.y < map_size.y - 3.0:
+			draw_circle(entity_pos, 3.5, color)
+			
 	# Trova tutti gli Item
 	var items = get_tree().get_nodes_in_group("item")
 	for item in items:

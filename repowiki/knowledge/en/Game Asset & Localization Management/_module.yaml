@@ -1,0 +1,12 @@
+schema_version: 1
+module_path: game_assets
+title: Game Asset & Localization Management
+scope:
+    - Assets/
+    - Locale/
+source_files: []
+depends_on: []
+related_to:
+    - path: ui_menus
+    - path: levels_and_scenes
+    - path: game_core

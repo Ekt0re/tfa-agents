@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://server_disconnect_menu"]
+
+[ext_resource type="Script" path="res://Menu/server_disconnect_menu.gd" id="1_script"]
+
+[node name="ServerDisconnectMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_script")
+
+[node name="BG" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.1, 0.05, 0.05, 0.9)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBox" type="VBoxContainer" parent="CenterContainer"]
+theme_override_constants/separation = 24
+
+[node name="TitleLabel" type="Label" parent="CenterContainer/VBox"]
+text = "SERVER DISCONNESSO"
+theme_override_font_sizes/font_size = 48
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+horizontal_alignment = 1
+
+[node name="MessageLabel" type="Label" parent="CenterContainer/VBox"]
+text = "L'host si è disconnesso dalla partita."
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+horizontal_alignment = 1
+
+[node name="ReturnButton" type="Button" parent="CenterContainer/VBox"]
+text = "TORNA AL MENU"
+custom_minimum_size = Vector2(200, 50)
+theme_override_font_sizes/font_size = 20

@@ -1,0 +1,12 @@
+schema_version: 1
+module_path: levels_and_scenes
+title: Level Layout & Scene Composition
+scope:
+    - Maps/
+    - Scenes/
+source_files: []
+depends_on: []
+related_to:
+    - path: game_core
+    - path: game_assets
+    - path: shaders

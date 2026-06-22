@@ -96,9 +96,38 @@ game_over_subtitle,La tua partita è terminata.,Your match has ended.
 game_over_restart_checkpoint,Ricomincia dal checkpoint,Restart from checkpoint
 game_over_restart_begin,Ricomincia dall'inizio,Restart from beginning
 game_over_main_menu,Menu principale,Main menu
+game_over_respawn_title,RESPAWN IN CORSO,RESPAWNING
+game_over_respawn_countdown,Tornerai in gioco tra %d...,Returning to game in %d...
 game_over_spectator_title,MODALITÀ SPETTATORE,SPECTATOR MODE
 game_over_spectating,Stai osservando: %s,Spectating: %s
 game_over_spectating_no_players,Nessun giocatore rimasto in vita.,No players left alive.
 game_over_prev,< Prec,< Prev
 game_over_next,Succ >,Next >
 game_over_lobby,Torna alla lobby,Return to lobby
+game_mode_label,Modalità di gioco,Game mode
+game_mode_deathmatch,Deathmatch,Deathmatch
+game_mode_gun_match,Gun Match,Gun Match
+game_mode_player_vs_bot,Player vs Bot,Player vs Bot
+game_mode_team_battle,Battaglia a Squadre,Team Battle
+game_mode_capture_flag,Cattura la Bandiera,Capture the Flag
+game_mode_team_gun_match,Gun Match a Squadre,Team Gun Match
+respawn_checkbox,Abilita Respawn,Enable Respawn
+respawn_time_label,Tempo respawn: %.1fs,Respawn time: %.1fs
+mode_teams,A squadre,Teams
+mode_ffa,Tutti contro tutti (FFA),All vs All (FFA)
+team_count_label,Numero squadre,Number of teams
+lobby_game_mode_info,Modalità: %s %s | Respawn: %s,Mode: %s %s | Respawn: %s
+respawn_yes,SÌ (%.1fs),YES (%.1fs)
+respawn_no,NO,NO
+advanced_settings_button,⚙️ Impostazioni Avanzate,⚙️ Advanced Settings
+advanced_settings_title,Impostazioni Avanzate,Advanced Settings
+port_label,Porta,Port
+max_players_label,Giocatori massimi,Max players
+respawn_time_setting_label,Tempo respawn: %.1fs,Respawn time: %.1fs
+lobby_edit_settings,Modifica Impostazioni,Edit Settings
+lobby_players_connected,%d giocatori connessi,%d players connected
+lobby_player_disconnected,Un giocatore si è disconnesso.,A player has disconnected.
+lobby_map_selected,Mappa selezionata: %s,Map selected: %s
+lobby_waiting,In attesa...,Waiting...
+version_label,📦 Versione: %s,📦 Version: %s
+version_mismatch,Versione incompatibile! Host: %s, Tuo client: %s,Version mismatch! Host: %s, Your client: %s

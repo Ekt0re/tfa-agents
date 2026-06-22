@@ -1,0 +1,1 @@
+Defines multi-layered game maps and reusable scene components using Godot's node-based architecture.

@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://c7bf583nwd1gy" path="res://addons/virtual_joystick_plus/resources/textures/joystick_texture_4.png" id="4_dunbb"]
 
 [node name="InputManager" type="CanvasLayer" unique_id=2080147043]
+layer = 2
 
 [node name="left_stick" type="Control" parent="." unique_id=1736506250]
 visible = false

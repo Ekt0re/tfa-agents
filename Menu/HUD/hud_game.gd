@@ -10,6 +10,7 @@ signal quality_changed(level: int)
 @onready var subtitle_panel: PanelContainer = %SubtitlePanel
 @onready var subtitle_label: Label = %SubtitleLabel
 @onready var pause_btn: Button = %PauseBtn
+@onready var scoreboard_label: Label = %ScoreboardLabel
 @onready var _top_left: MarginContainer = $HUD/TopLeft
 
 var player: CharacterBody2D = null
@@ -34,8 +35,16 @@ func _ready() -> void:
 
 	# Connessione al player
 	var players = get_tree().get_nodes_in_group("players")
-	if not players.is_empty():
-		_setup_player(players[0])
+	var local_player: Node2D = null
+	for p in players:
+		if p.has_method("is_multiplayer_authority") and p.is_multiplayer_authority():
+			local_player = p
+			break
+	if not local_player and not players.is_empty():
+		local_player = players[0]
+		
+	if local_player:
+		_setup_player(local_player)
 	else:
 		get_tree().node_added.connect(_on_node_added)
 
@@ -59,7 +68,10 @@ func _ready() -> void:
 
 func _on_node_added(node: Node) -> void:
 	if node.is_in_group("players") and node is CharacterBody2D:
-		_setup_player(node)
+		if node.has_method("is_multiplayer_authority") and node.is_multiplayer_authority():
+			_setup_player(node)
+			if get_tree().node_added.is_connected(_on_node_added):
+				get_tree().node_added.disconnect(_on_node_added)
 
 func _setup_player(p: CharacterBody2D) -> void:
 	player = p
@@ -129,6 +141,14 @@ func _on_subtitle_requested(message: String, duration: float) -> void:
 			subtitle_label.text = message
 			subtitle_panel.visible = true
 			_subtitle_time_left = duration
+
+func update_scoreboard(text: String) -> void:
+	if scoreboard_label:
+		if text.is_empty():
+			scoreboard_label.visible = false
+		else:
+			scoreboard_label.text = text
+			scoreboard_label.visible = true
 
 func _on_pause_pressed() -> void:
 	# Simula la pressione dell'azione pause_game per attivare il menu di pausa

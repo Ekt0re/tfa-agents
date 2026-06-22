@@ -1,0 +1,3 @@
+- Organized into domain-specific subdirectories (Animation, Audio, UI, Lighting) containing Godot engine resource files (.tres, .import).
+- Centralized UI styling via `Assets/UI/global_theme.tres`, defining consistent StyleBoxFlat properties for buttons, panels, and inputs.
+- Bilingual support (Italian/English) implemented through CSV-based translation tables in `Locale/`, linked to Godot's localization system via `.translation` files.

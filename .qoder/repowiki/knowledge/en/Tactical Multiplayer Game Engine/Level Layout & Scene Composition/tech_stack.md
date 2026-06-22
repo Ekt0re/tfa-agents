@@ -1,0 +1,1 @@
+Godot Engine 4.x (TSCN format 3/4), utilizing `NavigationPolygon` for AI pathfinding and `ShaderMaterial` for visual effects in scenes.

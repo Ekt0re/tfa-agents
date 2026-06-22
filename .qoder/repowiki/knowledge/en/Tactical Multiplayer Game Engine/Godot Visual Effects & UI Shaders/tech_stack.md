@@ -1,0 +1,1 @@
+Godot Engine shading language (GLSL ES 3.0 subset) utilizing `canvas_item` render mode and built-in uniforms like `TIME`, `UV`, and `FRAGCOORD`.

@@ -1,0 +1,11 @@
+schema_version: 1
+module_path: ui_menus
+title: User Interface & Menu System
+scope:
+    - Menu/
+source_files: []
+depends_on: []
+related_to:
+    - path: game_core
+    - path: shaders
+    - path: game_assets

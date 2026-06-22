@@ -1,0 +1,2 @@
+- Sprite sheet animations use zero-padded sequential numbering (e.g., 0001.png) for frame ordering.
+- UI theme definitions utilize StyleBoxFlat with consistent corner radius and border color palettes across control states.

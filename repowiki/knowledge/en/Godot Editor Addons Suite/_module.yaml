@@ -1,0 +1,10 @@
+schema_version: 1
+module_path: editor_addons
+title: Godot Editor Addons Suite
+scope:
+    - addons/
+source_files: []
+depends_on: []
+related_to:
+    - path: game_core
+    - path: shaders

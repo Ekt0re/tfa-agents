@@ -1,0 +1,3 @@
+- UI scripts use `@onready` annotations to cache node references and `_refresh_texts()` methods to apply localization via `tr()` keys whenever the language changes.
+- Interactive menus implement `_unhandled_input(event)` to capture specific actions (like `pause_game`) and toggle visibility or navigate back, ensuring input is consumed via `get_viewport().set_input_as_handled()`.
+- Graphics-intensive UI elements (Minimap, Health Bar) query the `graphics_preset` from GlobalSettings and adjust rendering details (shaders, background drawing) based on quality levels 0–3.

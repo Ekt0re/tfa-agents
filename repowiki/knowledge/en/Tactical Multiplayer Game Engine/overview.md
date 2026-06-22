@@ -1,0 +1,1 @@
+Orchestrates a Godot-based tactical shooter by integrating core gameplay logic, UI systems, and level data through a shared global state and event-driven architecture.

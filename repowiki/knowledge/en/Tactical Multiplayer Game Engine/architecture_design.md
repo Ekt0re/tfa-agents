@@ -1,0 +1,4 @@
+- Centralized State Management: The `Global.tscn` scene and `global_settings.gd` script serve as the single source of truth for game state, persisting across scene transitions between menus, levels, and gameplay.
+- Event-Driven Communication: Decoupled interaction between subsystems (e.g., mission progress triggering UI updates) is achieved through a global event bus pattern implemented in `game_events.gd`.
+- Addon Integration: Editor-side tooling (mission editor, shader previewer) extends the development workflow while remaining isolated from the runtime build via the `addons/` directory structure.
+- Resource Orchestration: A dedicated `resource_preloader.gd` manages asynchronous loading of assets and scenes to ensure smooth transitions between the menu system and active game levels.

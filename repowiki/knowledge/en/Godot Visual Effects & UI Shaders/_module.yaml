@@ -1,0 +1,11 @@
+schema_version: 1
+module_path: shaders
+title: Godot Visual Effects & UI Shaders
+scope:
+    - Shaders/
+source_files: []
+depends_on: []
+related_to:
+    - path: ui_menus
+    - path: editor_addons
+    - path: levels_and_scenes

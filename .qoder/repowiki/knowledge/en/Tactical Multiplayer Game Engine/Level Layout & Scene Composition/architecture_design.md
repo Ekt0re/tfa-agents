@@ -1,0 +1,4 @@
+- **Map Structure**: Maps (`dev_map.tscn`, `pvp_map.tscn`) are organized into vertical layers (L0, L1, L2) using `Node2D` containers, each with dedicated `TileMapLayer` nodes for ground and walls.
+- **Navigation**: Each layer utilizes a `NavigationRegion2D` linked to pre-baked `NavigationPolygon` resources in `Maps/Nav1/`, sourced from geometry groups like `nav_source_l0`.
+- **Scene Reusability**: Common interactive elements (ramps, power-ups) are encapsulated as standalone `.tscn` files in `Scenes/` and instantiated within maps via `ExtResource` references.
+- **Scripting Boundaries**: Map-specific logic (lighting, tutorials) is attached via external GDScript resources, while scene components (e.g., `power_up.tscn`) embed their own behavior scripts and shader materials.

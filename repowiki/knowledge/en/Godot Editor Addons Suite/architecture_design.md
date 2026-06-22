@@ -1,0 +1,4 @@
+- The module is structured as three isolated leaf plugins (`mission_editor`, `shader-previewer`, `virtual_joystick_plus`), each adhering to the standard Godot addon layout with a `plugin.cfg` manifest and a root `EditorPlugin` script.
+- `mission_editor` implements a Dialogic-style visual editor using a programmatic `GraphEdit` UI (`editor_main.gd`) that manipulates `MissionFlow` resources and registers a `CheckPoint` custom type and `MissionFlowPlayer` autoload.
+- `shader-previewer` employs a reflective approach to inject a preview dock into the engine's internal `TextShaderEditor`, supporting both docked and floating modes with 3D mesh visualization capabilities.
+- `virtual_joystick_plus` provides a runtime `Control` node (`VirtualJoystickPlus`) that handles multi-touch input events to simulate analog stick behavior, registered as a custom type for easy scene integration.

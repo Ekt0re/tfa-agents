@@ -1,0 +1,3 @@
+- Time-based animations are implemented using the global `TIME` uniform combined with a configurable `time_scale` or `speed` uniform to allow runtime control over pulse, sweep, or breathing effects.
+- Visual thresholds and ranges are constrained using `hint_range` metadata on uniform declarations to provide intuitive editor sliders for designers (e.g., `hint_range(0.0, 1.0)`).
+- Procedural patterns such as grids, rings, and cracks are generated using mathematical functions like `sin`, `fract`, `smoothstep`, and Voronoi noise algorithms rather than relying on static texture assets.

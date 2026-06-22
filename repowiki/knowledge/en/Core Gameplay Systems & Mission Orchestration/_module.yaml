@@ -1,0 +1,13 @@
+schema_version: 1
+module_path: game_core
+title: Core Gameplay Systems & Mission Orchestration
+scope:
+    - Scripts/
+    - Game/
+source_files: []
+depends_on: []
+related_to:
+    - path: ui_menus
+    - path: editor_addons
+    - path: levels_and_scenes
+    - path: game_assets

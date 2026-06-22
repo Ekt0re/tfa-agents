@@ -101,7 +101,14 @@ func _on_main_menu_pressed() -> void:
 		get_tree().paused = false
 	_menu_is_open = false
 	main_menu_requested.emit()
-	if not main_menu_scene_path.is_empty():
+	
+	if multiplayer.has_multiplayer_peer():
+		var mp_man = get_node_or_null("/root/MultiplayerManager")
+		if mp_man and mp_man.has_method("leave_current_match"):
+			mp_man.leave_current_match()
+		else:
+			get_tree().change_scene_to_file("res://Menu/lobby.tscn")
+	elif not main_menu_scene_path.is_empty():
 		get_tree().change_scene_to_file(main_menu_scene_path)
 
 
@@ -116,7 +123,10 @@ func _refresh_texts() -> void:
 	_title_label.text = tr("pause_title")
 	_resume_button.text = tr("pause_resume")
 	_settings_button.text = tr("pause_settings")
-	_main_menu_button.text = tr("pause_main_menu")
+	if multiplayer.has_multiplayer_peer():
+		_main_menu_button.text = "Torna alla Lobby" # O tr("pause_return_lobby")
+	else:
+		_main_menu_button.text = tr("pause_main_menu")
 	_hint_label.text = tr("pause_hint")
 	_update_mode_label()
 

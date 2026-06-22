@@ -1,0 +1,1 @@
+Provides a collection of Godot CanvasItem shaders for HUD elements, environmental effects, and tactical overlays using procedural generation and time-based animation.

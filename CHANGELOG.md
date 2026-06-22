@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.1.11
+- Bug Fix: Principlamente ai joystick
+- Miglioramenti alla stabilità del multiplayer
+
+## 0.1.10
+- Multiplayer
+- Menù Multiplayer
+- Lobby Multiplayer
+- Ricerca server Multiplayer
+- Card Multiplayer
+- Creazione Server Multiplayer
+- Aggiornamento di Player, Item, Power Up, Scatole, Barili, Animazioni, Proiettili, Rampe
+- HUD Multiplayer
+- Modalità di gioco Multiplayer tra PvP e Squadre vs Squadre
+
 ## 0.1.9
 - Creazione di un sistema unificato per la gestione delle missioni
 - Stabilizzazione dell'HUD

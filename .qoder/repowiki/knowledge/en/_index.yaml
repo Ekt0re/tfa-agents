@@ -1,0 +1,78 @@
+# 知识卡导出索引文件
+schema_version: 1
+locale: en-US
+branch: main
+nodes_managed: true
+exported_at: "2026-06-22T10:28:02Z"
+modules:
+    "":
+        dir_name: Tactical Multiplayer Game Engine
+        title: Tactical Multiplayer Game Engine
+        scope: []
+        source_files: []
+        children:
+            - editor_addons
+            - game_assets
+            - game_core
+            - levels_and_scenes
+            - shaders
+            - ui_menus
+        depends_on: []
+        related_to: []
+    editor_addons:
+        dir_name: Godot Editor Addons Suite
+        title: Godot Editor Addons Suite
+        scope:
+            - addons/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    game_assets:
+        dir_name: Game Asset & Localization Management
+        title: Game Asset & Localization Management
+        scope:
+            - Assets/
+            - Locale/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    game_core:
+        dir_name: Core Gameplay Systems & Mission Orchestration
+        title: Core Gameplay Systems & Mission Orchestration
+        scope:
+            - Scripts/
+            - Game/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    levels_and_scenes:
+        dir_name: Level Layout & Scene Composition
+        title: Level Layout & Scene Composition
+        scope:
+            - Maps/
+            - Scenes/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    shaders:
+        dir_name: Godot Visual Effects & UI Shaders
+        title: Godot Visual Effects & UI Shaders
+        scope:
+            - Shaders/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    ui_menus:
+        dir_name: User Interface & Menu System
+        title: User Interface & Menu System
+        scope:
+            - Menu/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []

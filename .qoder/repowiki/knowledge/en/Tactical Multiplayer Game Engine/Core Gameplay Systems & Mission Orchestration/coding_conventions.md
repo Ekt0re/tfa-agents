@@ -1,0 +1,4 @@
+- Entities use a `livello` or `current_height_level` integer to determine collision layers and visibility, ensuring interactions only occur between entities on the same vertical plane.
+- Multiplayer authority is checked using `multiplayer.is_server()` or `is_multiplayer_authority()` before executing state-changing logic like explosion triggers or item collection.
+- Editor-specific preview logic is guarded by `if Engine.is_editor_hint():` to prevent runtime code from executing in the editor and vice versa, often using `@tool` scripts for live updates.
+- Global singletons and managers communicate via signals (e.g., `settings_changed`, `mission_completed`) rather than direct method calls to maintain loose coupling between systems.

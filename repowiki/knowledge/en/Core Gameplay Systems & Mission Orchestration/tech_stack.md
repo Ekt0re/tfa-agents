@@ -1,0 +1,1 @@
+Godot 4.x GDScript. Uses `HTTPClient` with TLS for GitHub API release checks in `global_settings.gd`. Implements custom Markdown-to-BBCode conversion in `markdown_to_bbcode.gd` for rich text display.

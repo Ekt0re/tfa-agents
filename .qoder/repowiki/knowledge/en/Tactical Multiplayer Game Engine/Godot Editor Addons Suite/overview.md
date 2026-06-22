@@ -1,0 +1,1 @@
+A collection of three independent Godot Engine plugins providing a visual mission flow editor, a real-time shader debugger, and a configurable virtual joystick for touch interfaces.

@@ -1,0 +1,1 @@
+Godot Engine 4.x (indicated by .tres format=3, .import metadata, and CanvasItemMaterial resources).

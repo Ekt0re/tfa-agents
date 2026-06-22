@@ -1,0 +1,3 @@
+- The module is organized into two logical groups: a `HUD/` subdirectory for interface-specific shaders (health bars, minimap overlays, mission panels) and root-level files for general-purpose visual effects (cracks, transitions, glows).
+- All shaders utilize the `canvas_item` shader type, indicating they are designed for 2D rendering or UI elements within the Godot engine.
+- Shaders rely exclusively on `uniform` variables for external configuration (e.g., `health_pct`, `damage_ratio`, `player_screen_position`), establishing a clear data-flow boundary where game logic injects state into the rendering pipeline without complex inter-shader dependencies.

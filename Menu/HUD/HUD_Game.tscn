@@ -99,6 +99,16 @@ theme_override_styles/fill = SubResource("StyleBoxFlat_fill")
 value = 100.0
 show_percentage = false
 
+[node name="ScoreboardLabel" type="Label" parent="HUD/TopLeft/VBox" unique_id=1308882148]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 18
+text = "SCOREBOARD"
+
 [node name="TopCenter" type="MarginContainer" parent="HUD" unique_id=1416369034]
 layout_mode = 1
 anchors_preset = -1
@@ -179,7 +189,6 @@ offset_right = -16.0
 offset_bottom = 420.0
 grow_horizontal = 0
 grow_vertical = 2
-mouse_filter = 2
 
 [node name="VBox" type="VBoxContainer" parent="HUD/TopRight" unique_id=295365208]
 layout_mode = 2
@@ -203,12 +212,14 @@ text = "PAUSA"
 custom_minimum_size = Vector2(220, 160)
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 script = ExtResource("2_minimap")
 
 [node name="MapLocLabel" type="Label" parent="HUD/TopRight/VBox" unique_id=347735123]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 1
 theme_override_colors/font_color = Color(0, 0.898039, 1, 1)
 theme_override_font_sizes/font_size = 9
 text = "MAP_LOC: SECTOR_07"
