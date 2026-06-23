@@ -335,9 +335,9 @@ func _get_laser_color() -> Color:
 		2: return Color(0.1, 1.0, 0.4, 0.85)   ## Verde
 		_: return Color(0.9, 0.5, 1.0, 0.85)   ## Viola
 
-func _show_laser(show: bool) -> void:
+func _show_laser(p_show: bool) -> void:
 	if _laser_line:
-		_laser_line.visible = show
+		_laser_line.visible = p_show
 
 # ---------------------------------------------------------------------------
 # Sistema di targeting — event-driven via Area2D (zero polling)
@@ -633,7 +633,7 @@ func _update_team_visuals() -> void:
 static func can_deploy_at(
 	scene_tree: SceneTree,
 	space_state: PhysicsDirectSpaceState2D,
-	position: Vector2,
+	p_position: Vector2,
 	check_radius: float,
 	target_level: int
 ) -> bool:
