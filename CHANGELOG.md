@@ -1,7 +1,7 @@
 # Changelog
 
 ## 0.1.11
-- Bug Fix: Principlamente ai joystick
+- Bug Fix: Principalmente ai joystick
 - Miglioramenti alla stabilità del multiplayer
 
 ## 0.1.10

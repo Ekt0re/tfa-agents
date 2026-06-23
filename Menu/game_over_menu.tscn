@@ -6,7 +6,8 @@
 layer = 100
 script = ExtResource("1_script")
 
-[node name="Overlay" type="Control" parent="."]
+; ── Overlay scuro (visibile solo quando il pannello centrale è attivo) ──────
+[node name="Dim" type="ColorRect" parent="."]
 unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 15
@@ -14,115 +15,150 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 1
-
-[node name="Dim" type="ColorRect" parent="Overlay"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
 color = Color(0.0117647, 0.0196078, 0.0352941, 0.88)
+mouse_filter = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="Overlay"]
-layout_mode = 1
+; ── Pannello centrale ────────────────────────────────────────────────────────
+[node name="CenterPanel" type="CenterContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="MenuPanel" type="PanelContainer" parent="Overlay/CenterContainer"]
+[node name="MenuPanel" type="PanelContainer" parent="CenterPanel"]
 custom_minimum_size = Vector2(520, 0)
 layout_mode = 2
 
-[node name="MenuMargin" type="MarginContainer" parent="Overlay/CenterContainer/MenuPanel"]
+[node name="MenuMargin" type="MarginContainer" parent="CenterPanel/MenuPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 24
-theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 24
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 32
 
-[node name="VBox" type="VBoxContainer" parent="Overlay/CenterContainer/MenuPanel/MenuMargin"]
+[node name="VBox" type="VBoxContainer" parent="CenterPanel/MenuPanel/MenuMargin"]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="TitleLabel" type="Label" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox"]
+[node name="TitleLabel" type="Label" parent="CenterPanel/MenuPanel/MenuMargin/VBox"]
 modulate = Color(1, 0.301961, 0.301961, 1)
 layout_mode = 2
-theme_override_font_sizes/font_size = 42
-text = "game_over_title"
+theme_override_font_sizes/font_size = 48
+text = "GAME OVER"
 horizontal_alignment = 1
 
-[node name="SubtitleLabel" type="Label" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox"]
-modulate = Color(0.8, 0.882353, 1, 0.658824)
+[node name="SubtitleLabel" type="Label" parent="CenterPanel/MenuPanel/MenuMargin/VBox"]
+modulate = Color(0.8, 0.882353, 1, 0.66)
 layout_mode = 2
-text = "game_over_subtitle"
+text = "La tua partita è terminata."
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="SingleplayerContainer" type="VBoxContainer" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox"]
+; ── Singleplayer buttons ─────────────────────────────────────────────────────
+[node name="SingleplayerContainer" type="VBoxContainer" parent="CenterPanel/MenuPanel/MenuMargin/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="RestartCheckpointButton" type="Button" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox/SingleplayerContainer"]
+[node name="RestartBeginButton" type="Button" parent="CenterPanel/MenuPanel/MenuMargin/VBox/SingleplayerContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "game_over_restart_checkpoint"
+text = "Rigioca"
 
-[node name="RestartBeginButton" type="Button" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox/SingleplayerContainer"]
+[node name="MainMenuButton" type="Button" parent="CenterPanel/MenuPanel/MenuMargin/VBox/SingleplayerContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "game_over_restart_begin"
+text = "Menu principale"
 
-[node name="MainMenuButton" type="Button" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox/SingleplayerContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "game_over_main_menu"
-
-[node name="MultiplayerContainer" type="VBoxContainer" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox"]
+; ── Multiplayer buttons (nel pannello) ───────────────────────────────────────
+[node name="MultiplayerContainer" type="VBoxContainer" parent="CenterPanel/MenuPanel/MenuMargin/VBox"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="SpectatorBox" type="VBoxContainer" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox/MultiplayerContainer"]
+[node name="SpectateStartButton" type="Button" parent="CenterPanel/MenuPanel/MenuMargin/VBox/MultiplayerContainer"]
+unique_name_in_owner = true
 layout_mode = 2
+text = "Inizia a osservare"
+
+[node name="LobbyButtonPanel" type="Button" parent="CenterPanel/MenuPanel/MenuMargin/VBox/MultiplayerContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Torna alla lobby"
+
+; ── HUD Spettatore (visibile solo durante lo spectating, overlay fisso) ──────
+[node name="SpectatorHUD" type="Control" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+; Label nome giocatore osservato — in alto al centro
+[node name="SpectatorLabel" type="Label" parent="SpectatorHUD"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -250.0
+offset_right = 250.0
+offset_top = 20.0
+offset_bottom = 56.0
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0, 0.9, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+text = ""
+horizontal_alignment = 1
+
+; Bottoni prev/next — in basso a destra
+[node name="SpectatorNavBox" type="HBoxContainer" parent="SpectatorHUD"]
+layout_mode = 1
+anchors_preset = 4
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -316.0
+offset_top = -64.0
+offset_right = -20.0
+offset_bottom = -20.0
 theme_override_constants/separation = 8
+alignment = 2
 
-[node name="SpectatorTitle" type="Label" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox/MultiplayerContainer/SpectatorBox"]
-modulate = Color(0, 0.898039, 1, 1)
-layout_mode = 2
-text = "game_over_spectator_title"
-horizontal_alignment = 1
-
-[node name="SpectatorLabel" type="Label" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox/MultiplayerContainer/SpectatorBox"]
+[node name="SpectatePrevButton" type="Button" parent="SpectatorHUD/SpectatorNavBox"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 40)
 layout_mode = 2
-text = "game_over_spectating"
-horizontal_alignment = 1
-autowrap_mode = 3
+text = "< Prec"
 
-[node name="SpectatorControls" type="HBoxContainer" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox/MultiplayerContainer/SpectatorBox"]
-layout_mode = 2
-theme_override_constants/separation = 16
-alignment = 1
-
-[node name="SpectatePrevButton" type="Button" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox/MultiplayerContainer/SpectatorBox/SpectatorControls"]
+[node name="SpectateNextButton" type="Button" parent="SpectatorHUD/SpectatorNavBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(140, 0)
+custom_minimum_size = Vector2(140, 40)
 layout_mode = 2
-text = "game_over_prev"
+text = "Succ >"
 
-[node name="SpectateNextButton" type="Button" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox/MultiplayerContainer/SpectatorBox/SpectatorControls"]
+; Bottone lobby — in basso a sinistra
+[node name="LobbyButton" type="Button" parent="SpectatorHUD"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(140, 0)
-layout_mode = 2
-text = "game_over_next"
-
-[node name="LobbyButton" type="Button" parent="Overlay/CenterContainer/MenuPanel/MenuMargin/VBox/MultiplayerContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "game_over_lobby"
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 0.0
+anchor_right = 0.0
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -64.0
+offset_right = 200.0
+offset_bottom = -20.0
+layout_mode = 1
+text = "Torna alla lobby"

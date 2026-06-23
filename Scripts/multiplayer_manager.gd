@@ -25,6 +25,7 @@ signal all_players_ready()
 signal map_selected(map_path: String)
 signal servers_discovered(servers: Array[Dictionary])
 signal version_mismatch(host_version: String, client_version: String)
+signal connection_quality_warning(peer_id: int, is_poor: bool)
 
 # ---------------------------------------------------------------------------
 # Stato Lobby
@@ -76,6 +77,12 @@ var is_match_running: bool = false
 var _peer: ENetMultiplayerPeer = null
 var _is_host: bool = false
 
+# Monitoraggio qualità connessione
+var _ping_timer: float = 0.0
+const PING_CHECK_INTERVAL: float = 2.0  # Controlla ogni 2 secondi
+var _peer_last_ping: Dictionary = {}  # {peer_id: last_ping_time}
+var _peer_poor_connection: Dictionary = {}  # {peer_id: bool}
+
 # ---------------------------------------------------------------------------
 # Server Discovery
 # ---------------------------------------------------------------------------
@@ -94,7 +101,7 @@ func _ready() -> void:
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	# Il server risponde ai broadcast di discovery in arrivo
 	if _broadcast_listener and _broadcast_listener.get_available_packet_count() > 0:
 		var _data = _broadcast_listener.get_packet()
@@ -114,6 +121,13 @@ func _process(_delta: float) -> void:
 		_broadcast_listener.set_dest_address(sender_ip, DISCOVERY_REPLY_PORT)
 		_broadcast_listener.put_packet(response.to_utf8_buffer())
 		print("MultiplayerManager: Risposta discovery inviata a %s" % sender_ip)
+	
+	# Monitoraggio qualità connessione (solo server)
+	if _is_host and is_match_running:
+		_ping_timer += delta
+		if _ping_timer >= PING_CHECK_INTERVAL:
+			_ping_timer = 0.0
+			_check_peer_connection_quality()
 
 
 # ---------------------------------------------------------------------------
@@ -512,6 +526,65 @@ func _on_server_disconnected() -> void:
 
 
 # ---------------------------------------------------------------------------
+# Monitoraggio qualità connessione
+# ---------------------------------------------------------------------------
+
+## Controlla la qualità della connessione con i peer (solo server)
+func _check_peer_connection_quality() -> void:
+	if not multiplayer.is_server():
+		return
+	
+	var current_time = Time.get_ticks_msec() / 1000.0
+	var timeout_threshold = PING_CHECK_INTERVAL * 3.0  # 3x l'intervallo = 6 secondi
+	
+	for peer_id in players_info.keys():
+		if peer_id == 1:  # Skip il server stesso
+			continue
+		
+		# Invia ping al client
+		if players_info.has(peer_id):
+			_ping_check.rpc_id(peer_id)
+		
+		var last_ping = _peer_last_ping.get(peer_id, current_time)
+		var time_since_ping = current_time - last_ping
+		
+		# Se non abbiamo ricevuto aggiornamenti da molto tempo, connessione scarsa
+		var is_poor = time_since_ping > timeout_threshold
+		
+		# Emitte segnale solo se lo stato è cambiato
+		if _peer_poor_connection.get(peer_id, false) != is_poor:
+			_peer_poor_connection[peer_id] = is_poor
+			connection_quality_warning.emit(peer_id, is_poor)
+			
+			if is_poor:
+				print("MultiplayerManager: Connessione scarsa rilevata per peer %d" % peer_id)
+			else:
+				print("MultiplayerManager: Connessione ripristinata per peer %d" % peer_id)
+
+
+## RPC: Il server invia un ping ai client per testare la connessione
+@rpc("authority", "call_remote", "reliable")
+func _ping_check() -> void:
+	# Il client risponde al ping
+	_pong_check.rpc_id(1)
+
+
+## RPC: Il client risponde al ping del server
+@rpc("any_peer", "call_local", "reliable")
+func _pong_check() -> void:
+	if not multiplayer.is_server():
+		return
+	
+	var sender_id = multiplayer.get_remote_sender_id()
+	_peer_last_ping[sender_id] = Time.get_ticks_msec() / 1000.0
+	
+	# Se la connessione era scarsa ora è buona
+	if _peer_poor_connection.get(sender_id, false):
+		_peer_poor_connection[sender_id] = false
+		connection_quality_warning.emit(sender_id, false)
+
+
+# ---------------------------------------------------------------------------
 # Normalizzazione chiavi — Godot 4 converte le chiavi int in String dopo RPC
 # ---------------------------------------------------------------------------
 
@@ -522,3 +595,14 @@ func _normalize_players_info() -> void:
 		var int_key: int = int(key) if str(key).is_valid_int() else key
 		normalized[int_key] = players_info[key]
 	players_info = normalized
+	
+	
+# In multiplayer_manager.gd — aggiungi questa funzione
+func is_active_multiplayer_session() -> bool:
+	if not is_match_running:
+		return false
+	if _peer == null:
+		return false
+	if _peer.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
+		return false
+	return true

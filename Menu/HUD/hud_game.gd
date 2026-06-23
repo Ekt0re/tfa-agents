@@ -54,6 +54,11 @@ func _ready() -> void:
 		global_settings.subtitle_requested.connect(_on_subtitle_requested)
 	if global_settings and global_settings.has_signal("settings_changed"):
 		global_settings.settings_changed.connect(_on_settings_changed)
+	
+	# Connessione al MultiplayerManager per avvisi di connessione
+	var mp_manager = get_node_or_null("/root/MultiplayerManager")
+	if mp_manager and mp_manager.has_signal("connection_quality_warning"):
+		mp_manager.connection_quality_warning.connect(_on_connection_quality_warning)
 
 	await get_tree().process_frame
 	if is_instance_valid(GlobalSettings._fps_panel):
@@ -179,6 +184,30 @@ func _on_reload_pressed() -> void:
 	# Chiama la ricarica sul player
 	if player and player.has_method("_try_reload"):
 		player.call("_try_reload")
+
+
+func _on_connection_quality_warning(peer_id: int, is_poor: bool) -> void:
+	# Mostra un avviso sottotitolo quando la connessione di un peer peggiora
+	if is_poor:
+		var mp_manager = get_node_or_null("/root/MultiplayerManager")
+		if mp_manager:
+			var player_name = "Giocatore"
+			var peer_info = mp_manager.get("players_info")
+			if peer_info:
+				# Controlla sia chiave int che String
+				if peer_info.has(peer_id):
+					player_name = str(peer_info[peer_id].get("name", "Giocatore"))
+				elif peer_info.has(str(peer_id)):
+					player_name = str(peer_info[str(peer_id)].get("name", "Giocatore"))
+			
+			var global_settings = get_node_or_null("/root/GlobalSettings")
+			if global_settings and global_settings.has_method("show_subtitle_key"):
+				global_settings.call("show_subtitle_key", "subtitle_poor_connection", [player_name], 3.0)
+	else:
+		# Quando la connessione migliora, mostra un breve avviso di ripristino
+		var global_settings = get_node_or_null("/root/GlobalSettings")
+		if global_settings and global_settings.has_method("show_subtitle_key"):
+			global_settings.call("show_subtitle_key", "subtitle_connection_restored", [], 2.0)
 
 
 func _update_health_position() -> void:

@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" uid="uid://t12n16npgxtc" path="res://Scenes/power_up.tscn" id="9_xqe5x"]
 [ext_resource type="PackedScene" uid="uid://bu1osy1fuhlin" path="res://Menu/HUD/HUD_Game.tscn" id="10_hud_game"]
 [ext_resource type="Script" uid="uid://ww1xf8dthkt1" path="res://Scripts/dev_map_tutorial.gd" id="11_tutorial"]
+[ext_resource type="PackedScene" uid="uid://cj5rrh5hd0nan" path="res://Game/Torrette/Turret.tscn" id="16_8o1ly"]
 
 [node name="DevMap" type="Node2D" unique_id=73936262]
 script = ExtResource("1_lighting")
@@ -604,3 +605,8 @@ current_height_level = 3
 
 [node name="Tutorial" type="Node" parent="." unique_id=999422702]
 script = ExtResource("11_tutorial")
+
+[node name="Turret" parent="." unique_id=734211450 instance=ExtResource("16_8o1ly")]
+position = Vector2(1648, 1392)
+scale = Vector2(1.6102556, 1.6102556)
+team_id = 1

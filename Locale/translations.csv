@@ -131,3 +131,5 @@ lobby_map_selected,Mappa selezionata: %s,Map selected: %s
 lobby_waiting,In attesa...,Waiting...
 version_label,📦 Versione: %s,📦 Version: %s
 version_mismatch,Versione incompatibile! Host: %s, Tuo client: %s,Version mismatch! Host: %s, Your client: %s
+subtitle_poor_connection,⚠️ %s ha problemi di connessione,⚠️ %s has connection issues
+subtitle_connection_restored,✓ Connessione ripristinata,✓ Connection restored

@@ -64,14 +64,14 @@ func _ready() -> void:
 	add_to_group("damageable")
 	
 	if camera_2d:
-		if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
+		if _is_multiplayer_session() and not is_multiplayer_authority():
 			camera_2d.enabled = false
 		else:
 			camera_2d.make_current()
 			_camera_base_offset = camera_2d.offset
 	
 	var input_mgr = get_node_or_null("InputManager")
-	if input_mgr and multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
+	if input_mgr and _is_multiplayer_session() and not is_multiplayer_authority():
 		input_mgr.queue_free() # Rimuove l'input manager remoto
 
 	# Emetti i segnali iniziali per l'HUD
@@ -81,14 +81,14 @@ func _ready() -> void:
 		shot_raycast.enabled = true
 		shot_raycast.add_exception(self)
 
-	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+	if _is_multiplayer_session() and multiplayer.is_server():
 		call_deferred("_sync_initial_state_to_peers")
 	
 	call_deferred("_initialize_level_system")
 	call_deferred("_update_team_color")
 	
 	# Ascolta la disconnessione del server durante il gameplay
-	if multiplayer.has_multiplayer_peer():
+	if _is_multiplayer_session():
 		var mp_manager = get_node_or_null("/root/MultiplayerManager")
 		if mp_manager and mp_manager.has_signal("connection_failed"):
 			mp_manager.connection_failed.connect(_on_server_disconnected)
@@ -137,14 +137,14 @@ func _receive_initial_state(p_team_id: int, p_skin_index: int, p_nome_arma: Stri
 	print("Player %s: Ricevuto stato iniziale -> Team: %d, Skin: %d, Arma: %s, Nome: %s" % [name, team_id, skin_index, nome_arma, player_name])
 
 	# Mappa nome arma all'animazione
-	var arama = get_node_or_null("Arama")
-	if arama:
+	var arma = get_node_or_null("Arma")
+	if arma:
 		var anim_name = "mitra" # fallback
-		if arama.sprite_frames.has_animation(nome_arma):
+		if arma.sprite_frames.has_animation(nome_arma):
 			anim_name = nome_arma
 		elif nome_arma == "ASSAULT_RIFLE_M4":
 			anim_name = "mitra"
-		arama.play(anim_name)
+		arma.play(anim_name)
 
 	_update_team_color()
 
@@ -191,8 +191,8 @@ func _update_team_color() -> void:
 	_outline_material.set_shader_parameter("outline_color", outline_col)
 	if has_node("Sprite2D"):
 		$Sprite2D.material = _outline_material
-	if has_node("Arama"):
-		get_node("Arama").material = _outline_material
+	if has_node("Arma"):
+		get_node("Arma").material = _outline_material
 
 	
 	var sprite = get_node_or_null("Sprite2D")
@@ -211,7 +211,7 @@ func _initialize_level_system() -> void:
 
 
 func _check_and_restore_checkpoint() -> void:
-	if multiplayer.has_multiplayer_peer():
+	if _is_multiplayer_session():
 		return  # In PvP/multiplayer non ripristinare checkpoint (evita spawn fuori mappa)
 		
 	var flow_player = get_node_or_null("/root/MissionFlowPlayer")
@@ -234,7 +234,7 @@ func _check_and_restore_checkpoint() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
+	if _is_multiplayer_session() and not is_multiplayer_authority():
 		return
 		
 	if event.is_action_pressed("cambia_piano"):
@@ -255,7 +255,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
+	if _is_multiplayer_session() and not is_multiplayer_authority():
 		return
 		
 	if event is InputEventScreenTouch or event is InputEventScreenDrag:
@@ -265,7 +265,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
+	if _is_multiplayer_session() and not is_multiplayer_authority():
 		return
 		
 	var direction := Vector2.ZERO
@@ -303,7 +303,7 @@ func _physics_process(delta: float) -> void:
 			rotation = lerp_angle(rotation, dir_to_mouse.angle(), 20.0 * delta)
 	
 	# Invia stato ai peer remoti ogni _SYNC_EVERY frame
-	if multiplayer.has_multiplayer_peer():
+	if _is_multiplayer_session():
 		_sync_tick += 1
 		if _sync_tick >= _SYNC_EVERY:
 			_sync_tick = 0
@@ -314,8 +314,8 @@ func _physics_process(delta: float) -> void:
 ## Riceve lo stato del giocatore remoto e lo applica (interpolato).
 @rpc("any_peer", "unreliable")
 func _send_state_to_remotes(remote_pos: Vector2, remote_rot: float, remote_level: int) -> void:
-	# Ignora se siamo noi stessi (non dovrebbe arrivare, ma per sicurezza)
-	if is_multiplayer_authority():
+	# Ignora se non siamo nell'albero o se siamo noi stessi
+	if not is_inside_tree() or is_multiplayer_authority():
 		return
 	global_position = remote_pos
 	rotation = remote_rot
@@ -413,7 +413,7 @@ func _try_fire_in_direction(aim_direction: Vector2) -> void:
 		if global_settings:
 			global_settings.call("show_subtitle_key", "subtitle_weapon_fired", [], 0.6)
 
-	if multiplayer.has_multiplayer_peer():
+	if _is_multiplayer_session():
 		_replicate_fire.rpc(
 			shot_data["origin"],
 			shot_data["impact_position"],
@@ -461,7 +461,7 @@ func _on_projectile_impact(target_path: NodePath, shooter_peer_id: int = 0) -> v
 		return
 
 	# Usa lo shooter_peer_id passato dal proiettile (non get_unique_id che è il server!)
-	var effective_shooter: int = shooter_peer_id if shooter_peer_id > 0 else (multiplayer.get_unique_id() if multiplayer.has_multiplayer_peer() else 1)
+	var effective_shooter: int = shooter_peer_id if shooter_peer_id > 0 else (multiplayer.get_unique_id() if _is_multiplayer_session() else 1)
 
 	# IMPORTANTE: receive_damage ha priorità su apply_damage perché porta il source_peer_id
 	# necessario per l'attribuzione corretta delle kill
@@ -492,7 +492,7 @@ func _on_projectile_impact(target_path: NodePath, shooter_peer_id: int = 0) -> v
 			target.call_deferred("queue_free")
 
 func _can_fire() -> bool:
-	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
+	if _is_multiplayer_session() and not is_multiplayer_authority():
 		return false
 
 	# Non può sparare se è morto
@@ -637,7 +637,7 @@ func _configure_shot_raycast_for_current_level() -> void:
 
 
 func _can_apply_projectile_impacts() -> bool:
-	if not multiplayer.has_multiplayer_peer():
+	if not _is_multiplayer_session():
 		return true
 	return multiplayer.is_server()
 
@@ -647,7 +647,7 @@ func _get_time_seconds() -> float:
 
 
 func _can_apply_local_feedback() -> bool:
-	if multiplayer.has_multiplayer_peer() and not is_multiplayer_authority():
+	if _is_multiplayer_session() and not is_multiplayer_authority():
 		return false
 	return true
 
@@ -793,9 +793,9 @@ func _collect_canvas_items(node: Node, canvas_items: Array[CanvasItem]) -> void:
 
 
 func apply_damage(amount: float) -> void:
-	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+	if _is_multiplayer_session() and multiplayer.is_server():
 		_apply_damage_internal(amount, 0)
-	elif not multiplayer.has_multiplayer_peer():
+	elif not _is_multiplayer_session():
 		_apply_damage_internal(amount, 0)
 
 @rpc("any_peer", "call_local", "reliable")
@@ -803,37 +803,49 @@ func receive_damage(amount: float, source_peer_id: int) -> void:
 	if not multiplayer.is_server():
 		return
 	
+	# Verifica che il nodo vittima esista ancora
+	if not is_inside_tree():
+		return
+	
 	var source_player = null
 	var current_scene = get_tree().current_scene
-	if current_scene.has_node("Players"):
-		source_player = current_scene.get_node("Players").get_node_or_null(str(source_peer_id))
-	elif current_scene.has_node(str(source_peer_id)):
+	if current_scene and current_scene.has_node("Players"):
+		var players_node = current_scene.get_node("Players")
+		if players_node and players_node.has_node(str(source_peer_id)):
+			source_player = players_node.get_node(str(source_peer_id))
+	elif current_scene and current_scene.has_node(str(source_peer_id)):
 		source_player = current_scene.get_node(str(source_peer_id))
 		
-	if source_player and source_player is PlayerPrototype:
+	if source_player and is_instance_valid(source_player) and source_player is PlayerPrototype:
 		if source_player.team_id == self.team_id:
 			return # No friendly fire
 	
 	_apply_damage_internal(amount, source_peer_id)
 
 func _apply_damage_internal(amount: float, source_peer_id: int) -> void:
-	if vita <= 0.0:
+	if vita <= 0.0 or not is_inside_tree():
 		return
 	vita = maxf(vita - amount, 0.0)
 	print("Player ", name, " subisce ", amount, " danni da ", source_peer_id, ". Vita rimanente: ", vita)
-	_broadcast_health_update.rpc(vita, vita_max)
+	
+	# Verifica che il nodo sia ancora nell'albero prima di inviare RPC
+	if is_inside_tree():
+		_broadcast_health_update.rpc(vita, vita_max)
 	
 	if vita <= 0.0:
 		print("Player ", name, " è morto!")
-		if multiplayer.has_multiplayer_peer():
+		if _is_multiplayer_session() and is_inside_tree():
 			var map = get_tree().current_scene
-			if map.has_method("_on_player_killed"):
+			if map and map.has_method("_on_player_killed"):
 				map._on_player_killed(source_peer_id, int(str(name)))
-		_die.rpc()
+		if is_inside_tree():
+			_die.rpc()
 
 @rpc("any_peer", "call_local", "reliable")
 func _broadcast_health_update(new_vita: float, new_vita_max: float) -> void:
-	if multiplayer.has_multiplayer_peer() and multiplayer.get_remote_sender_id() != 1 and multiplayer.get_remote_sender_id() != 0:
+	if _is_multiplayer_session() and multiplayer.get_remote_sender_id() != 1 and multiplayer.get_remote_sender_id() != 0:
+		return
+	if not is_inside_tree():
 		return
 	vita = new_vita
 	vita_max = new_vita_max
@@ -841,17 +853,19 @@ func _broadcast_health_update(new_vita: float, new_vita_max: float) -> void:
 
 @rpc("any_peer", "call_local", "reliable")
 func _die() -> void:
-	if multiplayer.has_multiplayer_peer() and multiplayer.get_remote_sender_id() != 1 and multiplayer.get_remote_sender_id() != 0:
+	if _is_multiplayer_session() and multiplayer.get_remote_sender_id() != 1 and multiplayer.get_remote_sender_id() != 0:
+		return
+	if not is_inside_tree():
 		return
 	# Disattiva controlli e movimento del player locale
-	if not multiplayer.has_multiplayer_peer() or is_multiplayer_authority():
+	if not _is_multiplayer_session() or is_multiplayer_authority():
 		set_physics_process(false)
 		
 	# Nascondi sprite e disattiva collisioni
 	if has_node("Sprite2D"):
 		$Sprite2D.visible = false
-	if has_node("Arama"):
-		get_node("Arama").visible = false
+	if has_node("Arma"):
+		get_node("Arma").visible = false
 	if has_node("CollisionShape2D"):
 		$CollisionShape2D.set_deferred("disabled", true)
 		
@@ -873,11 +887,25 @@ func _die() -> void:
 
 	# GUI per il giocatore locale
 	if _can_apply_local_feedback():
-		if multiplayer.has_multiplayer_peer():
-			# MULTIPLAYER: Verifica le impostazioni dal MultiplayerManager
+		print("[DEATH] Player ", name, " died. has_multiplayer_peer: ", _is_multiplayer_session())
+		
+		# SINGLEPLAYER: Always show game over menu (no respawn)
+		if not _is_multiplayer_session():
+			print("[DEATH] SINGLEPLAYER mode. Showing game over menu.")
+			var game_over_scene = load("res://Menu/game_over_menu.tscn")
+			if game_over_scene:
+				var go_menu = game_over_scene.instantiate()
+				var root = get_tree().current_scene
+				if root:
+					root.add_child(go_menu)
+					if go_menu.has_method("setup"):
+						go_menu.setup(self)
+		else:
+		# MULTIPLAYER: Verifica le impostazioni dal MultiplayerManager
 			var mp_manager = get_node_or_null("/root/MultiplayerManager")
 			var respawn_enabled = mp_manager != null and mp_manager.get("respawn_enabled") == true
-			
+			print("[DEATH] MULTIPLAYER mode. respawn_enabled: ", respawn_enabled)
+
 			if respawn_enabled:
 				# Multiplayer CON respawn: mostra countdown semplice
 				var death_ui = CanvasLayer.new()
@@ -894,32 +922,17 @@ func _die() -> void:
 				label.add_theme_constant_override("outline_size", 12)
 				death_ui.add_child(label)
 				add_child(death_ui)
-				
+
 				var tw = create_tween()
 				for i in range(int(respawn_time), 0, -1):
 					tw.tween_callback(func(): if is_instance_valid(label): label.text = "SEI MORTO!\nRespawn tra %d..." % i)
 					tw.tween_interval(1.0)
 				tw.tween_callback(death_ui.queue_free)
 			else:
-				# Multiplayer SENZA respawn (match ended o modalità senza respawn): mostra spettatore
-				var game_over_scene = load("res://Menu/game_over_menu.tscn")
-				if game_over_scene:
-					var go_menu = game_over_scene.instantiate()
-					var root = get_tree().current_scene
-					if root:
-						root.add_child(go_menu)
-						if go_menu.has_method("setup"):
-							go_menu.setup(self)
-		else:
-			# SINGLEPLAYER / STORIA: Mostra menu Game Over
-			var game_over_scene = load("res://Menu/game_over_menu.tscn")
-			if game_over_scene:
-				var go_menu = game_over_scene.instantiate()
-				var root = get_tree().current_scene
-				if root:
-					root.add_child(go_menu)
-					if go_menu.has_method("setup"):
-						go_menu.setup(self)
+				# Multiplayer SENZA respawn:
+				# NON mostrare game_over_menu.
+				# La schermata finale viene gestita dalla mappa (_show_victory_screen).
+				pass
 
 	# Elimina visivamente eventuali scudi
 	var scudo = get_node_or_null("SpriteScudo")
@@ -928,7 +941,9 @@ func _die() -> void:
 
 @rpc("any_peer", "call_local", "reliable")
 func respawn(spawn_pos: Vector2, spawn_level: int) -> void:
-	if multiplayer.has_multiplayer_peer() and multiplayer.get_remote_sender_id() != 1 and multiplayer.get_remote_sender_id() != 0:
+	if _is_multiplayer_session() and multiplayer.get_remote_sender_id() != 1 and multiplayer.get_remote_sender_id() != 0:
+		return
+	if not is_inside_tree():
 		return
 	vita = vita_max
 	colpi_correnti = capacita_caricatore
@@ -940,14 +955,14 @@ func respawn(spawn_pos: Vector2, spawn_level: int) -> void:
 	
 	change_height_level(spawn_level, true)
 	
-	if not multiplayer.has_multiplayer_peer() or is_multiplayer_authority():
+	if not _is_multiplayer_session() or is_multiplayer_authority():
 		set_physics_process(true)
 		
 	# Riattiva sprite e collisioni
 	if has_node("Sprite2D"):
 		$Sprite2D.visible = true
-	if has_node("Arama"):
-		get_node("Arama").visible = true
+	if has_node("Arma"):
+		get_node("Arma").visible = true
 	if has_node("CollisionShape2D"):
 		$CollisionShape2D.set_deferred("disabled", false)
 		set_process(true)
@@ -994,7 +1009,7 @@ func _try_reload() -> void:
 	_play_reload_animation()
 	
 	# Sincronizza l'animazione di ricarica in multiplayer
-	if multiplayer.has_multiplayer_peer():
+	if _is_multiplayer_session():
 		print("[RELOAD] Player %s - has_multiplayer_peer: true, is_authority: %s" % [name, is_multiplayer_authority()])
 		if is_multiplayer_authority():
 			print("[RELOAD] Invio RPC per sincronizzare animazione di ricarica")
@@ -1023,7 +1038,7 @@ func _finish_reload() -> void:
 
 
 func _play_reload_animation() -> void:
-	var weapon_sprite: AnimatedSprite2D = get_node_or_null("Arama") as AnimatedSprite2D
+	var weapon_sprite: AnimatedSprite2D = get_node_or_null("Arma") as AnimatedSprite2D
 	if not weapon_sprite:
 		return
 	var tw: Tween = create_tween()
@@ -1040,13 +1055,13 @@ func _play_reload_animation() -> void:
 @rpc("authority", "call_local", "reliable")
 func rpc_play_reload_animation() -> void:
 	# Non eseguire di nuovo se sei il caller (authority) - è già stato eseguito in _try_reload
-	if multiplayer.has_multiplayer_peer() and is_multiplayer_authority():
+	if _is_multiplayer_session() and is_multiplayer_authority():
 		return
 		
-	var weapon_sprite: AnimatedSprite2D = get_node_or_null("Arama") as AnimatedSprite2D
-	print("[RPC_RELOAD] Ricevuto RPC su player %s - Arama esiste: %s" % [name, weapon_sprite != null])
+	var weapon_sprite: AnimatedSprite2D = get_node_or_null("Arma") as AnimatedSprite2D
+	print("[RPC_RELOAD] Ricevuto RPC su player %s - Arma esiste: %s" % [name, weapon_sprite != null])
 	if not weapon_sprite:
-		print("[RPC_RELOAD] ERRORE: Nodo Arama non trovato!")
+		print("[RPC_RELOAD] ERRORE: Nodo Arma non trovato!")
 		return
 	var tw: Tween = create_tween()
 	var original_rotation: float = weapon_sprite.rotation
@@ -1067,7 +1082,7 @@ func heal(amount: float) -> void:
 
 @rpc("any_peer", "call_local", "reliable")
 func rpc_heal(amount: float) -> void:
-	if multiplayer.has_multiplayer_peer() and multiplayer.get_remote_sender_id() != 1 and multiplayer.get_remote_sender_id() != 0:
+	if _is_multiplayer_session() and multiplayer.get_remote_sender_id() != 1 and multiplayer.get_remote_sender_id() != 0:
 		return
 	heal(amount)
 
@@ -1080,7 +1095,7 @@ func add_ammo(amount: int) -> void:
 
 @rpc("any_peer", "call_local", "reliable")
 func rpc_add_ammo(amount: int) -> void:
-	if multiplayer.has_multiplayer_peer() and multiplayer.get_remote_sender_id() != 1 and multiplayer.get_remote_sender_id() != 0:
+	if _is_multiplayer_session() and multiplayer.get_remote_sender_id() != 1 and multiplayer.get_remote_sender_id() != 0:
 		return
 	add_ammo(amount)
 
@@ -1091,33 +1106,37 @@ func add_money(amount: int) -> void:
 
 @rpc("any_peer", "call_local", "reliable")
 func rpc_add_money(amount: int) -> void:
-	if multiplayer.has_multiplayer_peer() and multiplayer.get_remote_sender_id() != 1 and multiplayer.get_remote_sender_id() != 0:
+	if _is_multiplayer_session() and multiplayer.get_remote_sender_id() != 1 and multiplayer.get_remote_sender_id() != 0:
 		return
 	add_money(amount)
 
 
 func _on_server_disconnected(_reason: String) -> void:
-	# Mostra il menu di disconnessione del server
+	# Mostra il menu di disconnessione del server (solo se non già mostrato)
+	if get_tree().root.has_node("ServerDisconnectMenu"):
+		return
+	
 	var disconnect_menu = load("res://Menu/server_disconnect_menu.tscn").instantiate()
+	disconnect_menu.name = "ServerDisconnectMenu"
 	get_tree().root.add_child(disconnect_menu)
 
 
 func set_weapon_animation(anim_name: String) -> void:
-	var arama = get_node_or_null("Arama")
-	if arama and arama.sprite_frames.has_animation(anim_name):
-		arama.play(anim_name)
+	var arma = get_node_or_null("Arma")
+	if arma and arma.sprite_frames.has_animation(anim_name):
+		arma.play(anim_name)
 		nome_arma = anim_name
 
 		# Sincronizza l'animazione in multiplayer a tutti i client
-		if multiplayer.has_multiplayer_peer() and is_multiplayer_authority():
+		if _is_multiplayer_session() and is_multiplayer_authority():
 			rpc_set_weapon_animation(anim_name)
 
 
 @rpc("authority", "call_remote", "reliable")
 func rpc_set_weapon_animation(anim_name: String) -> void:
-	var arama = get_node_or_null("Arama")
-	if arama and arama.sprite_frames.has_animation(anim_name):
-		arama.play(anim_name)
+	var arma = get_node_or_null("Arma")
+	if arma and arma.sprite_frames.has_animation(anim_name):
+		arma.play(anim_name)
 		nome_arma = anim_name
 
 
@@ -1143,3 +1162,9 @@ func rpc_set_weapon_animation(anim_name: String) -> void:
 # - layer 9: proiettili Piano 2
 # - - mask: layer 7, 8
 # - Navigation: layer 2
+
+func _is_multiplayer_session() -> bool:
+	var mp_manager = get_node_or_null("/root/MultiplayerManager")
+	if mp_manager and mp_manager.has_method("is_active_multiplayer_session"):
+		return mp_manager.is_active_multiplayer_session()
+	return multiplayer.has_multiplayer_peer() and not multiplayer.get_peers().is_empty()

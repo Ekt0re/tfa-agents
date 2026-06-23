@@ -233,6 +233,9 @@ func _on_player_killed(killer_peer_id: int, victim_peer_id: int) -> void:
 	
 	if respawn_enabled:
 		_schedule_respawn(victim_peer_id)
+	else:
+		# Senza respawn: verifica se una squadra è stata completamente eliminata
+		_check_team_elimination()
 
 
 func _schedule_respawn(peer_id: int) -> void:
@@ -271,6 +274,64 @@ func _check_win_condition() -> void:
 			_match_over = true
 			_end_match.rpc(team_id)
 			return
+
+
+## Verifica se una squadra è stata completamente eliminata (senza respawn).
+func _check_team_elimination() -> void:
+	if _match_over:
+		return
+	
+	var mp_manager = get_node_or_null("/root/MultiplayerManager")
+	if not mp_manager:
+		return
+	
+	var mode: String = str(mp_manager.get("team_mode"))
+	var all_peers := _get_all_peer_ids()
+	
+	if mode == "ffa":
+		# In FFA, la partita finisce quando rimane un solo giocatore vivo
+		var alive_count := 0
+		var last_alive_peer := 0
+		for peer_id in all_peers:
+			var player_node = _players_node.get_node_or_null(str(peer_id))
+			if player_node and is_instance_valid(player_node) and player_node.get("vita") > 0.0:
+				alive_count += 1
+				last_alive_peer = peer_id
+		
+		if alive_count <= 1:
+			_match_over = true
+			var winner_team := 0
+			if last_alive_peer > 0:
+				var winner_info := _get_peer_info(last_alive_peer)
+				winner_team = int(winner_info.get("team_id", 0))
+			_end_match.rpc(winner_team)
+	else:
+		# In team mode, la partita finisce quando tutti i membri di una squadra sono morti
+		var team_players: Dictionary = {}
+		var team_alive: Dictionary = {}
+		
+		for peer_id in all_peers:
+			var p_info := _get_peer_info(int(peer_id))
+			var t_id: int = int(p_info.get("team_id", 0))
+			if not team_players.has(t_id):
+				team_players[t_id] = []
+				team_alive[t_id] = 0
+			team_players[t_id].append(peer_id)
+			
+			var player_node = _players_node.get_node_or_null(str(peer_id))
+			if player_node and is_instance_valid(player_node) and player_node.get("vita") > 0.0:
+				team_alive[t_id] += 1
+		
+		# Trova una squadra con zero giocatori vivi
+		for t_id in team_players:
+			if team_alive.get(t_id, 0) == 0 and team_players[t_id].size() > 0:
+				# Questa squadra è stata eliminata, vincono gli altri
+				# Trova la squadra vincente (prima squadra con giocatori vivi)
+				for other_t_id in team_alive:
+					if other_t_id != t_id and team_alive.get(other_t_id, 0) > 0:
+						_match_over = true
+						_end_match.rpc(other_t_id)
+						return
 
 
 @rpc("authority", "call_local", "reliable")
