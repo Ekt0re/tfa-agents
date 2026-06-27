@@ -81,10 +81,22 @@ func _find_checkpoint() -> Area2D:
 	# La sintassi %CheckPoint richiede unique_name_in_owner=true che non è attivo.
 	var scene_root := get_parent()
 	if scene_root:
+		# Prova prima con get_node_or_null diretto
 		var cp := scene_root.get_node_or_null("CheckPoint")
 		if cp is Area2D:
 			return cp as Area2D
-	push_warning("dev_map_tutorial: CheckPoint non trovato nella scena radice!")
+		
+		# Se non trovato, prova con find_child (più lento ma più flessibile)
+		cp = scene_root.find_child("CheckPoint", true, false)
+		if cp is Area2D:
+			return cp as Area2D
+		
+		# Se ancora non trovato, cerca tra tutti i nodi della scena
+		for child in scene_root.get_children():
+			if child is Area2D and child.name.contains("CheckPoint"):
+				return child as Area2D
+	
+	# Se arriviamo qui, il checkpoint non esiste (potrebbe essere normale in alcune mappe)
 	return null
 
 

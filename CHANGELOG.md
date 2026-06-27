@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.12
+- Bug fix
+- Miglioramenti alla stabilità del multiplayer
+- Miglioramento torrette: aggiunto laser e hitscan
+- Miglioramento al frame rate, aggiunti visibilitynotifier alle torrette
+- Introdotta possibilità di hackare torrette (In fase di sperimentazione)
+- Miglioramenti al Player: Animazioni aggiunte, Sistema di corpo modulare, hitbox migliorate, risolti bug ai proiettili.
+- Introduzione di più armi a disposizione dei giocatori
+- Introdotte le torrette automatiche (Sperimentale)
+
 ## 0.1.11
 - Bug Fix: Principalmente ai joystick
 - Miglioramenti alla stabilità del multiplayer

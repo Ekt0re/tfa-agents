@@ -641,14 +641,14 @@ static func can_deploy_at(
 	if scene_tree.has_group(level_group):
 		for entity: Node in scene_tree.get_nodes_in_group(level_group):
 			if entity is Node2D:
-				if position.distance_to((entity as Node2D).global_position) < check_radius:
+				if p_position.distance_to((entity as Node2D).global_position) < check_radius:
 					return false
 
 	var params := PhysicsShapeQueryParameters2D.new()
 	var circle  := CircleShape2D.new()
 	circle.radius            = check_radius * 0.5
 	params.shape             = circle
-	params.transform         = Transform2D(0.0, position)
+	params.transform         = Transform2D(0.0, p_position)
 	params.collision_mask    = 1 << (target_level * 3)
 	params.collide_with_areas  = false
 	params.collide_with_bodies = true
