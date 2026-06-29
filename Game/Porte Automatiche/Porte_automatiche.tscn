@@ -1,0 +1,99 @@
+[gd_scene format=3 uid="uid://iu3pey1do2ef"]
+
+[ext_resource type="Script" uid="uid://k0hhalxcp7c7" path="res://Game/Porte Automatiche/Porte_automatiche.gd" id="1_door"]
+[ext_resource type="Texture2D" uid="uid://dtpbs7tt35hhl" path="res://Assets/Porte/scifi-dungeon-doors_OUTPUT.png" id="2_texture"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4"]
+atlas = ExtResource("2_texture")
+region = Rect2(0, 64, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3"]
+atlas = ExtResource("2_texture")
+region = Rect2(32, 64, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2"]
+atlas = ExtResource("2_texture")
+region = Rect2(64, 64, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1"]
+atlas = ExtResource("2_texture")
+region = Rect2(96, 64, 32, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_door"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1")
+}],
+"loop": false,
+"name": &"Apertura",
+"speed": 25.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4")
+}],
+"loop": false,
+"name": &"Chiusura",
+"speed": 25.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ueok7"]
+size = Vector2(48, 256)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_activation"]
+radius = 272.47018
+
+[node name="Porta automatica" type="StaticBody2D" unique_id=1705730947]
+z_index = 1
+position = Vector2(0, 20)
+collision_mask = 0
+script = ExtResource("1_door")
+
+[node name="DoorSprite" type="AnimatedSprite2D" parent="." unique_id=1762283991]
+self_modulate = Color(0.470588, 0.470588, 0.470588, 1)
+light_mask = 2
+position = Vector2(2.4999924, -61.000015)
+scale = Vector2(5.8437495, 5.8437495)
+sprite_frames = SubResource("SpriteFrames_door")
+animation = &"Apertura"
+autoplay = "true"
+
+[node name="CollisionShape" type="CollisionShape2D" parent="." unique_id=337196470]
+position = Vector2(-1.5258789e-05, -19.671051)
+shape = SubResource("RectangleShape2D_ueok7")
+
+[node name="ActivationArea" type="Area2D" parent="." unique_id=1839958939]
+collision_layer = 0
+collision_mask = 3
+monitorable = false
+
+[node name="ActivationShape" type="CollisionShape2D" parent="ActivationArea" unique_id=1095909210]
+position = Vector2(0, -20)
+shape = SubResource("CircleShape2D_activation")
+
+[node name="CloseTimer" type="Timer" parent="." unique_id=1191475950]
+wait_time = 2.0
+one_shot = true
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="." unique_id=1524225510]
+position = Vector2(-184, 140)
+rect = Rect2(-88, -432, 544, 548)

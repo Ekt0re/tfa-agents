@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://i0psfnd8rl7o"]
+
+[ext_resource type="PackedScene" uid="uid://iu3pey1do2ef" path="res://Game/Porte Automatiche/Porte_automatiche.tscn" id="1_87bon"]
+[ext_resource type="Script" uid="uid://cc1hafegsg3sg" path="res://Game/Porte Automatiche/Porte_Doppie.gd" id="2_script"]
+
+[node name="PorteDoppie" type="Node2D" unique_id=413205671]
+script = ExtResource("2_script")
+
+[node name="Porta automatica" parent="." unique_id=1705730947 instance=ExtResource("1_87bon")]
+position = Vector2(2, 144)
+
+[node name="Porta automatica2" parent="." unique_id=267493860 instance=ExtResource("1_87bon")]
+position = Vector2(2, -148)
+rotation = -3.1415927
+disable_hack_bar = true

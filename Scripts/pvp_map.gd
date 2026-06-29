@@ -44,6 +44,9 @@ func _get_all_peer_ids() -> Array:
 func _ready() -> void:
 	super._ready()
 	
+	# Connessione al segnale di disconnessione
+	_mp_manager.connection_failed.connect(_on_connection_failed)
+	
 	# Rimuove entità indesiderate ereditate da dev_map.tscn
 	for child in get_children():
 		if child is CharacterBody2D or child.name.begins_with("Bot") or child.name == "Tutorial":
@@ -210,6 +213,24 @@ func _spawn_player(peer_id: int, player_info: Dictionary, spawn_index: int) -> v
 
 
 # ── Kill / Win condition ──────────────────────────────────────────────────────
+
+## Gestisce le kill fatte dalle torrette (attribuite al deployer)
+func _on_turret_kill(turret_deployer_peer_id: int, _victim_peer_id: int) -> void:
+	if not multiplayer.is_server():
+		return
+	if _match_over:
+		return
+	
+	## Attribuisci la kill al team del deployer
+	var deployer_info := _get_peer_info(turret_deployer_peer_id)
+	var deployer_team: int = int(deployer_info.get("team_id", 0))
+	
+	if not _kills.has(deployer_team):
+		_kills[deployer_team] = 0
+	_kills[deployer_team] += 1
+	
+	_sync_kills.rpc(_kills)
+	_check_win_condition()
 
 func _on_player_killed(killer_peer_id: int, victim_peer_id: int) -> void:
 	if not multiplayer.is_server():
@@ -513,3 +534,16 @@ func _start_lobby_countdown(label: Label) -> void:
 		await get_tree().create_timer(1.0).timeout
 		if is_instance_valid(label):
 			label.text = "Ritorno in lobby tra %d secondi..." % i
+
+
+## Gestisce la disconnessione dal server durante la partita
+func _on_connection_failed(reason: String) -> void:
+	print("PvPMap: Disconnessione rilevata - %s" % reason)
+	
+	# Salva il motivo in GlobalSettings per passarlo al menu
+	var gs = get_node_or_null("/root/GlobalSettings")
+	if gs and gs.has_method("set_setting"):
+		gs.call("set_setting", "disconnect_reason", reason)
+	
+	# Cambia scena direttamente al menu di disconnessione
+	get_tree().change_scene_to_file("res://Menu/server_disconnect_menu.tscn")

@@ -92,7 +92,7 @@ func _setup_player(p: CharacterBody2D) -> void:
 		_on_player_health_changed(player.vita, player.vita_max)
 	if "colpi_correnti" in player and "colpi_totali" in player:
 		_on_player_ammo_changed(player.colpi_correnti, player.colpi_totali)
-	if "nome_arma" in player and weapon_name_label:
+	if player and "nome_arma" in player and weapon_name_label:
 		weapon_name_label.text = player.nome_arma
 
 func _process(delta: float) -> void:
@@ -101,7 +101,9 @@ func _process(delta: float) -> void:
 		_subtitle_time_left = maxf(0.0, _subtitle_time_left - delta)
 		if _subtitle_time_left <= 0.0 and subtitle_panel:
 			subtitle_panel.visible = false
-			
+	
+	if player and "nome_arma" in player and weapon_name_label:
+		weapon_name_label.text = player.nome_arma
 
 func _on_player_health_changed(current: float, max_val: float) -> void:
 	if health_bar:

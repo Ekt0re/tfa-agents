@@ -9,7 +9,7 @@
 ## Hacking:     barra disegnata via _draw().
 
 @tool
-extends Node2D
+extends StaticBody2D
 class_name Turret
 
 # ---------------------------------------------------------------------------
@@ -95,6 +95,7 @@ var _registered_levels: Array[int]   = []
 var _player_node: Node2D             = null
 var _screen_visible: bool            = true
 var _last_shot_time: float           = -1000.0
+var _deployer_peer_id: int           = 0  ## Peer ID del player che ha piazzato la torretta
 
 # Materiali shader (inizializzati in _ready)
 var _danger_indicator: ColorRect      = null
@@ -111,7 +112,6 @@ var _laser_shader_mat: ShaderMaterial = null
 @onready var _ray_cast       : RayCast2D                 = $RayCast2D
 @onready var _action_area    : Area2D                    = $ActionArea
 @onready var _action_shape   : CollisionShape2D          = $ActionArea/ActionShape
-@onready var _hit_area       : Area2D                    = $HitArea
 @onready var _reload_timer   : Timer                     = $ReloadTimer
 @onready var _anim_sprite    : AnimatedSprite2D          = $AnimatedSprite2D
 @onready var _particles      : CPUParticles2D            = $ExplosionParticles
@@ -183,9 +183,6 @@ func _ready() -> void:
 	_action_area.body_exited.connect(_on_action_body_exited)
 	_action_area.area_entered.connect(_on_action_area_entered)
 	_action_area.area_exited.connect(_on_action_area_exited)
-
-	# Segnali HitArea
-	_hit_area.area_entered.connect(_on_hit_area_entered)
 
 	# Timer ricarica
 	_reload_timer.wait_time = cadenza_fuoco
@@ -420,13 +417,14 @@ func _try_shoot() -> void:
 
 	if _ray_cast.is_colliding():
 		impact_pos = _ray_cast.get_collision_point()
-		var collider := _ray_cast.get_collider()
-		if collider is Node:
-			# Registra target_path solo se è il nemico reale (non un muro)
-			if _is_enemy(collider as Node) or collider == _target or collider.get_parent() == _target:
-				target_path = collider.get_path()
+		var collider := _ray_cast.get_collider() as Node
+		if collider:
+			# Cerca il nodo nemico: il collider stesso o un suo antenato
+			var dmg_target := _find_damageable_ancestor(collider)
+			if dmg_target and _is_enemy(dmg_target):
+				target_path = dmg_target.get_path()
 			else:
-				return  # Ostacolo fisso tra torretta e target: non sparare
+				return  ## Ostacolo tra torretta e target: non sparare
 
 	_fire_projectile(fire_origin, impact_pos, target_path)
 
@@ -459,7 +457,33 @@ func _on_projectile_impact(hit_path: NodePath, _shooter_peer_id: int) -> void:
 	if target.has_method("apply_damage"):
 		target.call_deferred("apply_damage", danno)
 	elif target.has_method("receive_damage"):
-		target.call_deferred("receive_damage", danno, 0)
+		target.call_deferred("receive_damage", danno, _deployer_peer_id)
+	
+	## Notifica la mappa per il conteggio delle kill (solo se il target è un player)
+	if target is PlayerPrototype:
+		_notify_turret_kill.rpc(target.name, _deployer_peer_id)
+
+
+## RPC per notificare alla mappa che la torretta ha ucciso un player
+@rpc("authority", "call_local", "reliable")
+func _notify_turret_kill(victim_name: String, turret_deployer_peer_id: int) -> void:
+	if not multiplayer.is_server():
+		return
+	
+	var current_scene := get_tree().current_scene
+	if current_scene and current_scene.has_method("_on_turret_kill"):
+		current_scene.call("_on_turret_kill", turret_deployer_peer_id, int(victim_name) if victim_name.is_valid_int() else 0)
+
+## Risale la gerarchia fino a trovare un nodo con apply_damage o in damageable.
+func _find_damageable_ancestor(node: Node) -> Node:
+	var current := node
+	var limit    := 4  ## Max livelli di gerarchia da controllare
+	while current and limit > 0:
+		if current.is_in_group("damageable") or current.has_method("apply_damage"):
+			return current
+		current = current.get_parent()
+		limit -= 1
+	return node  ## Fallback: ritorna il nodo originale
 
 func _on_reload_timeout() -> void:
 	_can_shoot = true
@@ -468,20 +492,31 @@ func _on_reload_timeout() -> void:
 # Ricezione danni
 # ---------------------------------------------------------------------------
 
-func _on_hit_area_entered(area: Area2D) -> void:
-	if _is_dead:
-		return
-	var area_team := _get_team_id(area)
-	if area_team != team_id and area_team != -1 and "danno" in area:
-		apply_damage(area.danno)
-
 ## API pubblica — stessa firma di mina.gd.
-func apply_damage(amount: float, _source: Node = null) -> void:
+## Essendo StaticBody2D, il player la trova direttamente via RayCast.
+## Supporta source_peer_id per attribuzione kill nel multiplayer.
+func apply_damage(amount: float, source: Node = null) -> void:
 	if _is_dead or vita <= 0.0:
 		return
+	
+	## Verifica friendly fire: se source è un player dello stesso team, ignora il danno
+	if source and source is PlayerPrototype:
+		var source_player := source as PlayerPrototype
+		if source_player.team_id == team_id:
+			return  ## No friendly fire sulle torrette del proprio team
+	
 	vita = maxf(vita - amount, 0.0)
 	if vita <= 0.0:
-		_die()
+		## Nel multiplayer, sincronizza la distruzione
+		if _is_multiplayer_session():
+			_die_rpc.rpc()
+		else:
+			_die()
+
+
+## Verifica se è una sessione multiplayer
+func _is_multiplayer_session() -> bool:
+	return multiplayer.has_multiplayer_peer() and not multiplayer.get_peers().is_empty()
 
 # ---------------------------------------------------------------------------
 # Distruzione — identica a mina.gd
@@ -497,11 +532,11 @@ func _die() -> void:
 	_targets_in_range.clear()
 	_show_laser(false)
 
-	# Disabilita collisioni
+	# Disabilita collisioni (StaticBody2D self + ActionArea)
+	set_deferred("collision_layer", 0)
+	set_deferred("collision_mask",  0)
 	_action_area.set_deferred("collision_layer", 0)
 	_action_area.set_deferred("collision_mask",  0)
-	_hit_area.set_deferred("collision_layer", 0)
-	_hit_area.set_deferred("collision_mask",  0)
 
 	# Suono esplosione
 	if _sfx_explosion:
@@ -514,6 +549,9 @@ func _die() -> void:
 		_point_light.visible = false
 
 	# Rimuove shader per riprodurre l'esplosione pulita (come mina.gd)
+	_base_sprite.visible = false
+	_gun_sprite.visible = false
+	
 	if _anim_sprite:
 		_anim_sprite.material = null
 
@@ -549,9 +587,19 @@ func _die() -> void:
 
 	destroyed.emit()
 
+
+## RPC per sincronizzare la distruzione della torretta nel multiplayer
+@rpc("authority", "call_local", "reliable")
+func _die_rpc() -> void:
+	_die()
+
 # ---------------------------------------------------------------------------
 # Hacking
 # ---------------------------------------------------------------------------
+
+## Imposta il peer ID del player che ha piazzato questa torretta
+func set_deployer_peer_id(peer_id: int) -> void:
+	_deployer_peer_id = peer_id
 
 func start_hack(new_team: int = -1) -> void:
 	if not hackable or _is_dead or _is_hacking:
@@ -584,16 +632,29 @@ func _complete_hack() -> void:
 # ---------------------------------------------------------------------------
 
 func _get_team_id(node: Node) -> int:
+	# Prima cerca nei gruppi team_X
 	for group: String in node.get_groups():
 		if group.begins_with("team_"):
 			return int(group.get_slice("_", 1))
+	# Fallback: proprietà diretta team_id (usata da player, bot, altre torrette)
+	if "team_id" in node:
+		return int(node.get("team_id"))
 	return -1
 
 func _is_enemy(node: Node) -> bool:
 	if not node.is_in_group("damageable"):
 		return false
+	if node == self:
+		return false
+	
+	## Le torrette ignorano le mine
+	if node is Mina:
+		return false
+	
 	var node_team := _get_team_id(node)
-	return node_team != team_id and node_team != -1
+	if node_team == -1:
+		return false  ## Team sconosciuto: mai nemico
+	return node_team != team_id
 
 func _is_same_level(node: Node) -> bool:
 	var node_level: int = livello
@@ -665,13 +726,14 @@ func _apply_collision_layers() -> void:
 	var wall_bit      := 1 << (base_layer - 1)
 	var character_bit := 1 << base_layer
 
-	if _action_area:
-		_action_area.collision_layer = 0
-		_action_area.collision_mask  = character_bit
+	# StaticBody2D (self): occupa il wall_layer → player e proiettili ci collidono
+	collision_layer = wall_bit
+	collision_mask  = 0  ## Non ha bisogno di rilevare nulla direttamente
 
-	if _hit_area:
-		_hit_area.collision_layer = wall_bit
-		_hit_area.collision_mask  = character_bit
+	if _action_area:
+		# Rileva sia CharacterBody2D (player/bot) che altri StaticBody2D (torrette)
+		_action_area.collision_layer = 0
+		_action_area.collision_mask  = wall_bit | character_bit
 
 	if _ray_cast:
 		_ray_cast.collision_mask = wall_bit | character_bit

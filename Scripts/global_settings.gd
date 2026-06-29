@@ -85,6 +85,7 @@ func _ready() -> void:
 	if get_tree() and not get_tree().node_added.is_connected(_on_tree_node_added):
 		get_tree().node_added.connect(_on_tree_node_added)
 	_load_config()
+	_apply_keybinds_on_startup()
  
  
 func _process(_delta: float) -> void:
@@ -613,5 +614,13 @@ func _is_version_newer(current: String, latest: String) -> bool:
 		if l_parts[i].to_int() < c_parts[i].to_int():
 			return false
 	return l_parts.size() > c_parts.size()
- 
+
+
+func _apply_keybinds_on_startup() -> void:
+	var keybind_dialog_script = load("res://Menu/keybind_dialog.gd")
+	if keybind_dialog_script:
+		var keybind_dialog = keybind_dialog_script.new()
+		keybind_dialog.apply_keybinds_on_startup()
+		keybind_dialog.queue_free()
+
  

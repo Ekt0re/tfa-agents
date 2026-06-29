@@ -1,36 +1,44 @@
-[gd_scene format=3 uid="uid://cj5rrh5hd0nan"]
+[gd_scene format=3 uid="uid://cd6eqdpwrblx7"]
 
 [ext_resource type="Script" uid="uid://scl6kyruuq3v" path="res://Game/Torrette/Turret.gd" id="1_turret"]
-[ext_resource type="Texture2D" uid="uid://d30b4gn1q3db2" path="res://Assets/Icons/Gun_change.png" id="2_65fko"]
-[ext_resource type="Texture2D" uid="uid://d1l8ex1xbblcr" path="res://Assets/Icons/protagonista.png" id="3_v7mjx"]
+[ext_resource type="Texture2D" uid="uid://mxqm3sh8tq6" path="res://Assets/Nemici/Torrette/Toretta Base.png" id="2_p07t2"]
+[ext_resource type="Texture2D" uid="uid://sv0npm7npmcd" path="res://Assets/Nemici/Torrette/Toretta Canna.png" id="3_65fko"]
+[ext_resource type="SpriteFrames" uid="uid://guvmkhoac7lj" path="res://Assets/Explosion/Esplosione.tres" id="4_v7mjx"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 35.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_action"]
-radius = 200.25983
-
-[sub_resource type="CircleShape2D" id="CircleShape2D_hit"]
-radius = 35.0
+radius = 400.0
 
 [sub_resource type="Gradient" id="Gradient_particles"]
 offsets = PackedFloat32Array(0, 0.35, 1)
 colors = PackedColorArray(1, 0.6, 0.1, 1, 1, 0.2, 0, 1, 0.2, 0.1, 0.1, 0)
 
-[node name="Turret" type="Node2D" unique_id=734211450]
+[node name="Turret" type="StaticBody2D" unique_id=1303604919]
 z_index = 1
+collision_mask = 0
 script = ExtResource("1_turret")
 
-[node name="BaseSprite" type="Sprite2D" parent="." unique_id=254323672]
-texture = ExtResource("2_65fko")
+[node name="BodyShape" type="CollisionShape2D" parent="." unique_id=34421501]
+scale = Vector2(2.159171, 2.159171)
+shape = SubResource("CircleShape2D_body")
 
-[node name="GunSprite" type="Node2D" parent="." unique_id=953066973]
+[node name="BaseSprite" type="Sprite2D" parent="." unique_id=1413373110]
+scale = Vector2(0.0157963, 0.0157963)
+texture = ExtResource("2_p07t2")
+
+[node name="GunSprite" type="Node2D" parent="." unique_id=1310162788]
 z_index = 1
+scale = Vector2(2.159171, 2.159171)
 
-[node name="GunTexture" type="Sprite2D" parent="GunSprite" unique_id=500365186]
-position = Vector2(-1.847744e-06, -8.46386e-06)
-scale = Vector2(0.008478635, 0.008478635)
-texture = ExtResource("3_v7mjx")
+[node name="GunTexture" type="Sprite2D" parent="GunSprite" unique_id=555438662]
+scale = Vector2(0.109009154, 0.109009154)
+texture = ExtResource("3_65fko")
 
-[node name="LaserLine" type="Line2D" parent="GunSprite" unique_id=507390146]
-visible = false
+[node name="LaserLine" type="Line2D" parent="GunSprite" unique_id=1047312623]
+z_index = 1
+scale = Vector2(0.46429464, 0.46314073)
 points = PackedVector2Array(0, 0, 400, 0)
 width = 5.0
 default_color = Color(1, 0.2, 0.1, 0.85)
@@ -39,33 +47,29 @@ begin_cap_mode = 2
 end_cap_mode = 2
 antialiased = true
 
-[node name="RayCast2D" type="RayCast2D" parent="." unique_id=603670212]
+[node name="RayCast2D" type="RayCast2D" parent="." unique_id=73538433]
 enabled = false
 target_position = Vector2(400, 0)
 collision_mask = 3
 
-[node name="ActionArea" type="Area2D" parent="." unique_id=1592398543]
+[node name="ActionArea" type="Area2D" parent="." unique_id=1097555099]
 collision_layer = 0
-collision_mask = 2
+collision_mask = 3
 monitorable = false
 
-[node name="ActionShape" type="CollisionShape2D" parent="ActionArea" unique_id=1319890856]
+[node name="ActionShape" type="CollisionShape2D" parent="ActionArea" unique_id=1060250079]
 shape = SubResource("CircleShape2D_action")
 
-[node name="HitArea" type="Area2D" parent="." unique_id=865618332]
-collision_mask = 2
-
-[node name="HitShape" type="CollisionShape2D" parent="HitArea" unique_id=1243468616]
-shape = SubResource("CircleShape2D_hit")
-
-[node name="ReloadTimer" type="Timer" parent="." unique_id=1910588845]
+[node name="ReloadTimer" type="Timer" parent="." unique_id=907113099]
 wait_time = 0.4
 one_shot = true
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1001531211]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1393758091]
 visible = false
+sprite_frames = ExtResource("4_v7mjx")
+animation = &"Esplosione"
 
-[node name="ExplosionParticles" type="CPUParticles2D" parent="." unique_id=1620414369]
+[node name="ExplosionParticles" type="CPUParticles2D" parent="." unique_id=587446241]
 emitting = false
 amount = 120
 lifetime = 0.8
@@ -83,13 +87,13 @@ scale_amount_min = 8.0
 scale_amount_max = 24.0
 color_ramp = SubResource("Gradient_particles")
 
-[node name="SfxShoot" type="AudioStreamPlayer2D" parent="." unique_id=129098697]
+[node name="SfxShoot" type="AudioStreamPlayer2D" parent="." unique_id=2122827555]
 max_distance = 500.0
 attenuation = 1.5
 
-[node name="SfxExplosion" type="AudioStreamPlayer2D" parent="." unique_id=1940975803]
+[node name="SfxExplosion" type="AudioStreamPlayer2D" parent="." unique_id=1517828335]
 max_distance = 1000.0
 attenuation = 0.5
 
-[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="." unique_id=502314054]
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="." unique_id=122721278]
 rect = Rect2(-60, -60, 120, 120)

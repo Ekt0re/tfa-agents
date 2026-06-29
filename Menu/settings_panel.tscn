@@ -1,29 +1,29 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://yxi1iq3j37l7"]
 
-[ext_resource type="Script" path="res://Menu/settings_panel.gd" id="1_script"]
-[ext_resource type="Theme" path="res://Assets/UI/global_theme.tres" id="2_theme"]
+[ext_resource type="Script" uid="uid://bgqjhtugksyqu" path="res://Menu/settings_panel.gd" id="1_script"]
+[ext_resource type="Theme" uid="uid://du6vlm3j6xlwy" path="res://Assets/UI/global_theme.tres" id="2_theme"]
 
-[node name="SettingsPanel" type="PanelContainer"]
+[node name="SettingsPanel" type="PanelContainer" unique_id=541102741]
 custom_minimum_size = Vector2(820, 620)
 theme = ExtResource("2_theme")
 script = ExtResource("1_script")
 
-[node name="ContentMargin" type="MarginContainer" parent="."]
+[node name="ContentMargin" type="MarginContainer" parent="." unique_id=1191793460]
 layout_mode = 2
-	theme_override_constants/margin_left = 16
-	theme_override_constants/margin_top = 16
-	theme_override_constants/margin_right = 16
-	theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 
-[node name="RootVBox" type="VBoxContainer" parent="ContentMargin"]
+[node name="RootVBox" type="VBoxContainer" parent="ContentMargin" unique_id=484207429]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Header" type="HBoxContainer" parent="ContentMargin/RootVBox"]
+[node name="Header" type="HBoxContainer" parent="ContentMargin/RootVBox" unique_id=335945423]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="HeaderText" type="VBoxContainer" parent="ContentMargin/RootVBox/Header"]
+[node name="HeaderText" type="VBoxContainer" parent="ContentMargin/RootVBox/Header" unique_id=398211383]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 4
@@ -36,8 +36,8 @@ text = "IMPOSTAZIONI"
 
 [node name="SubtitleLabel" type="Label" parent="ContentMargin/RootVBox/Header/HeaderText" unique_id=2]
 unique_name_in_owner = true
-layout_mode = 2
 modulate = Color(0.8, 0.88, 1, 0.78)
+layout_mode = 2
 text = "Configura audio, grafica e accessibilità dell'interfaccia."
 autowrap_mode = 3
 
@@ -46,45 +46,45 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Indietro"
 
-[node name="ScrollContainer" type="ScrollContainer" parent="ContentMargin/RootVBox"]
+[node name="ScrollContainer" type="ScrollContainer" parent="ContentMargin/RootVBox" unique_id=1894049818]
 custom_minimum_size = Vector2(0, 380)
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="SectionsVBox" type="VBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer"]
+[node name="SectionsVBox" type="VBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer" unique_id=501069326]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 18
 
-[node name="AudioSection" type="PanelContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox"]
+[node name="AudioSection" type="PanelContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox" unique_id=421528108]
 layout_mode = 2
 
-[node name="AudioMargin" type="MarginContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection"]
+[node name="AudioMargin" type="MarginContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection" unique_id=62999453]
 layout_mode = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="AudioVBox" type="VBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin"]
+[node name="AudioVBox" type="VBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin" unique_id=1384750846]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="AudioTitle" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox"]
+[node name="AudioTitle" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox" unique_id=406601832]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Audio"
 
-[node name="MasterRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox"]
+[node name="MasterRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox" unique_id=2086486037]
 layout_mode = 2
 columns = 2
 
-[node name="MasterLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/MasterRow"]
+[node name="MasterLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/MasterRow" unique_id=1188815945]
 layout_mode = 2
 text = "Volume master"
 
-[node name="MasterControl" type="HBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/MasterRow"]
+[node name="MasterControl" type="HBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/MasterRow" unique_id=960270967]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 10
@@ -93,7 +93,6 @@ theme_override_constants/separation = 10
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-max_value = 100.0
 value = 80.0
 
 [node name="MasterValue" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/MasterRow/MasterControl" unique_id=5]
@@ -103,15 +102,15 @@ layout_mode = 2
 text = "80%"
 horizontal_alignment = 2
 
-[node name="MusicRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox"]
+[node name="MusicRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox" unique_id=1782287842]
 layout_mode = 2
 columns = 2
 
-[node name="MusicLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/MusicRow"]
+[node name="MusicLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/MusicRow" unique_id=734016497]
 layout_mode = 2
 text = "Volume musica"
 
-[node name="MusicControl" type="HBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/MusicRow"]
+[node name="MusicControl" type="HBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/MusicRow" unique_id=1818338147]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 10
@@ -120,7 +119,6 @@ theme_override_constants/separation = 10
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-max_value = 100.0
 value = 70.0
 
 [node name="MusicValue" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/MusicRow/MusicControl" unique_id=7]
@@ -130,15 +128,15 @@ layout_mode = 2
 text = "70%"
 horizontal_alignment = 2
 
-[node name="SfxRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox"]
+[node name="SfxRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox" unique_id=788400805]
 layout_mode = 2
 columns = 2
 
-[node name="SfxLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/SfxRow"]
+[node name="SfxLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/SfxRow" unique_id=1250810346]
 layout_mode = 2
 text = "Volume effetti"
 
-[node name="SfxControl" type="HBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/SfxRow"]
+[node name="SfxControl" type="HBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/SfxRow" unique_id=1353720063]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 10
@@ -147,7 +145,6 @@ theme_override_constants/separation = 10
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-max_value = 100.0
 value = 85.0
 
 [node name="SfxValue" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/AudioSection/AudioMargin/AudioVBox/SfxRow/SfxControl" unique_id=9]
@@ -157,30 +154,30 @@ layout_mode = 2
 text = "85%"
 horizontal_alignment = 2
 
-[node name="GraphicsSection" type="PanelContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox"]
+[node name="GraphicsSection" type="PanelContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox" unique_id=840793515]
 layout_mode = 2
 
-[node name="GraphicsMargin" type="MarginContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection"]
+[node name="GraphicsMargin" type="MarginContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection" unique_id=1014964389]
 layout_mode = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="GraphicsVBox" type="VBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin"]
+[node name="GraphicsVBox" type="VBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin" unique_id=1822995623]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="GraphicsTitle" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox"]
+[node name="GraphicsTitle" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox" unique_id=1546743324]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Grafica"
 
-[node name="WindowModeRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox"]
+[node name="WindowModeRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox" unique_id=94844106]
 layout_mode = 2
 columns = 2
 
-[node name="WindowModeLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/WindowModeRow"]
+[node name="WindowModeLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/WindowModeRow" unique_id=47988109]
 layout_mode = 2
 text = "Modalità finestra"
 
@@ -188,27 +185,26 @@ text = "Modalità finestra"
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Finestra"
 
-[node name="VSyncRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox"]
+[node name="VSyncRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox" unique_id=626977338]
 layout_mode = 2
 columns = 2
 
-[node name="VSyncLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/VSyncRow"]
+[node name="VSyncLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/VSyncRow" unique_id=1303236457]
 layout_mode = 2
 text = "VSync"
 
 [node name="VSyncToggle" type="CheckButton" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/VSyncRow" unique_id=11]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Attivo"
 button_pressed = true
+text = "Attivo"
 
-[node name="FpsCapRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox"]
+[node name="FpsCapRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox" unique_id=161307835]
 layout_mode = 2
 columns = 2
 
-[node name="FpsCapLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/FpsCapRow"]
+[node name="FpsCapLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/FpsCapRow" unique_id=384025631]
 layout_mode = 2
 text = "Limite fotogrammi"
 
@@ -216,13 +212,12 @@ text = "Limite fotogrammi"
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-text = "60 FPS"
 
-[node name="PresetRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox"]
+[node name="PresetRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox" unique_id=2078429941]
 layout_mode = 2
 columns = 2
 
-[node name="PresetLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/PresetRow"]
+[node name="PresetLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GraphicsSection/GraphicsMargin/GraphicsVBox/PresetRow" unique_id=2096547360]
 layout_mode = 2
 text = "Preset grafico"
 
@@ -230,32 +225,31 @@ text = "Preset grafico"
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Alto"
 
-[node name="GameplaySection" type="PanelContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox"]
+[node name="GameplaySection" type="PanelContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox" unique_id=771626885]
 layout_mode = 2
 
-[node name="GameplayMargin" type="MarginContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection"]
+[node name="GameplayMargin" type="MarginContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection" unique_id=1310443796]
 layout_mode = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="GameplayVBox" type="VBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin"]
+[node name="GameplayVBox" type="VBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin" unique_id=1144756810]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="GameplayTitle" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox"]
+[node name="GameplayTitle" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox" unique_id=1963825452]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Gioco e interfaccia"
 
-[node name="UiScaleRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox"]
+[node name="UiScaleRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox" unique_id=1005309356]
 layout_mode = 2
 columns = 2
 
-[node name="UiScaleLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/UiScaleRow"]
+[node name="UiScaleLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/UiScaleRow" unique_id=12611641]
 layout_mode = 2
 text = "Scala UI"
 
@@ -263,13 +257,12 @@ text = "Scala UI"
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Normale"
 
-[node name="LanguageRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox"]
+[node name="LanguageRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox" unique_id=276399981]
 layout_mode = 2
 columns = 2
 
-[node name="LanguageLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/LanguageRow"]
+[node name="LanguageLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/LanguageRow" unique_id=312354164]
 layout_mode = 2
 text = "Lingua"
 
@@ -277,27 +270,26 @@ text = "Lingua"
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Italiano"
 
-[node name="SubtitlesRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox"]
+[node name="SubtitlesRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox" unique_id=309109400]
 layout_mode = 2
 columns = 2
 
-[node name="SubtitlesLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/SubtitlesRow"]
+[node name="SubtitlesLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/SubtitlesRow" unique_id=728452794]
 layout_mode = 2
 text = "Sottotitoli"
 
 [node name="SubtitlesToggle" type="CheckButton" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/SubtitlesRow" unique_id=15]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Attivi"
 button_pressed = true
+text = "Attivi"
 
-[node name="ShowFpsRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox"]
+[node name="ShowFpsRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox" unique_id=204796114]
 layout_mode = 2
 columns = 2
 
-[node name="ShowFpsLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/ShowFpsRow"]
+[node name="ShowFpsLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/ShowFpsRow" unique_id=1383238364]
 layout_mode = 2
 text = "Mostra FPS"
 
@@ -306,28 +298,61 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Disattivato"
 
-[node name="ScreenShakeRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox"]
+[node name="ScreenShakeRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox" unique_id=349110930]
 layout_mode = 2
 columns = 2
 
-[node name="ScreenShakeLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/ScreenShakeRow"]
+[node name="ScreenShakeLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/ScreenShakeRow" unique_id=75951901]
 layout_mode = 2
 text = "Screen shake"
 
 [node name="ScreenShakeToggle" type="CheckButton" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/ScreenShakeRow" unique_id=17]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Attivo"
 button_pressed = true
+text = "Attivo"
 
-[node name="Footer" type="HBoxContainer" parent="ContentMargin/RootVBox"]
+[node name="ControlsSection" type="PanelContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox" unique_id=123456789]
+layout_mode = 2
+
+[node name="ControlsMargin" type="MarginContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/ControlsSection" unique_id=987654321]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="ControlsVBox" type="VBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/ControlsSection/ControlsMargin" unique_id=456789123]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="FooterHint" type="Label" parent="ContentMargin/RootVBox/Footer"]
+[node name="ControlsTitle" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/ControlsSection/ControlsMargin/ControlsVBox" unique_id=789123456]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Controlli"
+
+[node name="KeybindButtonRow" type="GridContainer" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/ControlsSection/ControlsMargin/ControlsVBox" unique_id=321654987]
+layout_mode = 2
+columns = 2
+
+[node name="KeybindLabel" type="Label" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/ControlsSection/ControlsMargin/ControlsVBox/KeybindButtonRow" unique_id=654987321]
+layout_mode = 2
+text = "Personalizzazione tasti"
+
+[node name="KeybindButton" type="Button" parent="ContentMargin/RootVBox/ScrollContainer/SectionsVBox/ControlsSection/ControlsMargin/ControlsVBox/KeybindButtonRow" unique_id=20]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+text = "Configura tasti"
+
+[node name="Footer" type="HBoxContainer" parent="ContentMargin/RootVBox" unique_id=1914270611]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="FooterHint" type="Label" parent="ContentMargin/RootVBox/Footer" unique_id=2079570727]
 modulate = Color(0.8, 0.88, 1, 0.66)
+layout_mode = 2
+size_flags_horizontal = 3
 text = "Le modifiche vengono applicate e salvate automaticamente."
 autowrap_mode = 3
 

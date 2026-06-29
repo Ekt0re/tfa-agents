@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://t12n16npgxtc" path="res://Scenes/power_up.tscn" id="9_xqe5x"]
 [ext_resource type="PackedScene" uid="uid://bu1osy1fuhlin" path="res://Menu/HUD/HUD_Game.tscn" id="10_hud_game"]
 [ext_resource type="Script" uid="uid://ww1xf8dthkt1" path="res://Scripts/dev_map_tutorial.gd" id="11_tutorial"]
+[ext_resource type="PackedScene" uid="uid://i0psfnd8rl7o" path="res://Game/Porte Automatiche/Porte Doppie.tscn" id="14_2ukye"]
 
 [node name="DevMap" type="Node2D" unique_id=73936262]
 script = ExtResource("1_lighting")
@@ -688,3 +689,7 @@ type = 1
 
 [node name="Tutorial" type="Node" parent="." unique_id=999422702]
 script = ExtResource("11_tutorial")
+
+[node name="PorteDoppie" parent="." unique_id=413205671 instance=ExtResource("14_2ukye")]
+position = Vector2(284, 2536)
+rotation = -1.5707964

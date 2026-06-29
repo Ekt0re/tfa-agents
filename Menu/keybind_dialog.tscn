@@ -1,0 +1,82 @@
+[gd_scene format=3 uid="uid://brfvib4s82xjn"]
+
+[ext_resource type="Script" uid="uid://cdtoektt3ptd2" path="res://Menu/keybind_dialog.gd" id="1_script"]
+[ext_resource type="Theme" uid="uid://du6vlm3j6xlwy" path="res://Assets/UI/global_theme.tres" id="2_theme"]
+
+[node name="KeybindDialog" type="Window" unique_id=1860554605]
+oversampling_override = 1.0
+title = "Personalizzazione Tasti"
+initial_position = 2
+size = Vector2i(700, 600)
+exclusive = true
+unresizable = true
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="ContentMargin" type="MarginContainer" parent="." unique_id=1354688513]
+offset_right = 695.0
+offset_bottom = 588.0
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="RootVBox" type="VBoxContainer" parent="ContentMargin" unique_id=85638702]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="HBoxContainer" parent="ContentMargin/RootVBox" unique_id=573120314]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HeaderText" type="VBoxContainer" parent="ContentMargin/RootVBox/Header" unique_id=68555607]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="TitleLabel" type="Label" parent="ContentMargin/RootVBox/Header/HeaderText" unique_id=298902521]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Personalizzazione Tasti"
+
+[node name="SubtitleLabel" type="Label" parent="ContentMargin/RootVBox/Header/HeaderText" unique_id=1588236509]
+unique_name_in_owner = true
+modulate = Color(0.8, 0.88, 1, 0.78)
+layout_mode = 2
+text = "Premi un tasto per riassegnare l'azione."
+autowrap_mode = 3
+
+[node name="CloseButton" type="Button" parent="ContentMargin/RootVBox/Header" unique_id=1585251861]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Chiudi"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="ContentMargin/RootVBox" unique_id=579470702]
+custom_minimum_size = Vector2(0, 350)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="KeybindsVBox" type="VBoxContainer" parent="ContentMargin/RootVBox/ScrollContainer" unique_id=1620864682]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="Footer" type="HBoxContainer" parent="ContentMargin/RootVBox" unique_id=446445709]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="FooterHint" type="Label" parent="ContentMargin/RootVBox/Footer" unique_id=1492753928]
+unique_name_in_owner = true
+modulate = Color(0.8, 0.88, 1, 0.66)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Premi ESC per annullare la riassegnazione."
+autowrap_mode = 3
+
+[node name="ResetButton" type="Button" parent="ContentMargin/RootVBox/Footer" unique_id=119785895]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Ripristina predefiniti"

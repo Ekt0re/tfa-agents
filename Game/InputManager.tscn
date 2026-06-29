@@ -46,3 +46,13 @@ joystick_color = Color(0.9843137, 0.3372549, 0.101960786, 1)
 stick_texture = ExtResource("3_dunbb")
 stick_color = Color(0.9490196, 0.33333334, 0.101960786, 1)
 metadata/_custom_type_script = "uid://du65plwnxxes"
+
+[node name="action_button" type="Button" parent="." unique_id=2048561920]
+visible = false
+layout_mode = 1
+anchors_preset = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 100.0
+offset_bottom = 100.0
+text = "ACTION"

@@ -1,0 +1,58 @@
+[gd_scene format=3 uid="uid://c1fi3an6ao3sy"]
+
+[ext_resource type="Script" uid="uid://b31xwf6heivvv" path="res://Scripts/Telecamera.gd" id="1_telecamera"]
+[ext_resource type="SpriteFrames" uid="uid://guvmkhoac7lj" path="res://Assets/Explosion/Esplosione.tres" id="2_1m84c"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_detection"]
+radius = 800.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_explosion"]
+radius = 400.0
+
+[sub_resource type="Gradient" id="Gradient_particles"]
+offsets = PackedFloat32Array(0, 0.35, 1)
+colors = PackedColorArray(1, 0.9, 0.2, 1, 1, 0.2, 0, 1, 0.2, 0.1, 0.1, 0)
+
+[node name="Telecamera" type="Area2D" unique_id=664841100]
+z_index = 1
+collision_layer = 0
+collision_mask = 438
+script = ExtResource("1_telecamera")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=344235598]
+position = Vector2(4, 36.000004)
+scale = Vector2(4.7450004, 4.7450004)
+sprite_frames = ExtResource("2_1m84c")
+animation = &"MinaViola"
+
+[node name="RayCast2D" type="RayCast2D" parent="." unique_id=1234567890]
+enabled = true
+target_position = Vector2(800, 0)
+collision_mask = 438
+
+[node name="DetectionArea" type="Area2D" parent="." unique_id=2345678901]
+collision_layer = 0
+collision_mask = 438
+
+[node name="DetectionShape" type="CollisionShape2D" parent="DetectionArea" unique_id=3456789012]
+shape = SubResource("CircleShape2D_detection")
+
+[node name="ExplosionParticles" type="CPUParticles2D" parent="." unique_id=102948102]
+emitting = false
+amount = 120
+lifetime = 0.8
+one_shot = true
+explosiveness = 0.95
+emission_shape = 1
+emission_sphere_radius = 1.0
+spread = 180.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 50.0
+initial_velocity_max = 250.0
+angular_velocity_min = -180.0
+angular_velocity_max = 180.0
+scale_amount_min = 8.0
+scale_amount_max = 24.0
+color_ramp = SubResource("Gradient_particles")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="." unique_id=4567890123]

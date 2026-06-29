@@ -83,6 +83,10 @@ const PING_CHECK_INTERVAL: float = 2.0  # Controlla ogni 2 secondi
 var _peer_last_ping: Dictionary = {}  # {peer_id: last_ping_time}
 var _peer_poor_connection: Dictionary = {}  # {peer_id: bool}
 
+# Timeout lato client per rilevare disconnessione server
+var _last_server_data_time: float = 0.0
+const SERVER_TIMEOUT_SECONDS: float = 15.0  # Timeout 15 secondi
+
 # ---------------------------------------------------------------------------
 # Server Discovery
 # ---------------------------------------------------------------------------
@@ -128,6 +132,10 @@ func _process(delta: float) -> void:
 		if _ping_timer >= PING_CHECK_INTERVAL:
 			_ping_timer = 0.0
 			_check_peer_connection_quality()
+	
+	# Monitoraggio timeout server (solo client)
+	if not _is_host and is_connected_to_session():
+		_check_server_timeout(delta)
 
 
 # ---------------------------------------------------------------------------
@@ -509,6 +517,7 @@ func _on_peer_disconnected(peer_id: int) -> void:
 
 func _on_connected_to_server() -> void:
 	print("MultiplayerManager: Connesso al server come peer %d" % multiplayer.get_unique_id())
+	_last_server_data_time = Time.get_ticks_msec() / 1000.0  # Inizializza timer
 	_register_local_player(multiplayer.get_unique_id())
 	_register_player_on_server.rpc_id(1, multiplayer.get_unique_id(), local_player_name, local_skin_index)
 
@@ -523,6 +532,24 @@ func _on_server_disconnected() -> void:
 	print("MultiplayerManager: Server disconnesso.")
 	disconnect_game()
 	connection_failed.emit("Il server si è disconnesso.")
+
+
+## Controlla se il server non invia dati da troppo tempo (solo client)
+func _check_server_timeout(_delta: float) -> void:
+	var current_time = Time.get_ticks_msec() / 1000.0
+	
+	# Se è la prima volta, inizializza
+	if _last_server_data_time == 0.0:
+		_last_server_data_time = current_time
+		return
+	
+	var time_since_last_data = current_time - _last_server_data_time
+	
+	if time_since_last_data >= SERVER_TIMEOUT_SECONDS:
+		print("MultiplayerManager: Timeout server - nessun dato ricevuto per %.1f secondi" % time_since_last_data)
+		disconnect_game()
+		connection_failed.emit("Connessione persa con il server.
+Nessun dato ricevuto per %.0f secondi." % SERVER_TIMEOUT_SECONDS)
 
 
 # ---------------------------------------------------------------------------
@@ -565,6 +592,8 @@ func _check_peer_connection_quality() -> void:
 ## RPC: Il server invia un ping ai client per testare la connessione
 @rpc("authority", "call_remote", "reliable")
 func _ping_check() -> void:
+	# Il client aggiorna il timer dell'ultimo dato ricevuto dal server
+	_last_server_data_time = Time.get_ticks_msec() / 1000.0
 	# Il client risponde al ping
 	_pong_check.rpc_id(1)
 
@@ -582,6 +611,12 @@ func _pong_check() -> void:
 	if _peer_poor_connection.get(sender_id, false):
 		_peer_poor_connection[sender_id] = false
 		connection_quality_warning.emit(sender_id, false)
+
+
+## Aggiorna il timer quando ricevi qualsiasi RPC dal server
+func _on_rpc_received() -> void:
+	if not _is_host:
+		_last_server_data_time = Time.get_ticks_msec() / 1000.0
 
 
 # ---------------------------------------------------------------------------

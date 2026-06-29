@@ -26,7 +26,28 @@ settings_language,Lingua,Language
 settings_show_fps,Mostra FPS,Show FPS
 settings_subtitles,Sottotitoli azioni,Action subtitles
 settings_screen_shake,Shake camera,Camera shake
+settings_section_controls,Controlli,Controls
+settings_keybind,Personalizzazione tasti,Key customization
+settings_keybind_button,Configura tasti,Configure keys
 settings_footer_hint,Le modifiche vengono salvate automaticamente e applicate subito.,Changes are saved automatically and applied immediately.
+keybind_dialog_title,Personalizzazione Tasti,Key Customization
+keybind_dialog_subtitle,Premi un tasto per riassegnare l'azione.,Press a key to reassign the action.
+keybind_dialog_close,Chiudi,Close
+keybind_dialog_reset,Ripristina predefiniti,Reset defaults
+keybind_dialog_hint,Premi ESC per annullare la riassegnazione.,Press ESC to cancel reassignment.
+keybind_category_movement,Movimento,Movement
+keybind_category_actions,Azioni,Actions
+keybind_category_weapons,Armi,Weapons
+keybind_action_up,Su,Up
+keybind_action_down,Giù,Down
+keybind_action_left,Sinistra,Left
+keybind_action_right,Destra,Right
+keybind_action_reload,Ricarica,Reload
+keybind_action_deploy_turret,Piazza Torretta,Place Turret
+keybind_action_hack,Hack,Hack
+keybind_action_weapon_next,Arma Successiva,Next Weapon
+keybind_action_weapon_prev,Arma Precedente,Previous Weapon
+keybind_press_key,Premi un tasto...,Press a key...
 window_mode_windowed,Finestra,Windowed
 window_mode_borderless,Borderless,Borderless
 window_mode_fullscreen,Schermo intero,Fullscreen

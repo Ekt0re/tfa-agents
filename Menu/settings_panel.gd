@@ -18,8 +18,10 @@ signal back_requested
 @onready var _show_fps_toggle: CheckButton = %ShowFpsToggle
 @onready var _subtitles_toggle: CheckButton = %SubtitlesToggle
 @onready var _screen_shake_toggle: CheckButton = %ScreenShakeToggle
+@onready var _keybind_button: Button = %KeybindButton
 
 var _is_loading := false
+var _keybind_dialog: Window = null
 
 
 func _ready() -> void:
@@ -51,6 +53,7 @@ func _connect_controls() -> void:
 	_show_fps_toggle.toggled.connect(_on_toggle_changed)
 	_subtitles_toggle.toggled.connect(_on_toggle_changed)
 	_screen_shake_toggle.toggled.connect(_on_toggle_changed)
+	_keybind_button.pressed.connect(_on_keybind_button_pressed)
 
 
 func _hide_non_real_rows() -> void:
@@ -112,6 +115,9 @@ func _update_texts() -> void:
 	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/ShowFpsRow/ShowFpsLabel").text = tr("settings_show_fps")
 	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/SubtitlesRow/SubtitlesLabel").text = tr("settings_subtitles")
 	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/ScreenShakeRow/ScreenShakeLabel").text = tr("settings_screen_shake")
+	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/ControlsSection/ControlsMargin/ControlsVBox/ControlsTitle").text = tr("settings_section_controls")
+	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/ControlsSection/ControlsMargin/ControlsVBox/KeybindButtonRow/KeybindLabel").text = tr("settings_keybind")
+	_keybind_button.text = tr("settings_keybind_button")
 	get_node("ContentMargin/RootVBox/Footer/FooterHint").text = tr("settings_footer_hint")
 	_refresh_toggle_texts()
 
@@ -199,3 +205,17 @@ func _select_option_by_metadata(option: OptionButton, value: Variant) -> void:
 			option.select(index)
 			return
 	option.select(0)
+
+
+func _on_keybind_button_pressed() -> void:
+	if _keybind_dialog == null:
+		_keybind_dialog = load("res://Menu/keybind_dialog.tscn").instantiate()
+		_keybind_dialog.keybinds_changed.connect(_on_keybinds_changed)
+		get_tree().root.add_child(_keybind_dialog)
+	
+	_keybind_dialog.popup_centered()
+
+
+func _on_keybinds_changed() -> void:
+	# I keybinds vengono applicati automaticamente dal dialog
+	pass

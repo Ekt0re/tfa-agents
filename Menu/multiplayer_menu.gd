@@ -6,7 +6,6 @@ extends Control
 # --- Tab Crea ---
 @onready var _game_mode_option: OptionButton = %GameModeOption
 @onready var _respawn_checkbox: CheckBox = %RespawnCheckbox
-@onready var _advanced_settings_button: Button = %AdvancedSettingsButton
 @onready var _create_button: Button = %CreateButton
 
 # --- Advanced Settings Popup ---

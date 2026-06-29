@@ -7,6 +7,16 @@ signal ammo_changed(current: int, total: int)
 signal reload_started(duration: float)
 
 const PROJECTILE_VISUAL_SCENE := preload("res://Scenes/projectile_visual.tscn")
+const TURRET_SCENE            := preload("res://Game/Torrette/Turret.tscn")
+
+## Dati armi — rispecchia WeaponSystem.gd
+const WEAPONS: Dictionary = {
+	"pistola": { "damage": 25,  "cooldown": 0.3,  "range": 1200, "magazine": 12 },
+	"mitra":   { "damage": 20,  "cooldown": 0.12, "range": 1600, "magazine": 30 },
+	"pompa":   { "damage": 12,  "cooldown": 0.8,  "range": 800,  "magazine": 8,
+				 "pellets": 8,  "spread": 0.2 },
+	## granata: TODO
+}
 
 @export var speed: float = 400.0
 @export var current_height_level: int = 0
@@ -23,8 +33,16 @@ var vita: float = 100.0
 @export var colpi_correnti: int = 30
 @export var colpi_totali: int = 90
 @export var capacita_caricatore: int = 30
-@export var nome_arma: String = "ASSAULT_RIFLE_M4"
+@export var nome_arma: String = "mitra"
 @export var player_name: String = "Player"
+
+## Ordine di selezione armi (rotellina / numeri)
+var _weapon_order: Array[String] = ["pistola", "mitra", "pompa"]
+var _weapon_index: int = 1  ## mitra default
+
+## Hacking torrette
+var _hacking_turret: Node = null   ## Turret corrente in hack
+var _hack_held: bool     = false   ## E è tenuto premuto
 
 @onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D if has_node("NavigationAgent2D") else null
 @onready var joystick: VirtualJoystickPlus = $InputManager/left_stick
@@ -83,6 +101,9 @@ func _ready() -> void:
 
 	if _is_multiplayer_session() and multiplayer.is_server():
 		call_deferred("_sync_initial_state_to_peers")
+
+	# Inizializza arma di default (mitra)
+	call_deferred("_switch_weapon", _weapon_index)
 	
 	call_deferred("_initialize_level_system")
 	call_deferred("_update_team_color")
@@ -136,15 +157,13 @@ func _receive_initial_state(p_team_id: int, p_skin_index: int, p_nome_arma: Stri
 
 	print("Player %s: Ricevuto stato iniziale -> Team: %d, Skin: %d, Arma: %s, Nome: %s" % [name, team_id, skin_index, nome_arma, player_name])
 
-	# Mappa nome arma all'animazione
-	var arma = get_node_or_null("Arma")
-	if arma:
-		var anim_name = "mitra" # fallback
-		if arma.sprite_frames.has_animation(nome_arma):
-			anim_name = nome_arma
-		elif nome_arma == "ASSAULT_RIFLE_M4":
-			anim_name = "mitra"
-		arma.play(anim_name)
+	# Applica l'arma ricevuta tramite _switch_weapon (aggiorna AnimationPlayer + proprietà)
+	var weapon_idx := _weapon_order.find(nome_arma)
+	if weapon_idx >= 0:
+		_switch_weapon(weapon_idx)
+	else:
+		# Fallback: forza mitra se l'arma non è nell'array (es. legacy "ASSAULT_RIFLE_M4")
+		_switch_weapon(1)
 
 	_update_team_color()
 
@@ -241,17 +260,57 @@ func _unhandled_input(event: InputEvent) -> void:
 		var next_level := (current_height_level + 1) % total_levels
 		change_height_level(next_level)
 		return
+	
+	if event.is_action_pressed("reload"):
+		_try_reload()
+		return
 
-	if event is InputEventKey and event.pressed:
-		var key_event := event as InputEventKey
-		if key_event.physical_keycode == KEY_R:
-			_try_reload()
-			return
+	if event.is_action_pressed("deploy_turret"):
+		_try_deploy_turret()
+		return
+
+	# weapon switch diretto (tasti numerici)
+	if event.is_action_pressed("weapon_1"):
+		_switch_weapon(0)
+		return
+
+	if event.is_action_pressed("weapon_2"):
+		_switch_weapon(1)
+		return
+
+	if event.is_action_pressed("weapon_3"):
+		_switch_weapon(2)
+		return
+
+	# hacking (press/release corretto)
+	if event.is_action_pressed("hack"):
+		_hack_held = true
+		return
+
+	if event.is_action_released("hack"):
+		_hack_held = false
+		_stop_hacking()
+		return
+	
+	# weapon switch sequenziale (destra/sinistra)
+	if event.is_action_pressed("weapon_next"):
+		_switch_weapon((_weapon_index + 1) % _weapon_order.size())
+		return
+
+	if event.is_action_pressed("weapon_prev"):
+		_switch_weapon((_weapon_index - 1 + _weapon_order.size()) % _weapon_order.size())
+		return
 
 	if event is InputEventMouseButton:
 		var mouse_event := event as InputEventMouseButton
-		if mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed:
-			_try_fire()
+		match mouse_event.button_index:
+			MOUSE_BUTTON_LEFT:
+				if mouse_event.pressed:
+					_try_fire()
+			MOUSE_BUTTON_WHEEL_UP:
+				_switch_weapon((_weapon_index - 1 + _weapon_order.size()) % _weapon_order.size())
+			MOUSE_BUTTON_WHEEL_DOWN:
+				_switch_weapon((_weapon_index + 1) % _weapon_order.size())
 
 
 func _input(event: InputEvent) -> void:
@@ -270,14 +329,20 @@ func _physics_process(delta: float) -> void:
 		
 	var direction := Vector2.ZERO
 
-	if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
-		direction.y -= 1
-	if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
-		direction.y += 1
-	if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
-		direction.x -= 1
-	if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
-		direction.x += 1
+	#if Input.is_action_pressed("ui_up"):
+		#direction.y -= 1
+	#if Input.is_action_pressed("ui_down"):
+		#direction.y += 1
+	#if Input.is_action_pressed("ui_left"):
+		#direction.x -= 1
+	#if Input.is_action_pressed("ui_right"):
+		#direction.x += 1
+	
+	direction.y -= Input.get_action_strength("ui_up")
+	direction.y += Input.get_action_strength("ui_down")
+	
+	direction.x -= Input.get_action_strength("ui_left")
+	direction.x += Input.get_action_strength("ui_right")
 
 	var joy_dir := joystick.get_value()
 	if joy_dir.length() > 0.0:
@@ -324,6 +389,12 @@ func _send_state_to_remotes(remote_pos: Vector2, remote_rot: float, remote_level
 
 
 func _process(delta: float) -> void:
+	if _is_multiplayer_session() and not is_multiplayer_authority():
+		if nickname_label:
+			nickname_label.global_position = global_position + Vector2(-100, -80)
+			nickname_label.visible = visible
+		return
+
 	_update_player_position_in_shaders()
 	_update_entity_auras_in_shaders()
 	_update_camera_shake(delta)
@@ -331,6 +402,9 @@ func _process(delta: float) -> void:
 	if nickname_label:
 		nickname_label.global_position = global_position + Vector2(-100, -80)
 		nickname_label.visible = visible
+
+	# Hacking torretta
+	_process_hacking(delta)
 
 
 func change_height_level(new_level: int, force_update: bool = false) -> void:
@@ -392,7 +466,6 @@ func _try_fire() -> void:
 
 func _try_fire_in_direction(aim_direction: Vector2) -> void:
 	if not _can_fire():
-		# Auto-ricarica se il caricatore è vuoto ma ci sono munizioni di riserva
 		if colpi_correnti <= 0 and colpi_totali > 0:
 			_try_reload()
 		return
@@ -401,9 +474,28 @@ func _try_fire_in_direction(aim_direction: Vector2) -> void:
 		return
 
 	var fire_origin := _get_fire_origin()
-	var shot_data := _build_shot_data(fire_origin, aim_direction.normalized())
 	_last_shot_time = _get_time_seconds()
-	
+
+	# Pompa: spara N pallettoni con spread
+	nome_arma = _weapon_order[_weapon_index] if _weapon_index < _weapon_order.size() else "mitra"
+	if nome_arma == "pompa" and WEAPONS["pompa"].has("pellets"):
+		var pellets: int = WEAPONS["pompa"].get("pellets", 8)
+		## Consuma un colpo per ogni pallettone sparato
+		if colpi_correnti < pellets:
+			## Non ci sono abbastanza colpi per tutti i pallettoni, spara solo quelli disponibili
+			pellets = colpi_correnti
+		
+		_fire_shotgun_pellets(fire_origin, aim_direction.normalized(), pellets)
+		
+		## Consuma tutti i colpi sparati
+		colpi_correnti -= pellets
+		ammo_changed.emit(colpi_correnti, colpi_totali)
+		if _can_apply_local_feedback():
+			_trigger_screen_shake(5.0, 0.18)
+		return
+
+	var shot_data := _build_shot_data(fire_origin, aim_direction.normalized())
+
 	# Consuma colpo e aggiorna HUD
 	colpi_correnti -= 1
 	ammo_changed.emit(colpi_correnti, colpi_totali)
@@ -468,7 +560,11 @@ func _on_projectile_impact(target_path: NodePath, shooter_peer_id: int = 0) -> v
 	if target.has_method("receive_damage"):
 		target.call_deferred("receive_damage", projectile_damage, effective_shooter)
 	elif target.has_method("apply_damage"):
-		target.call_deferred("apply_damage", projectile_damage)
+		## Passa il player come source per il controllo friendly fire sulle torrette
+		if target is Turret:
+			target.call_deferred("apply_damage", projectile_damage, self)
+		else:
+			target.call_deferred("apply_damage", projectile_damage)
 	elif target.has_method("destroy_from_projectile"):
 		target.call_deferred("destroy_from_projectile")
 
@@ -490,6 +586,191 @@ func _on_projectile_impact(target_path: NodePath, shooter_peer_id: int = 0) -> v
 			pass
 		elif _is_enemy_target(target):
 			target.call_deferred("queue_free")
+
+## ── Cambio arma ────────────────────────────────────────────────────────────
+
+## Cambia arma per index nell'array _weapon_order.
+## Aggiorna proprietà di sparo, AnimationPlayer e HUD munizioni.
+func _switch_weapon(new_index: int) -> void:
+	var idx := clampi(new_index, 0, _weapon_order.size() - 1)
+	_weapon_index = idx
+	var wname: String = _weapon_order[idx]
+	nome_arma = wname
+
+	# Applica proprietà dell'arma
+	if WEAPONS.has(wname):
+		var w: Dictionary = WEAPONS[wname]
+		projectile_damage     = float(w.get("damage",   20))
+		fire_cooldown         = float(w.get("cooldown", 0.12))
+		shot_range            = float(w.get("range",    1600))
+		capacita_caricatore   = int(w.get("magazine",  30))
+		# Ricarica automatica se cambio arma e il caricatore è diverso
+		colpi_correnti = mini(colpi_correnti, capacita_caricatore)
+		ammo_changed.emit(colpi_correnti, colpi_totali)
+
+	# AnimationPlayer per posizione/rotazione braccia
+	var anim_player := get_node_or_null("AnimationPlayer") as AnimationPlayer
+	if anim_player and anim_player.has_animation(wname):
+		anim_player.play(wname)
+
+	# AnimatedSprite2D dell'arma
+	var arma := get_node_or_null("Arma") as AnimatedSprite2D
+	if arma and arma.sprite_frames and arma.sprite_frames.has_animation(wname):
+		arma.play(wname)
+
+	# Sincronizzazione multiplayer
+	if _is_multiplayer_session() and is_multiplayer_authority():
+		rpc_switch_weapon.rpc(idx)
+
+
+@rpc("authority", "call_remote", "reliable")
+func rpc_switch_weapon(new_index: int) -> void:
+	## Applicato sui client remoti: aggiorna sia visuale che proprietà dell'arma
+	var idx := clampi(new_index, 0, _weapon_order.size() - 1)
+	var wname: String = _weapon_order[idx]
+	
+	## Aggiorna le proprietà dell'arma per coerenza
+	if WEAPONS.has(wname):
+		var w: Dictionary = WEAPONS[wname]
+		projectile_damage   = float(w.get("damage",   20))
+		fire_cooldown       = float(w.get("cooldown", 0.12))
+		shot_range          = float(w.get("range",    1600))
+		capacita_caricatore = int(w.get("magazine",  30))
+		nome_arma = wname
+		_weapon_index = idx
+	
+	var anim_player := get_node_or_null("AnimationPlayer") as AnimationPlayer
+	if anim_player and anim_player.has_animation(wname):
+		anim_player.play(wname)
+	var arma := get_node_or_null("Arma") as AnimatedSprite2D
+	if arma and arma.sprite_frames and arma.sprite_frames.has_animation(wname):
+		arma.play(wname)
+
+
+## ── Sparo pompa (shotgun) ───────────────────────────────────────────────────
+
+func _fire_shotgun_pellets(fire_origin: Vector2, base_dir: Vector2, pellet_count: int = 0) -> void:
+	var spread: float = WEAPONS["pompa"].get("spread", 0.2)
+	var pellets: int  = pellet_count if pellet_count > 0 else WEAPONS["pompa"].get("pellets", 8)
+	var peer_id: int  = multiplayer.get_unique_id() if _is_multiplayer_session() else 1
+	for i in range(pellets):
+		var angle_offset := randf_range(-spread, spread)
+		var pellet_dir   := base_dir.rotated(angle_offset).normalized()
+		var shot_data    := _build_shot_data(fire_origin, pellet_dir)
+		if _is_multiplayer_session():
+			_replicate_fire.rpc(
+				shot_data["origin"], shot_data["impact_position"],
+				shot_data["target_path"], shot_data["height_level"],
+				shot_data["visual_speed"], peer_id
+			)
+		else:
+			_replicate_fire(
+				shot_data["origin"], shot_data["impact_position"],
+				shot_data["target_path"], shot_data["height_level"],
+				shot_data["visual_speed"], 1
+			)
+
+
+## ── Piazzamento torretta ────────────────────────────────────────────────────
+
+func _try_deploy_turret() -> void:
+	if vita <= 0.0:
+		return
+	## Posizione di deploy: di fronte al player (~80px)
+	var deploy_pos := global_position + Vector2.RIGHT.rotated(global_rotation) * 80.0
+	
+	## Verifica che la posizione sia su navigation per il livello corrente
+	if not _is_valid_navigation_position(deploy_pos, current_height_level):
+		if global_settings:
+			global_settings.call("show_subtitle_key", "subtitle_cannot_deploy_here", [], 1.5)
+		return
+	
+	if _is_multiplayer_session():
+		if is_multiplayer_authority():
+			rpc_deploy_turret.rpc(deploy_pos, current_height_level)
+	else:
+		_do_deploy_turret(deploy_pos, current_height_level)
+
+
+## Verifica se una posizione è valida per la navigazione sul livello specificato
+func _is_valid_navigation_position(pos: Vector2, _level: int) -> bool:
+	var navigation_map_rid := get_world_2d().navigation_map
+	if navigation_map_rid.is_valid():
+		var closest_point := NavigationServer2D.map_get_closest_point(navigation_map_rid, pos)
+		var distance := pos.distance_to(closest_point)
+		## Se il punto più vicino sulla navigation mesh è dentro un raggio di 50px, è valido
+		return distance < 50.0
+	return false
+
+
+@rpc("authority", "call_local", "reliable")
+func rpc_deploy_turret(pos: Vector2, level: int) -> void:
+	_do_deploy_turret(pos, level)
+
+
+func _do_deploy_turret(pos: Vector2, level: int) -> void:
+	var turret := TURRET_SCENE.instantiate()
+	turret.set("team_id", team_id)
+	turret.set("livello", level)
+	turret.global_position = pos
+	
+	## Imposta il peer ID del deployer per l'attribuzione delle kill
+	var peer_id: int = multiplayer.get_unique_id() if _is_multiplayer_session() else 1
+	if turret.has_method("set_deployer_peer_id"):
+		turret.call("set_deployer_peer_id", peer_id)
+	
+	get_tree().current_scene.add_child(turret)
+
+
+## ── Hacking torrette ────────────────────────────────────────────────────────
+
+func _process_hacking(_delta: float) -> void:
+	if not _hack_held:
+		return
+	var turret := _find_hackable_turret()
+	if not turret:
+		_stop_hacking()
+		return
+	## Se è una nuova torretta da hackare, avvia
+	if turret != _hacking_turret:
+		_stop_hacking()
+		_hacking_turret = turret
+		if turret.has_method("start_hack"):
+			turret.call("start_hack", team_id)
+
+
+## Cerca la torretta nemica più vicina nel raggio d'interazione (100px).
+func _find_hackable_turret() -> Node:
+	var search_radius := 120.0
+	var best: Node = null
+	var best_dsq: float = search_radius * search_radius
+	for entity in get_tree().get_nodes_in_group("entities_level_" + str(current_height_level)):
+		if not entity.has_method("start_hack"):
+			continue
+		if not (entity is Node2D):
+			continue
+		## Hackabile solo se nemica
+		var e_team: int = entity.get("team_id") if "team_id" in entity else -1
+		if e_team == team_id:
+			continue
+		## Hackabile solo se hackable
+		if "hackable" in entity and not entity.get("hackable"):
+			continue
+		var d := global_position.distance_squared_to((entity as Node2D).global_position)
+		if d < best_dsq:
+			best_dsq = d
+			best = entity
+	return best
+
+
+func _stop_hacking() -> void:
+	if _hacking_turret and is_instance_valid(_hacking_turret):
+		if _hacking_turret.has_method("cancel_hack"):
+			_hacking_turret.call("cancel_hack")
+	_hacking_turret = null
+
+
+## ── Can fire ────────────────────────────────────────────────────────────────
 
 func _can_fire() -> bool:
 	if _is_multiplayer_session() and not is_multiplayer_authority():
@@ -1113,12 +1394,16 @@ func rpc_add_money(amount: int) -> void:
 
 func _on_server_disconnected(_reason: String) -> void:
 	# Mostra il menu di disconnessione del server (solo se non già mostrato)
-	if get_tree().root.has_node("ServerDisconnectMenu"):
+	var tree = get_tree()
+	if not tree or not tree.root:
+		return
+	
+	if tree.root.has_node("ServerDisconnectMenu"):
 		return
 	
 	var disconnect_menu = load("res://Menu/server_disconnect_menu.tscn").instantiate()
 	disconnect_menu.name = "ServerDisconnectMenu"
-	get_tree().root.add_child(disconnect_menu)
+	tree.root.add_child(disconnect_menu)
 
 
 func set_weapon_animation(anim_name: String) -> void:

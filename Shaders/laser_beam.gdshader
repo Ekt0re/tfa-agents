@@ -38,32 +38,31 @@ void fragment() {
         // ── QUALITÀ BASSA: solo colore piatto con fade alfa bordi ──
         float alpha = smoothstep(1.0, 0.0, dist_center * 1.2);
         COLOR = vec4(color.rgb, color.a * alpha * COLOR.a);
-        return;
+    } else {
+        // ── QUALITÀ ALTA ──
+
+        // Pulsazione temporale
+        float pulse = 0.75 + 0.25 * sin(TIME * pulse_speed);
+
+        // Noise per bordi irregolari (solo alta qualità)
+        float n = noise1(uv.x * 24.0 + TIME * 3.0) * noise_amount;
+        float dist_noisy = abs(uv.y - 0.5 + n) * 2.0;
+
+        // Core brillante stretto
+        float core  = smoothstep(0.18, 0.0,  dist_noisy);
+        // Glow morbido attorno
+        float glow  = smoothstep(1.0,  0.0,  dist_noisy);
+        // Bloom esterno (screen-space simulato)
+        float bloom = smoothstep(1.2,  0.0,  dist_center) * glow_strength * 0.3;
+
+        // Fade lungo UV.x per head e tail (evita clip duro)
+        float edge_fade = smoothstep(0.0, 0.04, uv.x) * smoothstep(1.0, 0.96, uv.x);
+
+        float intensity = (core * 1.5 + glow * 0.5 + bloom) * pulse * edge_fade;
+
+        vec3 final_rgb = color.rgb + vec3(core) * glow_strength * 0.25;
+        float final_a  = clamp(intensity * color.a, 0.0, 1.0);
+
+        COLOR = vec4(final_rgb, final_a * COLOR.a);
     }
-
-    // ── QUALITÀ ALTA ──
-
-    // Pulsazione temporale
-    float pulse = 0.75 + 0.25 * sin(TIME * pulse_speed);
-
-    // Noise per bordi irregolari (solo alta qualità)
-    float n = noise1(uv.x * 24.0 + TIME * 3.0) * noise_amount;
-    float dist_noisy = abs(uv.y - 0.5 + n) * 2.0;
-
-    // Core brillante stretto
-    float core  = smoothstep(0.18, 0.0,  dist_noisy);
-    // Glow morbido attorno
-    float glow  = smoothstep(1.0,  0.0,  dist_noisy);
-    // Bloom esterno (screen-space simulato)
-    float bloom = smoothstep(1.2,  0.0,  dist_center) * glow_strength * 0.3;
-
-    // Fade lungo UV.x per head e tail (evita clip duro)
-    float edge_fade = smoothstep(0.0, 0.04, uv.x) * smoothstep(1.0, 0.96, uv.x);
-
-    float intensity = (core * 1.5 + glow * 0.5 + bloom) * pulse * edge_fade;
-
-    vec3 final_rgb = color.rgb + vec3(core) * glow_strength * 0.25;
-    float final_a  = clamp(intensity * color.a, 0.0, 1.0);
-
-    COLOR = vec4(final_rgb, final_a * COLOR.a);
 }
