@@ -281,7 +281,6 @@ func _scan_for_enemies() -> void:
 			continue
 
 		var dir := global_position.direction_to(enemy.global_position)
-		var dist := global_position.distance_to(enemy.global_position)
 
 		# Configura RayCast
 		var ray_end_local := to_local(global_position + dir * detection_range)

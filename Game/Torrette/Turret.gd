@@ -22,6 +22,7 @@ signal target_lost()
 signal hacking_started()
 signal hacking_completed(new_team_id: int)
 signal destroyed()
+signal noise_emitted(pos: Vector2, noise_radius: float)
 
 # ---------------------------------------------------------------------------
 # Export — Torretta
@@ -62,7 +63,23 @@ signal destroyed()
 
 @export var hackable: bool        = true
 @export var hack_duration: float  = 5.0   ## Secondi per completare l'hack
-@export var hack_target_team: int = 1     ## Team a cui passa dopo l'hack
+@export var hack_bar_vertical_offset: float = 80.0  ## Distanza (px) sopra la torretta a cui mostrare la progress bar
+@export var hack_bar_size: Vector2 = Vector2(160.0, 34.0)  ## Larghezza/altezza della progress bar
+@export var activation_range: float = 120.0  ## Raggio per attivare l'hacking
+
+@export_group("Difficoltà")
+## 0=Facile 1=Normale 2=Difficile 3=Agente Caduto
+@export_range(0, 3, 1) var difficulty_level: int = 1
+## Se true, legge la difficoltà da GlobalSettings automaticamente.
+@export var use_global_difficulty: bool = true
+
+## Moltiplicatori difficoltà — [Facile, Normale, Difficile, Agente Caduto]
+const DIFFICULTY_MULTIPLIERS: Array[Dictionary] = [
+	{ "danno": 0.65, "vita": 0.65, "cadenza": 1.3, "raggio": 0.85, "hack_duration": 0.8 },
+	{ "danno": 1.00, "vita": 1.00, "cadenza": 1.0, "raggio": 1.00, "hack_duration": 1.0 },
+	{ "danno": 1.35, "vita": 1.35, "cadenza": 0.85, "raggio": 1.15, "hack_duration": 1.2 },
+	{ "danno": 1.80, "vita": 1.80, "cadenza": 0.7, "raggio": 1.30, "hack_duration": 1.5 },
+]
 
 # ---------------------------------------------------------------------------
 # Risorse precaricate
@@ -73,12 +90,14 @@ const DASHED_CIRCLE_SHADER    := preload("res://Shaders/dashed_circle.gdshader")
 const LASER_BEAM_SHADER       := preload("res://Shaders/laser_beam.gdshader")
 
 # ---------------------------------------------------------------------------
-# Costanti UI / Draw
+# UI / Hacking Bar
 # ---------------------------------------------------------------------------
 
-const HACK_BAR_WIDTH  := 84.0
-const HACK_BAR_HEIGHT := 10.0
-const HACK_BAR_OFFSET := Vector2(0.0, -65.0)
+var _hack_bar_pivot: Node2D = null
+var _hack_bar_progress: float = 0.0
+var _hack_target_team: int = 1  ## Team a cui passa dopo l'hack (gestito dinamicamente)
+var _entities_in_hacking_range: Array[Node2D] = []
+var _hacking_body: Node2D = null  ## Entità che sta attualmente effettuando l'hack
 
 # ---------------------------------------------------------------------------
 # Stato interno
@@ -129,11 +148,15 @@ func _ready() -> void:
 		_update_editor_preview()
 		return
 
+	# Risolvi e applica difficoltà
+	_resolve_difficulty()
+	_apply_difficulty()
 	vita = vita_max
 
 	# Gruppi
 	add_to_group("objects")
 	add_to_group("damageable")
+	add_to_group("noise_makers")
 	_on_team_changed()
 	_refresh_level_membership()
 	_apply_collision_layers()
@@ -201,6 +224,34 @@ func _ready() -> void:
 	# Collegamento player per livello
 	_connect_to_player()
 
+	# Inizializza hack bar
+	_crea_hack_bar()
+	if _hack_bar_pivot:
+		_hack_bar_pivot.visible = false
+
+	# Setup area di hacking
+
+# ---------------------------------------------------------------------------
+# Sistema Difficoltà
+# ---------------------------------------------------------------------------
+
+func _resolve_difficulty() -> void:
+	if use_global_difficulty:
+		var global_settings = get_node_or_null("/root/GlobalSettings")
+		if global_settings:
+			difficulty_level = global_settings.call("get_setting", "difficulty", 1)
+	# In multiplayer, forza sempre difficoltà normale (1)
+	if _is_multiplayer_session():
+		difficulty_level = 1
+
+func _apply_difficulty() -> void:
+	var mults = DIFFICULTY_MULTIPLIERS[clampi(difficulty_level, 0, DIFFICULTY_MULTIPLIERS.size() - 1)]
+	danno *= mults["danno"]
+	vita_max *= mults["vita"]
+	cadenza_fuoco *= mults["cadenza"]
+	raggio_azione *= mults["raggio"]
+	hack_duration *= mults["hack_duration"]
+
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
@@ -214,10 +265,26 @@ func _process(delta: float) -> void:
 	# Hacking
 	if _is_hacking:
 		_hack_progress += delta
-		queue_redraw()
+		_hack_bar_progress = clampf(_hack_progress / hack_duration, 0.0, 1.0)
+		_update_hack_bar()
 		if _hack_progress >= hack_duration:
 			_complete_hack()
 		return
+
+	# Gestione hacking da parte del player (tiene premuto il tasto hack nel raggio)
+	if hackable and not _is_hacking:
+		for body in _entities_in_hacking_range:
+			if not is_instance_valid(body):
+				continue
+			if not body.is_in_group("players"):
+				continue
+			var player_team := _get_team_id(body)
+			if player_team == team_id:
+				continue  # Ormai alleato (es. torretta appena hackerata): niente barra
+			if Input.is_action_pressed("hack"):
+				print("[TURRET] Player (team %d) inizia hack torretta (team %d)" % [player_team, team_id])
+				start_hack(player_team, body)
+				break
 
 	# Aggiorna effetti prossimità (come mina.gd)
 	_update_proximity_effects()
@@ -238,29 +305,7 @@ func _physics_process(_delta: float) -> void:
 	if _target != null and is_instance_valid(_target) and _can_shoot:
 		_try_shoot()
 
-## Disegna la barra di hacking in world-space.
-func _draw() -> void:
-	if not _is_hacking:
-		return
-	var progress := clampf(_hack_progress / hack_duration, 0.0, 1.0)
-	var tl       := HACK_BAR_OFFSET - Vector2(HACK_BAR_WIDTH * 0.5, HACK_BAR_HEIGHT * 0.5)
-
-	draw_rect(Rect2(tl, Vector2(HACK_BAR_WIDTH, HACK_BAR_HEIGHT)), Color(0.08, 0.08, 0.08, 0.88))
-	if progress > 0.0:
-		var fill_col := Color(0.0, 0.8, 1.0).lerp(Color(0.2, 1.0, 0.6), progress)
-		draw_rect(Rect2(tl, Vector2(HACK_BAR_WIDTH * progress, HACK_BAR_HEIGHT)), fill_col)
-	draw_rect(Rect2(tl, Vector2(HACK_BAR_WIDTH, HACK_BAR_HEIGHT)), Color(1.0, 1.0, 1.0, 0.55), false, 1.2)
-
-	# Testo percentuale
-	var pct := int(progress * 100.0)
-	draw_string(
-		ThemeDB.fallback_font,
-		tl + Vector2(HACK_BAR_WIDTH * 0.5 - 12.0, -2.0),
-		str(pct) + "%",
-		HORIZONTAL_ALIGNMENT_CENTER,
-		-1, 8,
-		Color(1, 1, 1, 0.9)
-	)
+# (La barra di hacking è ora disegnata tramite nodi UI, rimosso _draw)
 
 # ---------------------------------------------------------------------------
 # Effetti prossimità — identici a mina.gd
@@ -341,11 +386,24 @@ func _show_laser(p_show: bool) -> void:
 # ---------------------------------------------------------------------------
 
 func _on_action_body_entered(body: Node2D) -> void:
+	# Targeting nemici
 	if _is_enemy(body) and _is_same_level(body):
 		if body not in _targets_in_range:
 			_targets_in_range.append(body)
 		_pick_best_target()
 		_show_laser(true)
+	
+	# Hacking: rileva entità amiche nel raggio (player/bot del team diverso)
+	if hackable and not _is_dead and _is_same_level(body):
+		var body_team := _get_team_id(body)
+		if body_team != team_id:
+			if body not in _entities_in_hacking_range:
+				_entities_in_hacking_range.append(body)
+				print("[TURRET] Entità nel raggio di hacking: '%s' (team %d vs turret team %d)" % [body.name, body_team, team_id])
+			# Bot nemico → avvia hack automatico
+			if body.is_in_group("bots") and not _is_hacking:
+				print("[TURRET] Bot '%s' avvia hack automatico" % body.name)
+				start_hack(body_team, body)
 
 func _on_action_body_exited(body: Node2D) -> void:
 	_targets_in_range.erase(body)
@@ -354,6 +412,15 @@ func _on_action_body_exited(body: Node2D) -> void:
 		_pick_best_target()
 	if _targets_in_range.is_empty():
 		_show_laser(false)
+	
+	# Hacking: rimuovi dalla lista e annulla se era proprio lui a hackerare
+	_entities_in_hacking_range.erase(body)
+	if _is_hacking and body == _hacking_body:
+		print("[TURRET] Player che stava hackerando è uscito dal raggio, hack annullato")
+		cancel_hack()
+	elif _entities_in_hacking_range.is_empty() and _is_hacking:
+		print("[TURRET] Entità uscita, hack annullato")
+		cancel_hack()
 
 func _on_action_area_entered(area: Area2D) -> void:
 	if _is_enemy(area) and _is_same_level(area):
@@ -435,6 +502,7 @@ func _fire_projectile(origin: Vector2, impact: Vector2, target_path: NodePath) -
 
 	if _sfx_shoot:
 		_sfx_shoot.play()
+	noise_emitted.emit(global_position, raggio_azione * 1.5)
 
 	# Istanzia ProjectileVisual esattamente come il player
 	var projectile := PROJECTILE_VISUAL_SCENE.instantiate() as ProjectileVisual
@@ -455,7 +523,7 @@ func _on_projectile_impact(hit_path: NodePath, _shooter_peer_id: int) -> void:
 		return
 
 	if target.has_method("apply_damage"):
-		target.call_deferred("apply_damage", danno)
+		target.call_deferred("apply_damage", danno, self)
 	elif target.has_method("receive_damage"):
 		target.call_deferred("receive_damage", danno, _deployer_peer_id)
 	
@@ -601,31 +669,116 @@ func _die_rpc() -> void:
 func set_deployer_peer_id(peer_id: int) -> void:
 	_deployer_peer_id = peer_id
 
-func start_hack(new_team: int = -1) -> void:
+func start_hack(new_team: int = -1, body: Node2D = null) -> void:
 	if not hackable or _is_dead or _is_hacking:
 		return
 	if new_team >= 0:
-		hack_target_team = new_team
+		_hack_target_team = new_team
+	_hacking_body = body
 	_is_hacking    = true
 	_hack_progress = 0.0
-	queue_redraw()
+	_hack_bar_progress = 0.0
+	if _hack_bar_pivot:
+		_hack_bar_pivot.visible = true
+		_update_hack_bar()
 	hacking_started.emit()
 
 func cancel_hack() -> void:
 	if not _is_hacking:
 		return
 	_is_hacking    = false
+	_hacking_body  = null
 	_hack_progress = 0.0
-	queue_redraw()
+	_hack_bar_progress = 0.0
+	if _hack_bar_pivot:
+		_hack_bar_pivot.visible = false
 
 func _complete_hack() -> void:
 	_is_hacking = false
-	queue_redraw()
-	team_id = hack_target_team  # setter: aggiorna gruppi + visuals
+	_hacking_body = null
+	_hack_progress = 0.0
+	_hack_bar_progress = 0.0
+	if _hack_bar_pivot:
+		_hack_bar_pivot.visible = false
+	team_id = _hack_target_team  # setter: aggiorna gruppi + visuals
 	_targets_in_range.clear()
 	_target = null
 	_pick_best_target()
+	# Rimuove dal raggio di hacking chi ora è diventato alleato,
+	# così non può ri-hackerare (o mostrare la barra su) una torretta già sua
+	for i in range(_entities_in_hacking_range.size() - 1, -1, -1):
+		var b := _entities_in_hacking_range[i]
+		if not is_instance_valid(b) or _get_team_id(b) == team_id:
+			_entities_in_hacking_range.remove_at(i)
 	hacking_completed.emit(team_id)
+
+func _crea_hack_bar() -> void:
+	var pivot := Node2D.new()
+	pivot.name = "HackBarPivot"
+	pivot.z_index = 1000
+	pivot.z_as_relative = false
+	add_child(pivot)
+	pivot.global_position = global_position + Vector2(0, -hack_bar_vertical_offset)
+	pivot.global_rotation = 0.0
+
+	var bg := ColorRect.new()
+	bg.name = "Background"
+	bg.color = Color(0.06, 0.06, 0.08, 0.92)
+	bg.size = hack_bar_size + Vector2(6, 6)
+	bg.position = -(hack_bar_size + Vector2(6, 6)) * 0.5
+	pivot.add_child(bg)
+
+	var bar_bg := ColorRect.new()
+	bar_bg.name = "BarBG"
+	bar_bg.color = Color(0.15, 0.15, 0.18, 1.0)
+	bar_bg.size = hack_bar_size
+	bar_bg.position = -hack_bar_size * 0.5
+	pivot.add_child(bar_bg)
+
+	var bar_fill := ColorRect.new()
+	bar_fill.name = "BarFill"
+	bar_fill.color = Color(0.0, 0.85, 1.0, 1.0)
+	bar_fill.size = Vector2(0.0, hack_bar_size.y)
+	bar_fill.position = -hack_bar_size * 0.5
+	pivot.add_child(bar_fill)
+
+	var border := ColorRect.new()
+	border.name = "Border"
+	border.color = Color(0.0, 0.9, 1.0, 0.7)
+	border.size = hack_bar_size + Vector2(4, 4)
+	border.position = -(hack_bar_size + Vector2(4, 4)) * 0.5
+	pivot.add_child(border)
+	border.z_index = 1
+
+	var label := Label.new()
+	label.name = "Label"
+	label.size = hack_bar_size
+	label.position = -hack_bar_size * 0.5
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 14)
+	label.add_theme_color_override("font_color", Color.WHITE)
+	label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
+	label.add_theme_constant_override("shadow_offset_x", 1)
+	label.add_theme_constant_override("shadow_offset_y", 1)
+	label.z_index = 2
+	pivot.add_child(label)
+
+	_hack_bar_pivot = pivot
+
+func _update_hack_bar() -> void:
+	if not _hack_bar_pivot or not is_node_ready():
+		return
+
+	var fill := _hack_bar_pivot.get_node_or_null("BarFill") as ColorRect
+	if fill:
+		fill.size.x = hack_bar_size.x * _hack_bar_progress
+		fill.color = Color(0.0, 0.85, 1.0).lerp(Color(0.1, 1.0, 0.4), _hack_bar_progress)
+
+	var label := _hack_bar_pivot.get_node_or_null("Label") as Label
+	if label:
+		label.text = "HACK %d%%" % int(_hack_bar_progress * 100.0)
+
 
 # ---------------------------------------------------------------------------
 # Utility Team

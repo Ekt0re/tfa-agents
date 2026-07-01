@@ -70,9 +70,9 @@ signal team_changed(new_team_id: int)
 
 @export var hack_target_team: int = 1  ## Fallback se il team di chi ha hackerato non è determinabile
 
-@export var hack_bar_vertical_offset: float = 50.0  ## Distanza (px) sopra la porta a cui mostrare la progress bar
+@export var hack_bar_vertical_offset: float = 80.0  ## Distanza (px) sopra la porta a cui mostrare la progress bar
 
-@export var hack_bar_size: Vector2 = Vector2(48.0, 20.0)  ## Larghezza/altezza della progress bar (ridotta)
+@export var hack_bar_size: Vector2 = Vector2(160.0, 34.0)  ## Larghezza/altezza della progress bar
 
 @export var hack_input_action: String = "hack"  ## Nome dell'azione nell'Input Map da tenere premuta per hackare
 
@@ -124,6 +124,7 @@ var _player_node: Node2D = null
 var _screen_visible: bool = true
 var _hack_peer_id: int = 0  ## Peer ID del player che sta attualmente hackando (0 = nessuno)
 var _hack_entity_team: int = -1  ## Team dell'entità che ha avviato l'hack in corso
+var _nav_obstacle: NavigationObstacle2D = null  ## Ostacolo navigazione per porte LOCKED
 
 # ---------------------------------------------------------------------------
 # Riferimenti ai nodi
@@ -139,7 +140,7 @@ var _hack_entity_team: int = -1  ## Team dell'entità che ha avviato l'hack in c
 # Nodo opzionale hack bar — pivot figlio della porta che resta sempre con
 # rotazione globale 0, così la barra non ruota mai insieme alla porta.
 var _hack_bar_pivot: Node2D = null
-var _hack_bar_panel: Panel = null
+var _hack_bar_panel: Node2D = null
 
 # Nodi opzionali
 var _sfx: AudioStreamPlayer2D = null
@@ -197,6 +198,9 @@ func _ready() -> void:
 	if _hack_bar_pivot:
 		_hack_bar_pivot.visible = false
 
+	# Crea NavigationObstacle2D per porte LOCKED (influenza la NavMesh)
+	_setup_nav_obstacle()
+
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
@@ -218,8 +222,9 @@ func _process(delta: float) -> void:
 				# Non sono l'autorità: chiedo al server, che deciderà se
 				# questa porta è libera o già occupata da un altro player.
 				_request_hack_start.rpc_id(1, entity_team)
-		elif not hack_held and _is_hacking and _hack_peer_id == my_peer_id:
+		elif not hack_held and _is_hacking and _hack_peer_id == my_peer_id and _hack_peer_id >= 0:
 			# Sto rilasciando IO il tasto, e sono io quello che stava hackando.
+			# Nota: _hack_peer_id < 0 indica un hack avviato da un bot → non cancellare.
 			if am_authority:
 				cancel_hack()
 			else:
@@ -297,31 +302,40 @@ func _get_local_hacking_entity() -> Node2D:
 
 func _try_open_door(entity: Node) -> void:
 	if is_locked():
-		print("[DOOR] Porta bloccata, non si apre")
+		print("[DOOR] '%s' bloccata — ignoro entity '%s'" % [name, entity.name])
 		return
+
+	var entity_team := _get_team_id(entity)
+	var is_bot := entity.is_in_group("bots")
 
 	match door_type:
 		DoorType.AUTOMATIC:
-			print("[DOOR] Porta automatica, apro")
+			print("[DOOR] '%s' automatica — apro per '%s' (team %d)" % [name, entity.name, entity_team])
 			_open_door()
 		DoorType.TEAM_ONLY:
-			if is_team_restricted():
-				var entity_team := _get_team_id(entity)
-				if entity_team == team_id:
-					print("[DOOR] Team corretto, apro")
-					_open_door()
-				else:
-					print("[DOOR] Team sbagliato: entity=%d, door=%d" % [entity_team, team_id])
+			if entity_team == team_id:
+				print("[DOOR] '%s' team-only — team corretto (%d), apro" % [name, entity_team])
+				_open_door()
+			else:
+				print("[DOOR] '%s' team-only — team errato (entity=%d, porta=%d)" % [name, entity_team, team_id])
 		DoorType.MANUAL:
-			# L'hacking non si avvia più automaticamente all'ingresso:
-			# parte/si interrompe in base al tasto "hack" (vedi _process()).
-			pass
+			# I bot avviano l'hack automaticamente all'entrata nell'area.
+			# I player devono tenere premuto il tasto "hack".
+			if is_bot and not _is_open and not _is_hacking:
+				print("[DOOR] '%s' manual — bot '%s' (team %d) avvia hack automatico" % [name, entity.name, entity_team])
+				if _is_hack_authority():
+					start_hack(-1, entity_team)
+				else:
+					_request_hack_start.rpc_id(1, entity_team)
+			else:
+				print("[DOOR] '%s' manual — player '%s' nel raggio, attendo tasto hack" % [name, entity.name])
 		DoorType.LOCKED:
-			# Non si apre
-			pass
+			print("[DOOR] '%s' LOCKED — nessun accesso" % [name])
 
 func _schedule_close() -> void:
-	if _is_open and door_type != DoorType.LOCKED:
+	if not is_inside_tree():
+		return
+	if _close_timer and _close_timer.is_inside_tree() and _is_open and door_type != DoorType.LOCKED:
 		_close_timer.start()
 
 func _on_close_timer_timeout() -> void:
@@ -398,85 +412,99 @@ func _update_animation_speed() -> void:
 # ---------------------------------------------------------------------------
 
 func _crea_hack_bar() -> void:
-	# Pivot Node2D, figlio della porta stessa ("dentro porta").
-	# Ogni frame forziamo global_rotation a 0: Godot calcola da solo
-	# la rotazione locale necessaria per annullare quella del genitore
-	# (la porta), così la barra resta sempre dritta indipendentemente
-	# da come la porta è orientata.
+	# Pivot Node2D, figlio della porta stessa.
+	# global_rotation = 0 assicura che la barra resti sempre orizzontale.
 	var pivot := Node2D.new()
 	pivot.name = "HackBarPivot"
-	pivot.z_index = 1000      # sempre sopra lo sprite della porta
+	pivot.z_index = 1000
 	pivot.z_as_relative = false
 	add_child(pivot)
-
-	# Posizione e rotazione vengono fissate UNA SOLA VOLTA, qui alla creazione:
-	# - global_position: sopra la porta, in spazio globale (così l'offset
-	#   non viene ruotato insieme alla porta).
-	# - global_rotation = 0: Godot calcola la rotazione locale necessaria
-	#   per annullare quella del genitore (la porta), una volta per tutte.
 	pivot.global_position = global_position + Vector2(0, -hack_bar_vertical_offset)
 	pivot.global_rotation = 0.0
 
-	# Panel posizionato in coordinate locali del pivot (centrato),
-	# dimensionato tramite l'export hack_bar_size.
-	var panel := Panel.new()
-	panel.name = "Panel"
-	panel.position = -hack_bar_size * 0.5
-	panel.size = hack_bar_size
-	pivot.add_child(panel)
+	# ── Sfondo scuro con bordo ──────────────────────────────────────────────
+	var bg := ColorRect.new()
+	bg.name = "Background"
+	bg.color = Color(0.06, 0.06, 0.08, 0.92)
+	bg.size = hack_bar_size + Vector2(6, 6)
+	bg.position = -(hack_bar_size + Vector2(6, 6)) * 0.5
+	pivot.add_child(bg)
 
-	# Crea ProgressBar
-	var progress_bar := ProgressBar.new()
-	progress_bar.name = "ProgressBar"
-	progress_bar.set_anchors_preset(Control.PRESET_FULL_RECT)
-	progress_bar.max_value = 100.0
-	progress_bar.value = 0.0
-	progress_bar.show_percentage = false
-	panel.add_child(progress_bar)
+	# ── Barra di riempimento (ColorRect che scala in X) ─────────────────────
+	var bar_bg := ColorRect.new()
+	bar_bg.name = "BarBG"
+	bar_bg.color = Color(0.15, 0.15, 0.18, 1.0)
+	bar_bg.size = hack_bar_size
+	bar_bg.position = -hack_bar_size * 0.5
+	pivot.add_child(bar_bg)
 
-	# Crea Label
+	var bar_fill := ColorRect.new()
+	bar_fill.name = "BarFill"
+	bar_fill.color = Color(0.0, 0.85, 1.0, 1.0)
+	bar_fill.size = Vector2(0.0, hack_bar_size.y)
+	bar_fill.position = -hack_bar_size * 0.5
+	pivot.add_child(bar_fill)
+
+	# ── Bordo sovrapposto ───────────────────────────────────────────────────
+	var border := ColorRect.new()
+	border.name = "Border"
+	border.color = Color(0.0, 0.9, 1.0, 0.7)
+	border.size = hack_bar_size + Vector2(4, 4)
+	border.position = -(hack_bar_size + Vector2(4, 4)) * 0.5
+	pivot.add_child(border)
+	border.z_index = 1
+
+	# ── Label percentuale ───────────────────────────────────────────────────
 	var label := Label.new()
 	label.name = "Label"
-	label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	label.size = hack_bar_size
+	label.position = -hack_bar_size * 0.5
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", 12)
-	panel.add_child(label)
+	label.add_theme_font_size_override("font_size", 14)
+	label.add_theme_color_override("font_color", Color.WHITE)
+	label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
+	label.add_theme_constant_override("shadow_offset_x", 1)
+	label.add_theme_constant_override("shadow_offset_y", 1)
+	label.z_index = 2
+	pivot.add_child(label)
 
 	_hack_bar_pivot = pivot
-	_hack_bar_panel = panel
+	_hack_bar_panel = pivot  ## Riuso _hack_bar_panel come riferimento al pivot per compatibilità
 
 func _update_hack_bar() -> void:
 	if not _hack_bar_pivot or not is_node_ready():
 		return
 
-	if _hack_bar_panel:
-		var progress_bar := _hack_bar_panel.get_node_or_null("ProgressBar")
-		if progress_bar:
-			progress_bar.value = _hack_bar_progress * 100.0
+	var fill := _hack_bar_pivot.get_node_or_null("BarFill") as ColorRect
+	if fill:
+		fill.size.x = hack_bar_size.x * _hack_bar_progress
+		# Colore: blu freddo → verde al completamento
+		fill.color = Color(0.0, 0.85, 1.0).lerp(Color(0.1, 1.0, 0.4), _hack_bar_progress)
 
-		var label := _hack_bar_panel.get_node_or_null("Label")
-		if label:
-			label.text = str(int(_hack_bar_progress * 100.0)) + "%"
+	var label := _hack_bar_pivot.get_node_or_null("Label") as Label
+	if label:
+		label.text = "HACK %d%%" % int(_hack_bar_progress * 100.0)
 
 
 func start_hack(peer_id: int = 0, entity_team: int = -1) -> void:
 	if not is_hackable() or is_locked() or _is_hacking or _is_open:
-		print("[HACK] Cannot start hack: hackable=%s, locked=%s, hacking=%s, open=%s" % [is_hackable(), is_locked(), _is_hacking, _is_open])
+		print("[HACK] '%s': start fallito (hackable=%s locked=%s hacking=%s open=%s)" % [name, is_hackable(), is_locked(), _is_hacking, _is_open])
 		return
-	print("[HACK] Starting hack... peer_id=%d, entity_team=%d" % [peer_id, entity_team])
+	print("[HACK] '%s': inizio hack — peer=%d team=%d durata=%.1fs" % [name, peer_id, entity_team, hack_duration])
 	_is_hacking = true
 	_hack_progress = 0.0
 	_hack_bar_progress = 0.0
 	_hack_peer_id = peer_id
 	_hack_entity_team = entity_team
 	if _hack_bar_pivot:
-		print("[HACK] Showing hack bar")
+		print("[HACK] '%s': hack bar mostrata" % name)
 		_hack_bar_pivot.visible = true
 		_update_hack_bar()
 	if _is_multiplayer_session():
 		_sync_hack_started.rpc(peer_id, entity_team)
 	hacking_started.emit()
+	print("[HACK] '%s': hack avviato con successo!" % name)
 
 func cancel_hack() -> void:
 	if not _is_hacking:
@@ -545,6 +573,10 @@ func _is_same_level(node: Node) -> bool:
 	elif "current_height_level" in node:
 		node_level = node.get("current_height_level")
 	return node_level == livello
+
+## Metodo pubblico per controllare il livello (usato da SoldatoBot)
+func is_same_level(node: Node) -> bool:
+	return _is_same_level(node)
 
 func _on_team_changed() -> void:
 	if Engine.is_editor_hint() or not is_inside_tree():
@@ -792,7 +824,7 @@ func _sync_hack_ended() -> void:
 @rpc("authority", "call_local", "reliable")
 func _sync_hack_completed(new_team: int, new_door_type: int) -> void:
 	team_id = new_team
-	door_type = new_door_type
+	door_type = new_door_type as DoorType
 	_on_team_changed()
 	_update_editor_preview()
 
@@ -820,6 +852,37 @@ func is_door_open() -> bool:
 ## Verifica se la porta è bloccata
 func is_door_locked() -> bool:
 	return is_locked()
+
+## Setup NavigationObstacle2D — crea l'ostacolo solo per porte LOCKED
+## per escluderle dalla NavMesh e far sì che i bot le aggirino.
+func _setup_nav_obstacle() -> void:
+	# Rimuove un eventuale ostacolo precedente
+	if _nav_obstacle and is_instance_valid(_nav_obstacle):
+		_nav_obstacle.queue_free()
+		_nav_obstacle = null
+	if door_type != DoorType.LOCKED:
+		return
+	_nav_obstacle = NavigationObstacle2D.new()
+	_nav_obstacle.avoidance_enabled = false
+	## Abilita la bake della maschera sulla NavMesh statica
+	_nav_obstacle.affect_navigation_mesh = true
+	_nav_obstacle.carve_navigation_mesh = true
+	_nav_obstacle.navigation_layers = 1 << livello
+	## Forma rettangolare proporzionale alla CollisionShape
+	var half: float = 50.0
+	if _collision_shape and _collision_shape.shape:
+		if _collision_shape.shape is RectangleShape2D:
+			half = maxf((_collision_shape.shape as RectangleShape2D).size.x,
+					   (_collision_shape.shape as RectangleShape2D).size.y) * 0.5
+		elif _collision_shape.shape is CircleShape2D:
+			half = (_collision_shape.shape as CircleShape2D).radius
+	_nav_obstacle.vertices = PackedVector2Array([
+		Vector2(-half, -half),
+		Vector2( half, -half),
+		Vector2( half,  half),
+		Vector2(-half,  half)
+	])
+	add_child(_nav_obstacle)
 
 # ---------------------------------------------------------------------------
 # Editor

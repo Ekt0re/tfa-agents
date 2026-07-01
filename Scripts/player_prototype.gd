@@ -5,6 +5,7 @@ signal height_level_changed(new_level: int)
 signal health_changed(current: float, max_val: float)
 signal ammo_changed(current: int, total: int)
 signal reload_started(duration: float)
+signal noise_emitted(pos: Vector2, noise_radius: float)
 
 const PROJECTILE_VISUAL_SCENE := preload("res://Scenes/projectile_visual.tscn")
 const TURRET_SCENE            := preload("res://Game/Torrette/Turret.tscn")
@@ -80,6 +81,7 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	add_to_group("players")
 	add_to_group("damageable")
+	add_to_group("noise_makers")
 	
 	if camera_2d:
 		if _is_multiplayer_session() and not is_multiplayer_authority():
@@ -289,7 +291,6 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if event.is_action_released("hack"):
 		_hack_held = false
-		_stop_hacking()
 		return
 	
 	# weapon switch sequenziale (destra/sinistra)
@@ -402,9 +403,6 @@ func _process(delta: float) -> void:
 	if nickname_label:
 		nickname_label.global_position = global_position + Vector2(-100, -80)
 		nickname_label.visible = visible
-
-	# Hacking torretta
-	_process_hacking(delta)
 
 
 func change_height_level(new_level: int, force_update: bool = false) -> void:
@@ -531,6 +529,8 @@ func _replicate_fire(origin: Vector2, impact_position: Vector2, target_path: Nod
 	if not current_scene:
 		return
 
+	noise_emitted.emit(origin, 1200.0)
+
 	var projectile := PROJECTILE_VISUAL_SCENE.instantiate() as ProjectileVisual
 	if not projectile:
 		return
@@ -560,11 +560,7 @@ func _on_projectile_impact(target_path: NodePath, shooter_peer_id: int = 0) -> v
 	if target.has_method("receive_damage"):
 		target.call_deferred("receive_damage", projectile_damage, effective_shooter)
 	elif target.has_method("apply_damage"):
-		## Passa il player come source per il controllo friendly fire sulle torrette
-		if target is Turret:
-			target.call_deferred("apply_damage", projectile_damage, self)
-		else:
-			target.call_deferred("apply_damage", projectile_damage)
+		target.call_deferred("apply_damage", projectile_damage, self)
 	elif target.has_method("destroy_from_projectile"):
 		target.call_deferred("destroy_from_projectile")
 
@@ -720,54 +716,6 @@ func _do_deploy_turret(pos: Vector2, level: int) -> void:
 		turret.call("set_deployer_peer_id", peer_id)
 	
 	get_tree().current_scene.add_child(turret)
-
-
-## ── Hacking torrette ────────────────────────────────────────────────────────
-
-func _process_hacking(_delta: float) -> void:
-	if not _hack_held:
-		return
-	var turret := _find_hackable_turret()
-	if not turret:
-		_stop_hacking()
-		return
-	## Se è una nuova torretta da hackare, avvia
-	if turret != _hacking_turret:
-		_stop_hacking()
-		_hacking_turret = turret
-		if turret.has_method("start_hack"):
-			turret.call("start_hack", team_id)
-
-
-## Cerca la torretta nemica più vicina nel raggio d'interazione (100px).
-func _find_hackable_turret() -> Node:
-	var search_radius := 120.0
-	var best: Node = null
-	var best_dsq: float = search_radius * search_radius
-	for entity in get_tree().get_nodes_in_group("entities_level_" + str(current_height_level)):
-		if not entity.has_method("start_hack"):
-			continue
-		if not (entity is Node2D):
-			continue
-		## Hackabile solo se nemica
-		var e_team: int = entity.get("team_id") if "team_id" in entity else -1
-		if e_team == team_id:
-			continue
-		## Hackabile solo se hackable
-		if "hackable" in entity and not entity.get("hackable"):
-			continue
-		var d := global_position.distance_squared_to((entity as Node2D).global_position)
-		if d < best_dsq:
-			best_dsq = d
-			best = entity
-	return best
-
-
-func _stop_hacking() -> void:
-	if _hacking_turret and is_instance_valid(_hacking_turret):
-		if _hacking_turret.has_method("cancel_hack"):
-			_hacking_turret.call("cancel_hack")
-	_hacking_turret = null
 
 
 ## ── Can fire ────────────────────────────────────────────────────────────────
@@ -1073,7 +1021,7 @@ func _collect_canvas_items(node: Node, canvas_items: Array[CanvasItem]) -> void:
 		_collect_canvas_items(child, canvas_items)
 
 
-func apply_damage(amount: float) -> void:
+func apply_damage(amount: float, _source: Node = null) -> void:
 	if _is_multiplayer_session() and multiplayer.is_server():
 		_apply_damage_internal(amount, 0)
 	elif not _is_multiplayer_session():

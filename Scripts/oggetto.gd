@@ -7,6 +7,12 @@ extends StaticBody2D
 class_name Oggetto
 
 # ---------------------------------------------------------------------------
+# Segnali
+# ---------------------------------------------------------------------------
+
+signal exploded(pos: Vector2, noise_radius: float)
+
+# ---------------------------------------------------------------------------
 # Tipi
 # ---------------------------------------------------------------------------
 
@@ -39,6 +45,20 @@ enum Tipo { CASSA, BARILE_ESPLOSIVO }
 @export var explosion_damage: float = 100.0
 @export var explosion_radius: float = 2000.0
 
+@export_group("Difficoltà")
+## 0=Facile 1=Normale 2=Difficile 3=Agente Caduto
+@export_range(0, 3, 1) var difficulty_level: int = 1
+## Se true, legge la difficoltà da GlobalSettings automaticamente.
+@export var use_global_difficulty: bool = true
+
+## Moltiplicatori difficoltà — [Facile, Normale, Difficile, Agente Caduto]
+const DIFFICULTY_MULTIPLIERS: Array[Dictionary] = [
+	{ "danno": 0.65, "vita": 0.65 },
+	{ "danno": 1.00, "vita": 1.00 },
+	{ "danno": 1.35, "vita": 1.35 },
+	{ "danno": 1.80, "vita": 1.80 },
+]
+
 # ---------------------------------------------------------------------------
 # Stato interno
 # ---------------------------------------------------------------------------
@@ -63,11 +83,15 @@ func _ready() -> void:
 		_update_editor_preview()
 		return
 
+	# Risolvi e applica difficoltà
+	_resolve_difficulty()
+	_apply_difficulty()
 	vita = vita_max
 
 	add_to_group("objects")
 	add_to_group("damageable")
 	add_to_group("item")
+	add_to_group("explodable")
 	
 	
 	_apply_tipo()
@@ -76,6 +100,24 @@ func _ready() -> void:
 	_apply_collision_layers()
 	_connect_to_player()
 	_setup_global_settings()
+
+# ---------------------------------------------------------------------------
+# Sistema Difficoltà
+# ---------------------------------------------------------------------------
+
+func _resolve_difficulty() -> void:
+	if use_global_difficulty:
+		var global_settings = get_node_or_null("/root/GlobalSettings")
+		if global_settings:
+			difficulty_level = global_settings.call("get_setting", "difficulty", 1)
+	# In multiplayer, forza sempre difficoltà normale (1)
+	if multiplayer.has_multiplayer_peer():
+		difficulty_level = 1
+
+func _apply_difficulty() -> void:
+	var mults = DIFFICULTY_MULTIPLIERS[clampi(difficulty_level, 0, DIFFICULTY_MULTIPLIERS.size() - 1)]
+	explosion_damage *= mults["danno"]
+	vita_max *= mults["vita"]
 
 # ---------------------------------------------------------------------------
 # Tipo → animazione + collision
@@ -133,7 +175,7 @@ func _update_crack_shader() -> void:
 # Danno e distruzione
 # ---------------------------------------------------------------------------
 
-func apply_damage(amount: float) -> void:
+func apply_damage(amount: float, _source: Node = null) -> void:
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		return
 	if vita <= 0.0:
@@ -205,7 +247,7 @@ func _explode() -> void:
 			if dist > radius:
 				continue
 			var falloff: float = 1.0 - (dist / radius)
-			body.call("apply_damage", explosion_damage * falloff)
+			body.call("apply_damage", explosion_damage * falloff, self)
 
 	
 	# Disabilita collisioni fisiche per evitare ulteriori interazioni
@@ -213,6 +255,8 @@ func _explode() -> void:
 	collision_mask = 0
 	_col_barile.disabled = true
 	_col_cassa.disabled = true
+	
+	exploded.emit(global_position, radius * 1.5)
 	
 	# Rimuove il materiale shader per riprodurre l'esplosione senza crepe
 	_sprite.material = null

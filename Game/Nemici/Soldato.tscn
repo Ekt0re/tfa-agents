@@ -1,0 +1,99 @@
+[gd_scene format=3 uid="uid://caq05fy37go3d"]
+
+[ext_resource type="Script" uid="uid://bdqqjy34c7k3" path="res://Game/Nemici/Soldato_Bot.gd" id="1_root"]
+[ext_resource type="Script" uid="uid://cfdp5msm8x720" path="res://Game/Nemici/States/SoldatoState_Idle.gd" id="2_idle"]
+[ext_resource type="Texture2D" uid="uid://431h2yvh4vss" path="res://Assets/Nemici/Soldati/Soldato_MMT.png" id="2_odc02"]
+[ext_resource type="Script" uid="uid://vpviyln5k5vy" path="res://Game/Nemici/States/SoldatoState_Patrol.gd" id="3_patrol"]
+[ext_resource type="Script" uid="uid://bubivowjntt4r" path="res://Game/Nemici/States/SoldatoState_Investigate.gd" id="4_investigate"]
+[ext_resource type="Script" uid="uid://bl5lfun2otc6l" path="res://Game/Nemici/States/SoldatoState_Chase.gd" id="5_chase"]
+[ext_resource type="Script" uid="uid://btonwsvrp5376" path="res://Game/Nemici/States/SoldatoState_Attack.gd" id="6_attack"]
+[ext_resource type="Script" uid="uid://b1bbtreji3yyu" path="res://Game/Nemici/States/SoldatoState_Heal.gd" id="7_heal"]
+[ext_resource type="Script" uid="uid://bwtjrp4doar16" path="res://Game/Nemici/States/SoldatoState_HackDoor.gd" id="8_hackdoor"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_36x4v"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_odc02")
+}],
+"loop": true,
+"name": &"Soldato",
+"speed": 5.0
+}, {
+"frames": [],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_bot"]
+radius = 48.0
+
+[node name="Soldato" type="CharacterBody2D" unique_id=998090411]
+script = ExtResource("1_root")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=980426686]
+position = Vector2(3.8146973e-06, -4)
+scale = Vector2(0.673913, 0.67391306)
+sprite_frames = SubResource("SpriteFrames_36x4v")
+animation = &"Soldato"
+offset = Vector2(38.691593, -19.345795)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1686519537]
+position = Vector2(0, -7)
+shape = SubResource("CircleShape2D_bot")
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=1792244441]
+avoidance_enabled = true
+
+[node name="ShotRayCast" type="RayCast2D" parent="." unique_id=1229953121]
+target_position = Vector2(500, 0)
+
+[node name="LOSRayCast" type="RayCast2D" parent="." unique_id=1726144209]
+target_position = Vector2(750, 0)
+
+[node name="ActionArea" type="Area2D" parent="." unique_id=2114479845]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ActionArea" unique_id=1973505457]
+position = Vector2(0, -7)
+shape = SubResource("CircleShape2D_bot")
+
+[node name="Muzzle" type="Marker2D" parent="." unique_id=1482394272]
+position = Vector2(46, 0)
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="." unique_id=1390685143]
+position = Vector2(-155, -81)
+rect = Rect2(-40, -96, 391.11108, 352)
+
+[node name="SfxShoot" type="AudioStreamPlayer2D" parent="." unique_id=318260638]
+
+[node name="ReloadTimer" type="Timer" parent="." unique_id=116539280]
+
+[node name="DebugPathLine" type="Line2D" parent="." unique_id=1636244340]
+top_level = true
+width = 3.0
+default_color = Color(1, 0, 0, 0.588235)
+joint_mode = 2
+
+[node name="LimboHSM" type="LimboHSM" parent="." unique_id=659087375]
+
+[node name="Idle" type="LimboState" parent="LimboHSM" unique_id=1259680043]
+script = ExtResource("2_idle")
+
+[node name="Patrol" type="LimboState" parent="LimboHSM" unique_id=208365951]
+script = ExtResource("3_patrol")
+
+[node name="Investigate" type="LimboState" parent="LimboHSM" unique_id=1196020010]
+script = ExtResource("4_investigate")
+
+[node name="Chase" type="LimboState" parent="LimboHSM" unique_id=1009945055]
+script = ExtResource("5_chase")
+
+[node name="Attack" type="LimboState" parent="LimboHSM" unique_id=1125351655]
+script = ExtResource("6_attack")
+
+[node name="Heal" type="LimboState" parent="LimboHSM" unique_id=696244606]
+script = ExtResource("7_heal")
+
+[node name="HackDoor" type="LimboState" parent="LimboHSM" unique_id=1859554139]
+script = ExtResource("8_hackdoor")

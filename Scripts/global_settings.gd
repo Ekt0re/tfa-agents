@@ -22,6 +22,7 @@ const DEFAULTS := {
 	"show_fps": false,
 	"subtitles": true,
 	"screen_shake": true,
+	"difficulty": 1,
 }
 const DEFAULT_META := {
 	"last_seen_version": "",
@@ -260,6 +261,7 @@ func _sanitize_settings(values: Dictionary) -> Dictionary:
 	sanitized["show_fps"] = bool(values.get("show_fps", DEFAULTS["show_fps"]))
 	sanitized["subtitles"] = bool(values.get("subtitles", DEFAULTS["subtitles"]))
 	sanitized["screen_shake"] = bool(values.get("screen_shake", DEFAULTS["screen_shake"]))
+	sanitized["difficulty"] = clampi(int(values.get("difficulty", DEFAULTS["difficulty"])), 0, 3)
 	return sanitized
  
  

@@ -26,6 +26,7 @@ settings_language,Lingua,Language
 settings_show_fps,Mostra FPS,Show FPS
 settings_subtitles,Sottotitoli azioni,Action subtitles
 settings_screen_shake,Shake camera,Camera shake
+settings_difficulty,Difficoltà,Difficulty
 settings_section_controls,Controlli,Controls
 settings_keybind,Personalizzazione tasti,Key customization
 settings_keybind_button,Configura tasti,Configure keys
@@ -62,6 +63,10 @@ ui_scale_large,Grande,Large
 ui_scale_huge,Molto grande,Huge
 language_italian,Italiano,Italiano
 language_english,English,English
+difficulty_easy,Facile,Easy
+difficulty_normal,Normale,Normal
+difficulty_hard,Difficile,Hard
+difficulty_fallen,Agente Caduto,Fallen Agent
 pause_button,Pausa,Pause
 pause_title,PARTITA IN PAUSA,GAME PAUSED
 pause_resume,Riprendi,Resume

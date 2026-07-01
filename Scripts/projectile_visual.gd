@@ -2,6 +2,7 @@ extends Node2D
 class_name ProjectileVisual
 
 signal impact_reached(target_path: NodePath, shooter_peer_id: int)
+signal noise_emitted(pos: Vector2, noise_radius: float)
 
 @export var speed: float = 1800.0
 @export var trail_length: float = 36.0
@@ -27,6 +28,7 @@ func setup_projectile(start_position: Vector2, end_position: Vector2, projectile
 	speed = maxf(projectile_speed, 1.0)
 	z_index = height_level * 10 + 5
 	add_to_group("entities_level_" + str(height_level))
+	add_to_group("noise_makers")
 
 	var travel_vector := end_position - start_position
 	_remaining_distance = travel_vector.length()
@@ -94,5 +96,6 @@ func _complete_travel() -> void:
 		return
 
 	_completed = true
+	noise_emitted.emit(global_position, 1.5 * 300.0)
 	impact_reached.emit(_hit_target_path, _shooter_peer_id)
 	queue_free()

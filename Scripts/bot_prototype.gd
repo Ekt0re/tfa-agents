@@ -28,6 +28,20 @@ const NAV_REGION_NODE_NAMES := [
 @export var vita_max: float = 100.0
 var vita: float = 100.0
 
+@export_group("Difficoltà")
+## 0=Facile 1=Normale 2=Difficile 3=Agente Caduto
+@export_range(0, 3, 1) var difficulty_level: int = 1
+## Se true, legge la difficoltà da GlobalSettings automaticamente.
+@export var use_global_difficulty: bool = true
+
+## Moltiplicatori difficoltà — [Facile, Normale, Difficile, Agente Caduto]
+const DIFFICULTY_MULTIPLIERS: Array[Dictionary] = [
+	{ "vita": 0.65, "speed": 0.80 },
+	{ "vita": 1.00, "speed": 1.00 },
+	{ "vita": 1.35, "speed": 1.18 },
+	{ "vita": 1.80, "speed": 1.40 },
+]
+
 var wants_ramp_teleport: bool = false
 
 @onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D if has_node("NavigationAgent2D") else null
@@ -54,6 +68,11 @@ var _navigation_layer_masks_by_level: Dictionary = {}
 
 
 func _ready() -> void:
+	# Risolvi e applica difficoltà
+	_resolve_difficulty()
+	_apply_difficulty()
+	vita = vita_max
+
 	add_to_group("bots")
 	add_to_group("enemy")
 	add_to_group("damageable")
@@ -63,6 +82,24 @@ func _ready() -> void:
 func _initialize_bot() -> void:
 	_cache_navigation_regions()
 	change_height_level(current_height_level, true)
+
+# ---------------------------------------------------------------------------
+# Sistema Difficoltà
+# ---------------------------------------------------------------------------
+
+func _resolve_difficulty() -> void:
+	if use_global_difficulty:
+		var global_settings = get_node_or_null("/root/GlobalSettings")
+		if global_settings:
+			difficulty_level = global_settings.call("get_setting", "difficulty", 1)
+	# In multiplayer, forza sempre difficoltà normale (1)
+	if multiplayer.has_multiplayer_peer():
+		difficulty_level = 1
+
+func _apply_difficulty() -> void:
+	var mults = DIFFICULTY_MULTIPLIERS[clampi(difficulty_level, 0, DIFFICULTY_MULTIPLIERS.size() - 1)]
+	vita_max *= mults["vita"]
+	speed *= mults["speed"]
 
 	if ray_cast:
 		ray_cast.enabled = true

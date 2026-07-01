@@ -18,6 +18,7 @@ signal back_requested
 @onready var _show_fps_toggle: CheckButton = %ShowFpsToggle
 @onready var _subtitles_toggle: CheckButton = %SubtitlesToggle
 @onready var _screen_shake_toggle: CheckButton = %ScreenShakeToggle
+@onready var _difficulty: OptionButton = %DifficultyOption
 @onready var _keybind_button: Button = %KeybindButton
 
 var _is_loading := false
@@ -53,6 +54,7 @@ func _connect_controls() -> void:
 	_show_fps_toggle.toggled.connect(_on_toggle_changed)
 	_subtitles_toggle.toggled.connect(_on_toggle_changed)
 	_screen_shake_toggle.toggled.connect(_on_toggle_changed)
+	_difficulty.item_selected.connect(_on_setting_changed)
 	_keybind_button.pressed.connect(_on_keybind_button_pressed)
 
 
@@ -96,6 +98,16 @@ func _populate_options() -> void:
 	_language.add_item(tr("language_english"))
 	_language.set_item_metadata(_language.item_count - 1, "en")
 
+	_difficulty.clear()
+	for entry in [
+		{"key": "difficulty_easy", "value": 0},
+		{"key": "difficulty_normal", "value": 1},
+		{"key": "difficulty_hard", "value": 2},
+		{"key": "difficulty_fallen", "value": 3},
+	]:
+		_difficulty.add_item(tr(String(entry["key"])))
+		_difficulty.set_item_metadata(_difficulty.item_count - 1, int(entry["value"]))
+
 
 func _update_texts() -> void:
 	_title_label.text = tr("settings_title")
@@ -115,6 +127,7 @@ func _update_texts() -> void:
 	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/ShowFpsRow/ShowFpsLabel").text = tr("settings_show_fps")
 	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/SubtitlesRow/SubtitlesLabel").text = tr("settings_subtitles")
 	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/ScreenShakeRow/ScreenShakeLabel").text = tr("settings_screen_shake")
+	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/GameplaySection/GameplayMargin/GameplayVBox/DifficultyRow/DifficultyLabel").text = tr("settings_difficulty")
 	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/ControlsSection/ControlsMargin/ControlsVBox/ControlsTitle").text = tr("settings_section_controls")
 	get_node("ContentMargin/RootVBox/ScrollContainer/SectionsVBox/ControlsSection/ControlsMargin/ControlsVBox/KeybindButtonRow/KeybindLabel").text = tr("settings_keybind")
 	_keybind_button.text = tr("settings_keybind_button")
@@ -131,6 +144,7 @@ func _apply_settings_to_controls(settings: Dictionary) -> void:
 	_graphics_preset.select(clampi(int(settings.get("graphics_preset", 2)), 0, _graphics_preset.item_count - 1))
 	_select_option_by_metadata(_ui_scale, float(settings.get("ui_scale", 1.0)))
 	_select_option_by_metadata(_language, String(settings.get("language", "it")))
+	_select_option_by_metadata(_difficulty, int(settings.get("difficulty", 1)))
 	_show_fps_toggle.button_pressed = bool(settings.get("show_fps", false))
 	_subtitles_toggle.button_pressed = bool(settings.get("subtitles", true))
 	_screen_shake_toggle.button_pressed = bool(settings.get("screen_shake", true))
@@ -148,6 +162,7 @@ func _collect_settings() -> Dictionary:
 		"graphics_preset": _graphics_preset.selected,
 		"ui_scale": float(_ui_scale.get_selected_metadata()),
 		"language": String(_language.get_selected_metadata()),
+		"difficulty": int(_difficulty.get_selected_metadata()),
 		"show_fps": _show_fps_toggle.button_pressed,
 		"subtitles": _subtitles_toggle.button_pressed,
 		"screen_shake": _screen_shake_toggle.button_pressed,

@@ -6,10 +6,8 @@
 [ext_resource type="TileSet" uid="uid://blwvbrtt23g2r" path="res://Scenes/TileSet/Tile_set_prototype.tres" id="3_5wu4l"]
 [ext_resource type="PackedScene" uid="uid://cb3avrpy8pd06" path="res://Scenes/ramp.tscn" id="3_ramp"]
 [ext_resource type="NavigationPolygon" uid="uid://cgajmvdxovfds" path="res://Maps/Nav1/Piano1.tres" id="3_rd1f1"]
-[ext_resource type="PackedScene" uid="uid://buu621fan5j1a" path="res://bot.tscn" id="4_kuufh"]
 [ext_resource type="NavigationPolygon" uid="uid://dt86qinqcr3w4" path="res://Maps/Nav1/Piano2.tres" id="4_to1ab"]
 [ext_resource type="PackedScene" uid="uid://b7hfb3856gr2p" path="res://Game/Oggetti/oggetto.tscn" id="7_p200p"]
-[ext_resource type="PackedScene" uid="uid://yy2t6t2gu7ec" path="res://bot_simple.tscn" id="8_rd1f1"]
 [ext_resource type="PackedScene" uid="uid://g8cm505rhk5y" path="res://Game/Oggetti/Mina.tscn" id="8_v11qg"]
 [ext_resource type="PackedScene" uid="uid://dvg8adsjxd6tt" path="res://Menu/pause_menu.tscn" id="9_pause_menu"]
 [ext_resource type="PackedScene" uid="uid://t12n16npgxtc" path="res://Scenes/power_up.tscn" id="9_xqe5x"]
@@ -18,6 +16,13 @@
 [ext_resource type="PackedScene" uid="uid://cd6eqdpwrblx7" path="res://Game/Torrette/Turret.tscn" id="16_8o1ly"]
 [ext_resource type="PackedScene" uid="uid://iu3pey1do2ef" path="res://Game/Porte Automatiche/Porte_automatiche.tscn" id="17_nbx60"]
 [ext_resource type="PackedScene" uid="uid://i0psfnd8rl7o" path="res://Game/Porte Automatiche/Porte Doppie.tscn" id="18_pxt6q"]
+[ext_resource type="PackedScene" uid="uid://caq05fy37go3d" path="res://Game/Nemici/Soldato.tscn" id="19_0b3yc"]
+
+[sub_resource type="Curve2D" id="Curve2D_nbx60"]
+_data = {
+"points": PackedVector2Array(-156.47215, -71.03339, 156.47215, 71.03339, 648, 2048, -209.08801, 2.9040003, 209.08801, -2.9040003, 1104, 2104, -130.68001, -55.176003, 130.68001, 55.176003, 1432, 2264, -222.9902, 101.57774, 222.9902, -101.57774, 2032, 2264, -211.20001, 36.08, 211.20001, -36.08, 2344, 2016, -40.480003, -2.64, 40.480003, 2.64, 2880, 2224, -150.48001, 0, 150.48001, 0, 3336, 2312, -68.64001, 151.36002, 68.64001, -151.36002, 3888, 2192, 0, 0, 0, 0, 3960, 1360, 56.590755, 301.81735, -56.590755, -301.81735, 3920, 832, 183.95892, 160.57431, -183.95892, -160.57431, 2536, 904, 34.297424, 126.276886, -34.297424, -126.276886, 2419, 563, 170.06985, -79.36594, -170.06985, 79.36594, 784, 584, 35.43122, -111.96266, -35.43122, 111.96266, 528, 904, -2.9804218, -83.45181, 2.9804218, 83.45181, 568, 1816, 0, 0, 0, 0, 648, 2048)
+}
+point_count = 16
 
 [node name="DevMap" type="Node2D" unique_id=73936262]
 script = ExtResource("1_lighting")
@@ -118,14 +123,14 @@ explosion_damage = 200.0
 explosion_radius = 250.0
 
 [node name="Oggetto4" parent="Oggetti" unique_id=488299239 instance=ExtResource("7_p200p")]
-position = Vector2(2024, 1904)
+position = Vector2(1568, 1991)
 collision_layer = 1
 collision_mask = 6
 tipo = 1
 explosion_radius = 250.0
 
 [node name="Oggetto5" parent="Oggetti" unique_id=830470205 instance=ExtResource("7_p200p")]
-position = Vector2(1992, 2144)
+position = Vector2(776, 2361)
 collision_layer = 1
 collision_mask = 6
 explosion_radius = 250.0
@@ -155,13 +160,13 @@ tipo = 1
 explosion_radius = 250.0
 
 [node name="Oggetto7" parent="Oggetti" unique_id=821144349 instance=ExtResource("7_p200p")]
-position = Vector2(1576, 2016)
+position = Vector2(2368, 2368)
 collision_layer = 1
 collision_mask = 6
 explosion_radius = 250.0
 
 [node name="Oggetto8" parent="Oggetti" unique_id=1628543564 instance=ExtResource("7_p200p")]
-position = Vector2(1544, 2256)
+position = Vector2(1024, 2368)
 collision_layer = 1
 collision_mask = 6
 tipo = 1
@@ -175,7 +180,7 @@ tipo = 1
 explosion_radius = 250.0
 
 [node name="Oggetto10" parent="Oggetti" unique_id=1030621620 instance=ExtResource("7_p200p")]
-position = Vector2(1776, 2312)
+position = Vector2(832, 1088)
 collision_layer = 1
 collision_mask = 6
 explosion_radius = 250.0
@@ -486,7 +491,7 @@ collision_mask = 16
 livello = 1
 
 [node name="Mina4" parent="Mine" unique_id=524269852 instance=ExtResource("8_v11qg")]
-position = Vector2(376, 1664)
+position = Vector2(392, 1672)
 collision_layer = 1
 
 [node name="Mina5" parent="Mine" unique_id=781411529 instance=ExtResource("8_v11qg")]
@@ -511,7 +516,7 @@ collision_layer = 1
 collision_mask = 2
 
 [node name="Mina9" parent="Mine" unique_id=682264001 instance=ExtResource("8_v11qg")]
-position = Vector2(3584, 512)
+position = Vector2(2040, 1928)
 collision_layer = 1
 collision_mask = 2
 
@@ -578,28 +583,18 @@ position = Vector2(-312, 3840)
 type = 1
 
 [node name="Player" parent="." unique_id=1004030284 groups=["team_1"] instance=ExtResource("2_ien3m")]
-position = Vector2(2184, 4734)
+position = Vector2(2488, 1920)
 
-[node name="Bot" parent="." unique_id=1855505913 groups=["team_2"] instance=ExtResource("4_kuufh")]
-modulate = Color(1, 1, 0, 1)
-self_modulate = Color(1, 1, 0, 1)
-position = Vector2(1536, 1536)
+[node name="Soldato" parent="." unique_id=998090411 instance=ExtResource("19_0b3yc")]
+position = Vector2(3744, 3736)
+team_id = 2
+debug_show_path = true
 
-[node name="Bot2" parent="." unique_id=738434768 groups=["team_2"] instance=ExtResource("8_rd1f1")]
-position = Vector2(1168, 2056)
-
-[node name="Bot3" parent="." unique_id=312616154 groups=["team_2"] instance=ExtResource("8_rd1f1")]
-z_index = 4
-position = Vector2(4944, 1792)
-current_height_level = 3
-
-[node name="Bot4" parent="." unique_id=569209035 groups=["team_2"] instance=ExtResource("8_rd1f1")]
-position = Vector2(3328, 1272)
-
-[node name="Bot5" parent="." unique_id=1473197367 groups=["team_2"] instance=ExtResource("8_rd1f1")]
-z_index = 4
-position = Vector2(-1200, -160)
-current_height_level = 3
+[node name="Soldato2" parent="." unique_id=967802309 node_paths=PackedStringArray("patrol_path") instance=ExtResource("19_0b3yc")]
+position = Vector2(1513, 2304)
+team_id = 2
+patrol_path = NodePath("../Path2D")
+debug_show_path = true
 
 [node name="PauseMenu" parent="." unique_id=1983389635 instance=ExtResource("9_pause_menu")]
 
@@ -627,44 +622,57 @@ door_type = 1
 [node name="PorteDoppie" parent="Porte" unique_id=413205671 instance=ExtResource("18_pxt6q")]
 position = Vector2(2560, 4800)
 door_type = 1
+activation_range = 60.0
 
 [node name="PorteDoppie2" parent="Porte" unique_id=2061679143 instance=ExtResource("18_pxt6q")]
 position = Vector2(2560, 5760)
 door_type = 2
 team_id = 1
+activation_range = 60.0
 
 [node name="PorteDoppie3" parent="Porte" unique_id=2027396682 instance=ExtResource("18_pxt6q")]
 position = Vector2(3072, 5825)
 door_type = 3
+activation_range = 60.0
 
 [node name="PorteDoppie4" parent="Porte" unique_id=1368390527 instance=ExtResource("18_pxt6q")]
 position = Vector2(3072, 4800)
 door_type = 2
 team_id = 2
+activation_range = 60.0
 
 [node name="PorteDoppie5" parent="Porte" unique_id=776085510 instance=ExtResource("18_pxt6q")]
-position = Vector2(3328, 3648)
-door_type = 2
+position = Vector2(3328, 3584)
+door_type = 1
 team_id = 1
+activation_range = 60.0
 
 [node name="PorteDoppie6" parent="Porte" unique_id=1466523712 instance=ExtResource("18_pxt6q")]
 position = Vector2(4096, 4216)
 door_type = 2
 team_id = 2
+activation_range = 60.0
 
 [node name="PorteDoppie7" parent="Porte" unique_id=67464018 instance=ExtResource("18_pxt6q")]
 position = Vector2(5688, 4296)
 door_type = 2
 team_id = 2
+activation_range = 60.0
 
 [node name="PorteDoppie8" parent="Porte" unique_id=1989917656 instance=ExtResource("18_pxt6q")]
 position = Vector2(5000, 4264)
 door_type = 2
 team_id = 2
 livello = 1
+activation_range = 60.0
 
 [node name="PorteDoppie9" parent="Porte" unique_id=903882984 instance=ExtResource("18_pxt6q")]
 position = Vector2(5312, 3728)
 door_type = 2
 team_id = 2
 livello = 2
+activation_range = 60.0
+
+[node name="Path2D" type="Path2D" parent="." unique_id=1047568532]
+modulate = Color(0.79901314, 0.71207047, 0.27212217, 1)
+curve = SubResource("Curve2D_nbx60")

@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="tfa-agents"
-config/version="0.1.11"
+config/version="0.1.12"
 run/main_scene="uid://deb727qfvrtx4"
 config/features=PackedStringArray("4.6", "Mobile")
 boot_splash/bg_color=Color(0, 0, 0, 1)
@@ -29,6 +29,7 @@ MissionManager="*uid://yjcluspn5mm2"
 MissionFlowPlayer="*uid://brdvie860f4ap"
 ResourcePreloader="*res://Scripts/resource_preloader.gd"
 MultiplayerManager="*res://Scripts/multiplayer_manager.gd"
+DebugCam="*uid://brbxvqf80hn1l"
 
 [display]
 
@@ -36,7 +37,7 @@ window/stretch/mode="canvas_items"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/mission_editor/plugin.cfg", "res://addons/shader-previewer/plugin.cfg", "res://addons/virtual_joystick_plus/plugin.cfg")
+enabled=PackedStringArray("res://addons/debug_camera/plugin.cfg", "res://addons/mission_editor/plugin.cfg", "res://addons/shader-previewer/plugin.cfg", "res://addons/virtual_joystick_plus/plugin.cfg")
 
 [global_group]
 

@@ -57,7 +57,7 @@ class_name DoubleDoor
 
 @export_group("Raggio Attivazione")
 
-@export var activation_range: float = 60.0:
+@export var activation_range: float = 120.0:
 	set(value):
 		activation_range = maxf(value, 10.0)
 		_sync_settings()
@@ -118,6 +118,7 @@ func _ready() -> void:
 		_door_left.door_closed.connect(_on_door_closed)
 		_door_left.hacking_started.connect(_on_hacking_started)
 		_door_left.hacking_completed.connect(_on_hacking_completed)
+		_door_left.team_changed.connect(_on_left_door_team_changed)
 
 	if _door_right:
 		_door_right.door_opened.connect(_on_door_opened)
@@ -128,9 +129,32 @@ func _ready() -> void:
 	# Sincronizza impostazioni iniziali
 	_sync_settings()
 
+	# Riposiziona elementi al centro
+	_reposition_elements_to_center()
+
 # ---------------------------------------------------------------------------
 # Sincronizzazione Impostazioni
 # ---------------------------------------------------------------------------
+
+func _reposition_elements_to_center() -> void:
+	if not _door_left or not _door_right:
+		return
+	var midpoint := (_door_left.global_position + _door_right.global_position) * 0.5
+	
+	# Sposta l'ActivationArea al centro
+	var activation_area := _door_left.get_node_or_null("ActivationArea") as Area2D
+	if activation_area:
+		activation_area.global_position = midpoint
+	
+	# Sposta il pivot dell'hack bar al centro
+	var pivot := _door_left.get_node_or_null("HackBarPivot") as Node2D
+	if pivot:
+		pivot.global_position = midpoint
+
+func _on_left_door_team_changed(new_team_id: int) -> void:
+	if team_id != new_team_id:
+		team_id = new_team_id
+		_sync_settings()
 
 func _sync_settings() -> void:
 	if _is_syncing:
@@ -145,7 +169,7 @@ func _sync_settings() -> void:
 		_door_left.livello = livello
 		_door_left.hack_duration = hack_duration
 		_door_left.hack_target_team = hack_target_team
-		_door_left.activation_range = activation_range
+		_door_left.activation_range = activation_range * 1.5
 
 	if _door_right:
 		_door_right.door_type = door_type
@@ -155,7 +179,7 @@ func _sync_settings() -> void:
 		_door_right.livello = livello
 		_door_right.hack_duration = hack_duration
 		_door_right.hack_target_team = hack_target_team
-		_door_right.activation_range = activation_range
+		_door_right.activation_range = activation_range * 1.5
 
 	_is_syncing = false
 
